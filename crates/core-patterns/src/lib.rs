@@ -20,6 +20,7 @@ pub mod expr;
 pub mod file;
 pub mod matcher;
 pub mod metavar;
+pub mod top_level;
 
 pub use file::{PatternError, PatternRule, load, load_lazy};
 pub use matcher::{Captures, Pattern, SnippetParser};

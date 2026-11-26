@@ -1,0 +1,37 @@
+id: kubernetes-run-as-non-root
+message: "a container of the pod may run as root: set `runAsNonRoot: true` or a `runAsUser` above 0"
+description: >-
+  Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or
+  init container that has neither `runAsNonRoot: true` nor a `runAsUser` of 1 or more in its
+  `securityContext`, when the `securityContext` of the pod has none of them either. The report is on
+  the `kind:` line of the manifest.
+why: >-
+  A process that runs as root in a container has the rights to change the container's file system
+  and, with a kernel or runtime flaw, to reach the node.
+
+  To fix, set `runAsNonRoot: true` (and a `runAsUser` that the image supports) in the
+  `securityContext` of the pod or of the container.
+example: "kind: Deployment   # no runAsNonRoot in the pod or in a container"
+severity: off
+category: suspicious
+rule:
+  kind: BlockMapping
+  top-level:
+    apiVersion: '^(?:[a-z0-9][a-z0-9.-]*/)?v\d+(?:alpha|beta)?\d*$'
+    kind: '^(?<KIND>Pod|Deployment|DaemonSet|StatefulSet|ReplicaSet|ReplicationController|Job|CronJob)$'
+  has:
+    key-path: '^spec(\.template\.spec|\.jobTemplate\.spec\.template\.spec)?\.(containers|initContainers)\[\d+\]$'
+    not:
+      has:
+        role: key-value
+        any:
+          - fields: { key: { regex: '^runAsNonRoot$' }, value: { regex: '^true$' } }
+          - fields: { key: { regex: '^runAsUser$' }, value: { regex: '^[1-9]' } }
+  not:
+    has:
+      role: key-value
+      key-path: '^spec(\.template\.spec|\.jobTemplate\.spec\.template\.spec)?\.securityContext$'
+      any:
+        - fields: { key: { regex: '^runAsNonRoot$' }, value: { regex: '^true$' } }
+        - fields: { key: { regex: '^runAsUser$' }, value: { regex: '^[1-9]' } }
+report-on: $KIND

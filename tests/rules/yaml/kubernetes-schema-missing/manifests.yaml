@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+#     ^^^^^^^^^^^ kubernetes-schema-missing
+---
+apiVersion: apps/v1
+kind: Deployment
+---
+apiVersion: "v1"
+kind: 'ConfigMap'
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+#     ^^^^^^^ kubernetes-schema-missing
+---
+apiVersion: release-notes/v2
+kind: feature
+---
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: argoproj.io/v1alpha1
+    kind: Application

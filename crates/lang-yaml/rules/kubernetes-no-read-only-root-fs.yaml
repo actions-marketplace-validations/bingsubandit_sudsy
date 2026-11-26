@@ -1,0 +1,27 @@
+id: kubernetes-no-read-only-root-fs
+message: "a container of the pod does not set `securityContext.readOnlyRootFilesystem: true`"
+description: >-
+  Reports a Kubernetes manifest (Pod, Deployment, DaemonSet, StatefulSet, ReplicaSet,
+  ReplicationController, Job, CronJob) with a container or init container whose `securityContext`
+  does not have `readOnlyRootFilesystem: true`. The report is on the `kind:` line of the manifest.
+why: >-
+  A writable root file system lets a process that is compromised in the container change the image's
+  binaries and configuration.
+
+  To fix, set `readOnlyRootFilesystem: true` and mount an `emptyDir` volume on the paths the
+  program writes to.
+example: "kind: Pod   # a container without securityContext.readOnlyRootFilesystem: true"
+severity: off
+category: suspicious
+rule:
+  kind: BlockMapping
+  top-level:
+    apiVersion: '^(?:[a-z0-9][a-z0-9.-]*/)?v\d+(?:alpha|beta)?\d*$'
+    kind: '^(?<KIND>Pod|Deployment|DaemonSet|StatefulSet|ReplicaSet|ReplicationController|Job|CronJob)$'
+  has:
+    key-path: '^spec(\.template\.spec|\.jobTemplate\.spec\.template\.spec)?\.(containers|initContainers)\[\d+\]$'
+    not:
+      has:
+        role: key-value
+        fields: { key: { regex: '^readOnlyRootFilesystem$' }, value: { regex: '^true$' } }
+report-on: $KIND

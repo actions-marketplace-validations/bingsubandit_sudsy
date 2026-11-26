@@ -161,13 +161,19 @@ The status and the numbers of every language are in the generated table "Languag
 - Config section: `yaml`.
 - **Formatter:** Prettier 3.9.10. Corpus: YAML files of real projects (awesome-compose, the Kubernetes website, GitHub starter workflows, actionlint). The yaml-test-suite valid cases parse, round-trip and keep their data model.
 - **Linter:** yamllint.
-- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`.
+- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`, `yaml/kubernetes`.
 - **Options:** `quote_style`, `sequence_indent`, `document_start`, `document_end`, `max_blank_lines`, `comment_spacing`, `bracket_spacing`. Default `line_width` is 80.
 - **Differences:**
   - Long scalars and comments are not re-wrapped.
   - A broken flow sequence has no trailing comma; Prettier writes one.
   - A comment before a dedented item takes the next line's column; Prettier keeps its own.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier`, `scripts/parity.sh coverage yamllint`.
+
+### Kubernetes (YAML)
+
+- Kubernetes manifests are YAML files, recognised by content (`apiVersion` and `kind` at the top). The preset `yaml/kubernetes` formats like Prettier and turns on `kubernetes-schema-missing` (a kind that has no schema in the Kubernetes API, as kubeconform reports; add your custom resources to its `known` option), `kubernetes-no-read-only-root-fs`, `kubernetes-run-as-non-root`, `kubernetes-unset-memory-requirements`, `kubernetes-unset-cpu-requirements` and `kubernetes-latest-tag` (kube-linter's checks).
+- **Linters:** kubeconform and kube-linter with default flags; the preset covers 89% of their pooled findings on real projects. Schema validation of fields and checks that read other objects of the project are not covered.
+- **Reproduce (needs a source checkout):** `scripts/evidence_kubernetes_baseline.py` (see [ai/design/kubernetes.md](ai/design/kubernetes.md)).
 
 ### Ansible (YAML)
 

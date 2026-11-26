@@ -1,0 +1,23 @@
+# Kubernetes manifests: formats like Prettier (the usual formatter of manifests, as in
+# `prettier-compat`) and turns on the checks of kubeconform's default run (a kind with no schema) and
+# of kube-linter's security and resource checks that read one manifest. Checks that read other
+# objects of the project (a Service with no Deployment, a missing ServiceAccount) are not covered.
+yaml:
+  format:
+    line_width: 80
+    indent_size: 2
+    end_of_line: lf
+    bracket_spacing: true
+    sequence_indent: indented
+    quote_style: prefer_double
+    document_start: preserve
+    max_blank_lines: 1
+    blank_lines_after_key: remove
+  lint:
+    rules:
+      kubernetes-schema-missing: warn
+      kubernetes-no-read-only-root-fs: warn
+      kubernetes-run-as-non-root: warn
+      kubernetes-unset-memory-requirements: warn
+      kubernetes-unset-cpu-requirements: warn
+      kubernetes-latest-tag: warn

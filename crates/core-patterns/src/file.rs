@@ -1038,7 +1038,7 @@ fn light_words(
         for w in text.split(',').map(str::trim).filter(|w| !w.is_empty()) {
             let plain = w.starts_with(|c: char| c.is_ascii_alphabetic())
                 && w.chars()
-                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '-'))
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '-' | '/'))
                 && !matches!(
                     w,
                     "true" | "false" | "null" | "yes" | "no" | "on" | "off" | "y" | "n"
@@ -1059,7 +1059,7 @@ fn light_words(
 /// The spec of a document of a rule that is off by default, only plain top-level scalars, `report-on`, a `rule` or `token` body and plain `options`, for
 /// a language that gives its rules no row; `None` for any other document.
 fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
-    if doc.contains("\nrole:") || doc.contains(" role:") {
+    if doc.contains("needs-role") || doc.starts_with("role:") || doc.contains("\nrole:") {
         return None;
     }
     let (mut id, mut message, mut description, mut why, mut example) =
