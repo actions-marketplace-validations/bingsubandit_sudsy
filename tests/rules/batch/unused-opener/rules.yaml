@@ -1,0 +1,8 @@
+unused-opener:
+  level: warn
+  options:
+    kinds: [Name, Program]
+    open: [setlocal]
+    args: [enabledelayedexpansion]
+    use-kinds: [DelayedVar, Text]
+    use: '![^!\s%]+!'

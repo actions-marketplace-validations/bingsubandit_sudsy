@@ -3,6 +3,67 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "Reports the first argument of a command listed in the option `commands` that is written with the option `prefix` when the first such command of the file has none, or the other way round. Arguments listed in `except` are left out.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "goto :one\ngoto two\ngoto :eof\ngoto eof\n:one\n:two\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 6,
+            "length": 3,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "argument-prefix",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds of a command word.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The commands whose first argument is checked (ignoring case).",
+          "name": "commands",
+          "type": "list"
+        },
+        {
+          "default": "",
+          "description": "The text an argument may start with.",
+          "name": "prefix",
+          "type": "string"
+        },
+        {
+          "default": [],
+          "description": "Arguments, without the prefix, that have one form only (ignoring case).",
+          "name": "except",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S015",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Two spellings of one thing make a reader wonder whether they differ, and a search for one of them misses the other.\n\nTo fix, write every argument in one form."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Reports a block comment that follows an opening token on its line and ends the line (`if (a) { /* note */`). The tokens are the option `after` (default `{`). A line comment there, and a block comment with code after it on the line, are not reported.",
       "example": {
         "config": null,
@@ -123,6 +184,68 @@
         }
       ],
       "why": "One space after the marker is the common way to write comments, and it separates the text from the marker so that the comment reads as text and not as a disabled piece of code. A comment without it is also hard to tell from commented-out code (`//foo();`).\n\nTo fix, add the space; the fix does it."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports an outermost block of the kind named in the option `block` that is the body of a statement of the kinds in `parents`, has at least `lines` lines of code, and has no comment inside it or on the line right above it. With `indented`, a block whose body is not indented deeper than its opening line is left out.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if a==b (\n    echo 1\n    echo 2\n    echo 3\n)\nREM what\nif a==b (\n    echo 1\n    echo 2\n    echo 3\n)\nif a==b (\n    echo 1\n    REM inside\n    echo 2\n    echo 3\n)\nif a==b (\n    echo 1\n    echo 2\n)\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "commented-block",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The node kinds of a block.",
+          "name": "block",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The node kinds of the statements whose block is checked.",
+          "name": "parents",
+          "type": "list"
+        },
+        {
+          "default": 5,
+          "description": "The least number of lines of code in the block.",
+          "name": "lines",
+          "type": "int"
+        },
+        {
+          "default": true,
+          "description": "Only blocks whose body is indented deeper than the line that opens them.",
+          "name": "indented",
+          "type": "bool"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S008",
+          "note": "Blinter also reports blocks with a body that is not indented, and long runs of lines that are not a block",
+          "partial": true,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A long block is a step of the script with its own purpose, and a reader who finds only commands has to work out what it is for.\n\nTo fix, write a comment above the block that says what it does and why."
     },
     {
       "category": "style",
@@ -390,6 +513,128 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "Reports a label of a kind in the option `labels` that a command in `commands` calls (the first argument of the command is the label) and that has no comment on the line above, two lines above with a blank line between, or on the line below.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "call :one\ncall :two\ncall :three\n:one\nexit /b\n:: documented\n:two\nexit /b\n:three\n:: below\nexit /b\n:four\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 4,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "documented-subroutine",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds of a label.",
+          "name": "labels",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The token kinds of a command word.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The commands whose first argument names a label (ignoring case).",
+          "name": "commands",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S018",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A label that is called is a function of the script, and its name is all a reader sees at the call.\n\nTo fix, write a comment next to the label that says what it takes and does."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a token of the kinds in the option `kinds` that matches the regex of the option `use` while a feature is off. The feature is off at the start of the file, on after a word of the option `on`, and off after a word of `off` (words compared as whole words, ignoring case).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "echo !x!\nsetlocal EnableDelayedExpansion\necho !x!\nsetlocal DisableDelayedExpansion\nset y=!z!\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 6,
+            "length": 3,
+            "line": 1
+          },
+          {
+            "column": 7,
+            "length": 3,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "feature-not-enabled",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds that can use the feature.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": "",
+          "description": "A regex the text of a token that uses the feature matches.",
+          "name": "use",
+          "type": "string"
+        },
+        {
+          "default": [],
+          "description": "The words that turn the feature on.",
+          "name": "on",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The words that turn the feature off.",
+          "name": "off",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "P008",
+          "note": "Blinter reads `!x!` after an enable that is chained with `^&` as not enabled",
+          "partial": true,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Text that needs a feature is read as plain text while the feature is off, so the command gets the notation instead of its value.\n\nTo fix, turn the feature on before the use, or write the plain form."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Reports a heading written in another style than the document's: `#` before the text (ATX) or the text over a line of `=` or `-` (setext). The option `style` is `atx`, `setext` or `consistent` (the style of the first heading, the default). The fix rewrites a one-line heading of level 1 or 2.",
       "example": {
         "config": null,
@@ -564,6 +809,7 @@
         }
       ],
       "presets": [
+        "batch/blinter",
         "cmake/cmake-lint",
         "java/google",
         "kotlin/ktlint",
@@ -573,6 +819,16 @@
         "yaml/ansible-lint"
       ],
       "upstream": [
+        {
+          "id": "S011",
+          "partial": false,
+          "tool": "blinter"
+        },
+        {
+          "id": "S020",
+          "partial": false,
+          "tool": "blinter"
+        },
         {
           "id": "LineLength",
           "note": "No ignore pattern for `package` and `import` lines.",
@@ -644,6 +900,61 @@
         }
       ],
       "why": "Long lines do not fit next to each other in a diff or a code review, wrap unpredictably in narrow windows, and hide the end of the line when a view scrolls sideways. The limit is a convention of the project, set with `max`.\n\nTo fix, break the line at a natural place."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a file whose last lines of code (as many as the option `lines`) hold none of the token sequences of the option `terminators`. Reported on the last line of code that is not made of tokens of the option `skip` only.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "echo a\necho b\necho c\necho d\n:end\n)\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 4,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-terminator",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Token sequences that end a script, such as `exit` or `goto :eof` (ignoring case).",
+          "name": "terminators",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "Tokens that do not count as code when the report line is chosen; an entry ending in `*` is a prefix.",
+          "name": "skip",
+          "type": "list"
+        },
+        {
+          "default": 5,
+          "description": "How many of the last lines of code are searched.",
+          "name": "lines",
+          "type": "int"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W001",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A script that ends without an exit hands its caller whatever the last command left, so a failure in the middle is lost.\n\nTo fix, end the script with an explicit exit that carries the result."
     },
     {
       "category": "style",
@@ -1131,11 +1442,17 @@
       ],
       "presets": [
         "html/html-validate-recommended",
+        "batch/blinter",
         "cmake/cmake-lint",
         "yaml/yamllint",
         "yaml/ansible-lint"
       ],
       "upstream": [
+        {
+          "id": "S004",
+          "partial": false,
+          "tool": "blinter"
+        },
         {
           "id": "C0303",
           "partial": false,
@@ -1177,6 +1494,77 @@
       "presets": [],
       "upstream": [],
       "why": "The type says nothing the reader does not already know, and it makes the signature longer. `Unit` is what a block body returns when it has no `return` of a value.\n\nTo fix, delete the colon and the type; the formatter does it."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports the `nth` use (the option, default 2) and every later one of a command listed in the option `commands`; an entry `word arg` counts only the uses with `arg` after the word; the command words are the tokens of the kinds in `kinds`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "@echo off\nsetlocal\necho a\nsetlocal\n@echo off\necho on\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 8,
+            "line": 4
+          },
+          {
+            "column": 2,
+            "length": 4,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "repeated-command",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds of a command word.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The commands that are counted (ignoring case): `word`, or `word`, `word arg`, with `:N` at the end for its own `nth`.",
+          "name": "commands",
+          "type": "list"
+        },
+        {
+          "default": 2,
+          "description": "The use that is reported.",
+          "name": "nth",
+          "type": "int"
+        },
+        {
+          "default": false,
+          "description": "A use in the first command of the file is counted but not reported.",
+          "name": "first-exempt",
+          "type": "bool"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "P020",
+          "partial": false,
+          "tool": "blinter"
+        },
+        {
+          "id": "P024",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A second use of a command that scopes or prepares the whole file adds cost and hides which one holds.\n\nTo fix, keep one use, or close the first scope before the next."
     },
     {
       "category": "style",
@@ -1505,6 +1893,82 @@
     {
       "category": "suspicious",
       "default_level": "off",
+      "description": "Reports a command listed in the option `commands` that starts a line and has no text of the option `checks` (compared ignoring case) on its line or the lines after it, as many as the option `window` says (an entry `word:N` of `commands` says N for that command). A command after `if`, `&`, `(` or a path is not reported.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "reg add HKCU\\X /f\nreg add HKCU\\Y /f\nif errorlevel 1 exit /b 1\ncopy a b\necho one\necho two\necho three\nif errorlevel 1 exit /b 1\nif exist x copy a b\nreg query HKCU\\Z\necho a\necho b\necho c\necho d\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 4,
+            "line": 4
+          },
+          {
+            "column": 1,
+            "length": 3,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unchecked-command",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds of a command word.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The commands that need a check, `word` or `word:N` (a window of N lines).",
+          "name": "commands",
+          "type": "list"
+        },
+        {
+          "default": 3,
+          "description": "The lines after the command's line that may hold the check.",
+          "name": "window",
+          "type": "int"
+        },
+        {
+          "default": [],
+          "description": "The texts that count as a check of the result (ignoring case).",
+          "name": "checks",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W002",
+          "partial": false,
+          "tool": "blinter"
+        },
+        {
+          "id": "W003",
+          "partial": false,
+          "tool": "blinter"
+        },
+        {
+          "id": "W025",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A command that can fail (a copy, a delete, a registry or service change) does not stop the script, which then goes on as if it had worked.\n\nTo fix, test the result on the next line, or write why a failure does not matter."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
       "description": "Reports a comment that disables rules of another tool (`# rubocop:disable Foo/Bar`) by a `Group/Name` whose group the tool does not have, for example the group of an extension that is not installed. A name inside a known group is not checked (the groups are listed in the grammar's `suppress directive-group` rows).",
       "example": {
         "config": null,
@@ -1553,6 +2017,73 @@
         }
       ],
       "why": "A directive with a group the tool does not have does not suppress what the author expects, so the finding stays or the directive is ignored. It is usually a typo in the group name or an extension that is missing in the project.\n\nTo fix, correct the name, or install the extension."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a command of the option `open`, with one of the words of `args` after it when that option is set, in a file where no token of the kinds in `use-kinds` matches the regex of the option `use`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "setlocal enabledelayedexpansion\necho a\nsetlocal\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 8,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unused-opener",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The token kinds of a command word.",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The commands that open the feature or scope (ignoring case).",
+          "name": "open",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "Words one of which must follow the command to make it count (ignoring case); empty: any.",
+          "name": "args",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The token kinds that can use the feature.",
+          "name": "use-kinds",
+          "type": "list"
+        },
+        {
+          "default": "",
+          "description": "A regex the text of a token that uses the feature matches.",
+          "name": "use",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "P004",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A command that turns on a feature or opens a scope has a cost, and when nothing in the file uses it, it only misleads a reader.\n\nTo fix, remove the command, or add the use it is meant for."
     },
     {
       "category": "suspicious",
@@ -8098,6 +8629,881 @@
         }
       ],
       "why": "Code that cannot run is either a leftover or a sign that an earlier `return` or `throw` is in the wrong place, in which case what the author expected to run does not.\n\nTo fix, delete the statement, or move the jump that makes it unreachable."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a label that has no blank line before it, unless a comment stands on the line right before.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "@echo off\necho a\n:one\necho b\n\n:two\necho c\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 4,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "blank-line-before-label",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S027",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A label starts a routine or a jump target. A blank line before it shows where the previous code ends, so the routines of a long file can be told apart.\n\nTo fix, add a blank line before the label."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a file with the `.bat` extension, at its first token.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "@echo off\necho hi\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "cmd-extension",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S007",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A `.cmd` file is run by `cmd.exe` only and sets `ERRORLEVEL` after every command. A `.bat` file is also run by the DOS-era interpreters and, on old Windows, sets it only after some commands, so an `IF ERRORLEVEL` test can read a stale value.\n\nTo fix, rename the file to `.cmd`."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a command or keyword (`cd`, `set`, `if`, `for`, `goto`, ...) written in another case than the file mostly writes the same word in; a tie goes to the first one written. The `policy` option can instead name one case, or `consistent`. The fix writes the word as the file mostly does.",
+      "example": {
+        "config": null,
+        "fixed": "cd a\ncd b\ncd c\nEcho d\nECHO e\n",
+        "input": "cd a\nCD b\ncd c\nEcho d\nECHO e\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 2,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "command-case",
+      "languages": [
+        "batch"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise",
+            "majority"
+          ],
+          "default": "majority",
+          "description": "The case the words must be in: `consistent` follows the first one written; `majority`: the spelling the file uses most for each command.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S003",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`cmd` reads its commands without case, so `ECHO` and `echo` are the same command, but a file that mixes them looks like it was merged from different sources.\n\nTo fix, write the commands in the case that the policy gives."
+    },
+    {
+      "category": "performance",
+      "default_level": "off",
+      "description": "Reports a line in the body of a `FOR` loop that reads two or more variables with `!name!`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "for %%a in (1 2) do (\n  echo !x! !y!\n  echo !z!\n)\necho !x! !y!\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 3,
+            "length": 4,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "delayed-expansion-in-loop",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "P019",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Delayed expansion runs again on every round of the loop and turns every `!` in the text into a marker, so a loop that reads many variables this way is slower and easy to get wrong.\n\nTo fix, read the value into a loop variable with `for /f`, or move the body to a subroutine."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a `for /f` whose first argument is not a quoted string with `tokens=`, `delims=`, `skip=` or `eol=`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "for /f %%a in ('dir /b') do echo %%a\nfor /f \"tokens=1\" %%a in ('dir /b') do echo %%a\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 36,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "for-f-options",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W020",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Without options `for /f` takes the first blank-separated word of each line and drops a line that starts with `;`. That is rarely what a script about file or command output means, and the intent is not written down.\n\nTo fix, write the options (`\"tokens=1 delims=\"`) even when they equal the defaults."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports an `IF` line with a `==` comparison and a `*` or `?` after or before it.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if \"%1\"==\"*.txt\" echo wildcard\nif \"%1\"==\"a\" echo plain\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 30,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-compare-wildcard",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W065",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "The `==` comparison matches text exactly, so a pattern written with a wildcard only equals the same characters.\n\nTo fix, test with `findstr` or `for`, or compare a fixed text."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a `FOR` that is inside the body of another `FOR`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "for %%i in (a b) do (\n  for %%j in (c d) do echo %%i%%j\n)\nfor %%i in (a) do echo %%i\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 3,
+            "length": 3,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "nested-for",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W023",
+          "note": "Blinter also reports a FOR after an unbalanced parenthesis, which it counts as still inside the outer loop",
+          "partial": true,
+          "tool": "blinter"
+        },
+        {
+          "id": "W039",
+          "note": "Blinter also reports a FOR after an unbalanced parenthesis, which it counts as still inside the outer loop",
+          "partial": true,
+          "tool": "blinter"
+        }
+      ],
+      "why": "The inner loop is parsed again for every round of the outer one, and a loop variable is easy to mix up. A subroutine keeps each loop short and gives the inner one a name.\n\nTo fix, move the inner loop to a label and `call` it from the outer loop."
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "Reports a label that is defined twice in a file (compared without case).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": ":one\necho a\n:two\n:one\necho b\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 4,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-duplicate-label",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W013",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`goto` and `call` jump to the first label of that name, so the code under the second one can never be reached by name, and a copy that was meant to be renamed is easy to miss.\n\nTo fix, rename or remove one of the labels."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a command that starts PowerShell with `-ExecutionPolicy Bypass`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "powershell -ExecutionPolicy Bypass -File a.ps1\npowershell -ExecutionPolicy RemoteSigned -File a.ps1\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 46,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-execution-policy-bypass",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "SEC009",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "The policy is the machine's check on which scripts may run. Bypassing it for a script that is fetched or edited by others lets unchecked code run.\n\nTo fix, sign the script and use `RemoteSigned`, or run it with a policy the machine already allows."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports `reg delete` with `/f`, which deletes without a prompt.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "reg delete HKCU\\Software\\X /f\nreg delete HKCU\\Software\\X\nreg add HKCU\\Software\\X /f\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 29,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-forced-registry-delete",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "SEC004",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A deleted key cannot be restored, and a wrong or empty path in a variable removes a different key than meant.\n\nTo fix, check that the key exists first and export it (`reg export`) before the delete, or leave out `/f` so the user is asked."
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "Reports `if not errorlevel 0`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if not errorlevel 0 exit /b 1\nif errorlevel 1 exit /b 1\nif not errorlevel 10 echo a\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 29,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-if-not-errorlevel-zero",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W017",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`errorlevel N` is true when the exit code is N or more, so `not errorlevel 0` can only be true for a negative code. The check never reports the failure it is written for.\n\nTo fix, write `if errorlevel 1 (...)` for a failure."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports an `@` in front of a command on any line but the first.",
+      "example": {
+        "config": null,
+        "fixed": "@echo off\necho hi\necho ok\n",
+        "input": "@echo off\n@echo hi\necho ok\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 1,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "unsafe",
+      "id": "no-late-at-sign",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S029",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`@` hides one command from the echo. After `@echo off` the echo is off for the file, so the `@` does nothing and hints that the file is not sure whether the echo is on.\n\nTo fix, remove the `@`."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a line of more than 80 characters that joins commands with `&&` or `||` outside quotes.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\ndir && echo ok\necho short\ndir && echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 99,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-long-one-liner",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S024",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A long chain hides which command decides what runs next: the `||` or `&&` after a long pipe is read as applying to the whole chain, and an error in the middle is hard to find.\n\nTo fix, write the commands on separate lines, with `if errorlevel` or `||` on a line of their own."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports a number of three or more digits written in a command, which is not one of the common values (powers of two, ports, a thousand, a day in seconds) the rule lists.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if %build% EQU 19041 echo new\nset PORT=19041\necho 80 files\nif %n% EQU 100 echo a\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 16,
+            "length": 5,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-magic-numbers",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S019",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "A bare `9600` or `19041` says nothing about what it is, and the same value written in several places must be changed in each.\n\nTo fix, give the value a name with `set` once and write `%name%` where it is used."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a word or a comment with a character that is not ASCII.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "echo plain\necho café\nrem naïve\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 6,
+            "length": 4,
+            "line": 2
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-non-ascii",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W012",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`cmd` reads a script in the console's code page, so the same bytes mean different text on another machine, and a command with such a character in a name or a path can fail.\n\nTo fix, use ASCII, or `chcp 65001` and a file saved as UTF-8 without a byte order mark."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports an `IF` without `ELSE` whose body is one command in parentheses on the same line, as in `if exist x (del x)`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if a==b (echo yes)\nif a==b (\n  echo yes\n)\n(echo hi)\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 18,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-redundant-parens",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "S028",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Parentheses are needed for several commands or for lines that continue. Around one command they only invite a misplaced `)`, and a `)` inside the command (a path with `(x86)`) ends the block early.\n\nTo fix, remove the parentheses."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a `shift` inside a block of several lines (`( ... )` after `if`, `for` or alone).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "shift\nif a==b (\n  echo x\n  shift\n)\nif a==b shift\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 3,
+            "length": 5,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-shift-in-block",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W052",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`cmd` expands `%1` for the whole block before it runs the first line, so a `%1` after the `shift` in the same block still reads the value from before it.\n\nTo fix, move the loop to labels with `goto`, where each line is read when it runs."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports `rmdir /s /q` (a directory tree deleted without asking), `format` with `/q`, and `shutdown` with a switch.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "rmdir /s build\nrmdir /s /q build\nrd /s build\ndel /s x\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 17,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-unconfirmed-delete-tree",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "SEC003",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "These commands cannot be undone and run without a prompt. With a variable that is empty or wrong (`rmdir /s /q %dir%\\`) they remove or stop far more than meant.\n\nTo fix, check the target (`if exist`, a non-empty variable, a prompt with `choice`) before the command, or keep it out of the script."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a `%errorlevel%`, `%random%`, `%time%` or `%date%` inside a parenthesised block.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if a==b (\n  echo %errorlevel%\n  echo %time%\n  echo \"x%random%\"\n)\necho %errorlevel%\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 8,
+            "length": 12,
+            "line": 2
+          },
+          {
+            "column": 8,
+            "length": 6,
+            "line": 3
+          },
+          {
+            "column": 10,
+            "length": 8,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "parse-time-variable-in-block",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W071",
+          "note": "Blinter also reports `%errorlevel%` after a command on a line that is not in a block",
+          "partial": true,
+          "tool": "blinter"
+        }
+      ],
+      "why": "The block is expanded as a whole before its first command runs, so these variables keep the value they had before the block, and every round of a loop reads the same one.\n\nTo fix, enable delayed expansion and write `!errorlevel!`, or test with `if errorlevel`."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports `%CD%` written in an argument without quotes.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "set here=%CD%\nset \"here=%CD%\"\ncd \"%CD%\\x\"\nrem %CD%\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 5,
+            "length": 9,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "quote-cd-variable",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "SEC025",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "The current directory is any folder name the user made. A space, `&` or `)` in it splits the command or ends the block where the value is used.\n\nTo fix, write `\"%CD%\"`, or `set \"dir=%CD%\"` and use `\"%dir%\"`."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports an `IF` that compares a plain `%name%` with `==` and does not put it in quotes (or brackets). An `IF /I` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if %a%==x echo a\nif \"%a%\"==\"x\" echo b\nif %1==x echo c\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 16,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "quote-if-operand",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W005",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "When the variable is empty or holds a blank, `if %a%==b` reads `if ==b` and fails to run, and when it holds a space or `)` the line is split in the wrong place.\n\nTo fix, write `if \"%a%\"==\"b\"`."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports an `IF` that compares a plain `%name%` with `==` where the line has blanks around `==`, or the other side is an unquoted word of two or more characters.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if %a%==%b% echo a\nif %a%==x echo b\nif \"%a%\"==\"%b%\" echo c\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 18,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "quote-if-operands-both",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "E007",
+          "partial": false,
+          "tool": "blinter"
+        },
+        {
+          "id": "W021",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "Blanks around `==` are part of the operands, so the comparison is never true in the way it reads, and an unquoted variable on either side breaks the line when it is empty.\n\nTo fix, write `if \"%a%\"==\"%b%\"` with no blanks around `==`."
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Reports a command that has more words or redirections after `2>&1` or `>&2`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "dir 2>&1 > out.txt\ndir > out.txt 2>&1\necho 1>&2 oops\n(echo a) 1>&2\nexit /b 1\n",
+        "language": "batch",
+        "other_lines": [],
+        "spans": [
+          {
+            "column": 1,
+            "length": 3,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 4,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "stderr-redirect-last",
+      "languages": [
+        "batch"
+      ],
+      "options": [],
+      "presets": [
+        "batch/blinter"
+      ],
+      "upstream": [
+        {
+          "id": "W066",
+          "partial": false,
+          "tool": "blinter"
+        }
+      ],
+      "why": "`2>&1` copies stderr to where stdout goes at that moment, so a redirection written after it does not move stderr with it.\n\nTo fix, write `> file 2>&1`, not `2>&1 > file`."
     },
     {
       "category": "performance",

@@ -1,0 +1,14 @@
+id: no-duplicate-label
+family: unique-names
+params: { container: document, item: item, deep: "true", name: name, strip: ":", fold: lower, report: item, related: first defined here }
+message: "the label `{name}` is already defined; `goto` and `call` use the first one"
+description: >-
+  Reports a label that is defined twice in a file (compared without case).
+why: >-
+  `goto` and `call` jump to the first label of that name, so the code under the second one can
+  never be reached by name, and a copy that was meant to be renamed is easy to miss.
+
+  To fix, rename or remove one of the labels.
+example: ":start\necho a\n:start   # reported"
+severity: off
+category: correctness

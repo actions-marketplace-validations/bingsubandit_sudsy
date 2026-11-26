@@ -25,7 +25,6 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
-| Batchfile | 0.51~ | 0 (paid) | 6.09~ | - | - | lint: lint Blinter | estimate: pick only to measure it |
 | Jupyter Notebook | 0.57~ | 0 (paid) | 2.78~ | - | - | lint: lint ruff check on cells | JSON file with Python cells: the Python leg does the work; evidence in docs/ai/design/jupyter.md; estimate: pick only to measure it |
 | Gradle | 0.31~ | 1.2 | 2.10~ | 1.47~ | 2.35~ | both: lint none found + format Spotless (greclipse) | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; evidence in docs/ai/design/gradle.md; estimate: pick only to measure it |
 | Procfile | 0.26~ | ~1.5 | 1.59~ | 1.59~ | 2.17~ | both: lint none found + format none found | estimate: pick only to measure it |
@@ -50,8 +49,9 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | Hack | 0.20~ | ~1.2 | 1.10~ | 0.97~ | 1.39~ | both: lint hhast + format hackfmt | grammar archived; estimate: pick only to measure it |
 | Smarty | 0.15~ | ~1.2 | 1.04~ | 1.04~ | 1.37~ | both: lint none found + format none found | estimate: pick only to measure it |
 | Astro | 0.22~ | ~1.2 | 1.04~ | 1.04~ | 1.37~ | both: lint astro check + format prettier-plugin-astro | estimate: pick only to measure it |
+| R | 0.20 | ~1.2 | 1.08~ | 0.95~ | 1.35~ | both: lint lintr + format styler | estimate: pick only to measure it |
 
-The other 148 entries of the file, each with the score of its best plan: R 1.35~; package.json 1.32~; EJS 1.31~; Yacc / Lex 1.30~; Perl 1.30~; Vim Script 1.26~; Roff 1.24~; Cython 1.21~; Lua 1.21~; GraphQL 1.19~; MATLAB 1.16~; Handlebars 1.15~; VBA / VB6 1.15~; M4 1.13~; EDN 1.13~; GDScript 1.13~; Groovy 1.09~; OpenAPI 1.08~; NSIS 1.02~; ARM templates 0.99~; CloudFormation 0.99~; Docker Compose 0.99~; Tekton pipelines 0.99~; Rich Text Format 0.99~; Inno Setup 0.97~; Emacs Lisp 0.97~; RON 0.94~; Common Lisp / Scheme 0.91~; AsciiDoc 0.89~; ASP.NET (Razor, Web Forms) 0.89~; Cap'n Proto 0.89~; COBOL 0.89~; Java properties 0.89~; Prolog 0.89~; Thrift 0.89~; VBScript 0.89~; Visual Basic .NET 0.89~; Snakemake 0.88~; Gherkin 0.88~; Mermaid 0.88~; Elixir 0.87~; Awk 0.86~; Scala 0.86~; Avro IDL 0.83~; FlatBuffers 0.83~; GDB script 0.83~; Pawn 0.83~; QMake 0.83~; Raku 0.83~; RenderScript 0.83~; sed 0.83~; SWIG 0.83~; Tcl 0.83~; BitBake 0.83~; Grain 0.83~; Nix 0.81~; Smithy 0.78~; KDL 0.77~; BibTeX 0.76~; CoffeeScript 0.76~; Fennel / Janet 0.76~; Mojo 0.76~; PureScript 0.76~; Puppet 0.74~; Twig 0.74~; CSV / TSV 0.74~; Typst 0.74~; WebAssembly text 0.74~; Beancount / hledger 0.72~; JSON5 0.72~; MDX 0.72~; ANTLR 0.70~; Liquidsoap 0.70~; Marko 0.70~; Nextflow 0.70~; Prisma 0.70~; Meson 0.70~; Julia 0.69~; TOML 0.68~; CodeQL 0.68~; D2 0.68~; Gleam 0.68~; GN 0.68~; HTTP files / Hurl 0.68~; jq 0.68~; Just 0.68~; Metal 0.68~; Nickel 0.68~; Nim 0.68~; Nushell 0.68~; OCaml 0.68~; Odin 0.68~; Pkl 0.68~; ReScript / Reason 0.68~; Roc 0.68~; Standard ML 0.68~; templ 0.68~; Apex 0.68~; BrightScript / BrighterScript 0.68~; ERB 0.68~; Erlang 0.68~; F# 0.68~; Liquid 0.68~; Racket 0.68~; reStructuredText 0.68~; Robot Framework 0.68~; VHDL 0.68~; Fortran 0.66~; TypeSpec 0.64~; Stylus 0.63~; Elm 0.62~; Inko 0.61~; Protocol Buffer text format 0.61~; Soong (Android.bp) 0.61~; Ziggy 0.61~; Nginx config 0.59~; Clojure 0.58~; Sass (indented) 0.58~; Pascal / Delphi 0.58~; Go 0.58~; Solidity 0.54~; Haskell 0.52~; dotenv 0.45~; Quarto / R Markdown 0.41~; Zig 0.39~; D 0.39~; Ada 0.37~; WGSL 0.36~; Verilog / SystemVerilog 0.35~; Crystal 0.31~; Rego (Open Policy Agent) 0.31~; Dart 0.23~; Objective-C 0.18~; XML 0.17~; HLSL 0.16~; GLSL 0.15~; Starlark / Bazel 0.15~; CUDA 0.13~; Dhall 0.11~; Fish 0.11~; V 0.11~; Caddyfile 0.10~; Bicep 0.10~; KCL 0.10~; CUE 0.10~; Cedar 0.09~; Jsonnet 0.09~; QML 0.09~.
+The other 147 entries of the file, each with the score of its best plan: package.json 1.32~; EJS 1.31~; Yacc / Lex 1.30~; Perl 1.30~; Vim Script 1.26~; Roff 1.24~; Cython 1.21~; Lua 1.21~; GraphQL 1.19~; MATLAB 1.16~; Handlebars 1.15~; VBA / VB6 1.15~; M4 1.13~; EDN 1.13~; GDScript 1.13~; Groovy 1.09~; OpenAPI 1.08~; NSIS 1.02~; ARM templates 0.99~; CloudFormation 0.99~; Docker Compose 0.99~; Tekton pipelines 0.99~; Rich Text Format 0.99~; Inno Setup 0.97~; Emacs Lisp 0.97~; RON 0.94~; Common Lisp / Scheme 0.91~; AsciiDoc 0.89~; ASP.NET (Razor, Web Forms) 0.89~; Cap'n Proto 0.89~; COBOL 0.89~; Java properties 0.89~; Prolog 0.89~; Thrift 0.89~; VBScript 0.89~; Visual Basic .NET 0.89~; Snakemake 0.88~; Gherkin 0.88~; Mermaid 0.88~; Elixir 0.87~; Awk 0.86~; Scala 0.86~; Avro IDL 0.83~; FlatBuffers 0.83~; GDB script 0.83~; Pawn 0.83~; QMake 0.83~; Raku 0.83~; RenderScript 0.83~; sed 0.83~; SWIG 0.83~; Tcl 0.83~; BitBake 0.83~; Grain 0.83~; Nix 0.81~; Smithy 0.78~; KDL 0.77~; BibTeX 0.76~; CoffeeScript 0.76~; Fennel / Janet 0.76~; Mojo 0.76~; PureScript 0.76~; Puppet 0.74~; Twig 0.74~; CSV / TSV 0.74~; Typst 0.74~; WebAssembly text 0.74~; Beancount / hledger 0.72~; JSON5 0.72~; MDX 0.72~; ANTLR 0.70~; Liquidsoap 0.70~; Marko 0.70~; Nextflow 0.70~; Prisma 0.70~; Meson 0.70~; Julia 0.69~; TOML 0.68~; CodeQL 0.68~; D2 0.68~; Gleam 0.68~; GN 0.68~; HTTP files / Hurl 0.68~; jq 0.68~; Just 0.68~; Metal 0.68~; Nickel 0.68~; Nim 0.68~; Nushell 0.68~; OCaml 0.68~; Odin 0.68~; Pkl 0.68~; ReScript / Reason 0.68~; Roc 0.68~; Standard ML 0.68~; templ 0.68~; Apex 0.68~; BrightScript / BrighterScript 0.68~; ERB 0.68~; Erlang 0.68~; F# 0.68~; Liquid 0.68~; Racket 0.68~; reStructuredText 0.68~; Robot Framework 0.68~; VHDL 0.68~; Fortran 0.66~; TypeSpec 0.64~; Stylus 0.63~; Elm 0.62~; Inko 0.61~; Protocol Buffer text format 0.61~; Soong (Android.bp) 0.61~; Ziggy 0.61~; Nginx config 0.59~; Clojure 0.58~; Sass (indented) 0.58~; Pascal / Delphi 0.58~; Go 0.58~; Solidity 0.54~; Haskell 0.52~; dotenv 0.45~; Quarto / R Markdown 0.41~; Zig 0.39~; D 0.39~; Ada 0.37~; WGSL 0.36~; Verilog / SystemVerilog 0.35~; Crystal 0.31~; Rego (Open Policy Agent) 0.31~; Dart 0.23~; Objective-C 0.18~; XML 0.17~; HLSL 0.16~; GLSL 0.15~; Starlark / Bazel 0.15~; CUDA 0.13~; Dhall 0.11~; Fish 0.11~; V 0.11~; Caddyfile 0.10~; Bicep 0.10~; KCL 0.10~; CUE 0.10~; Cedar 0.09~; Jsonnet 0.09~; QML 0.09~.
 
 ## actionlint
 
@@ -85,6 +85,27 @@ Format: unclassified 0 of 24 differing files (0%).
 1. `number-array-fill` (12 files): Biome fills an array of numbers, many to a line up to the width; Sudsy puts one number on each line
 2. `lockfile-ignored` (9 files): Biome leaves package-lock.json as it is (a default ignore); Sudsy formats it
 3. `comment-before-comma` (3 files): Biome puts a block comment after a value in front of the comma (`true /* c */,`); Sudsy writes it after the comma
+
+## blinter
+
+Lint: target 85.1% (15595 of 18324, 2729 missed, measured on 032e2f36); rules by missed findings:
+1. `W068` (266 missed)
+2. `W023` (207 missed)
+3. `W039` (207 missed)
+4. `W040` (126 missed)
+5. `S008` (100 missed)
+6. `S010` (98 missed)
+7. `S013` (91 missed)
+8. `S022` (75 missed)
+9. `E008` (73 missed)
+10. `P014` (61 missed)
+11. `P019` (57 missed)
+12. `S016` (55 missed)
+13. `E028` (54 missed)
+14. `E047` (50 missed)
+15. `P006` (50 missed)
+
+84 more rules: 1159 missed.
 
 ## buf
 

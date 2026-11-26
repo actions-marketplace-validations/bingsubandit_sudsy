@@ -201,6 +201,7 @@ def lint_changed(tool, config, entries, sudsy, work, corpus=CORPUS):
         shutil.copy(corpus / rel, work / name)
         expected[name] = (want, rel)
     (work / "sudsy.yaml").write_text(json.dumps(pl.sudsy_config(tool, spec)), encoding="utf-8")
+    (work / ".gitignore").write_text("!*\n", encoding="utf-8")  # the work folder may sit in a checkout (CI: target/) whose .gitignore (`bin/`) would hide corpus files
     run = subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
     try:
         diagnostics = json.loads(run.stdout)["diagnostics"]

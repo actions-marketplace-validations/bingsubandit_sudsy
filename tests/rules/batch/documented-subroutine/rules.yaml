@@ -1,0 +1,6 @@
+documented-subroutine:
+  level: warn
+  options:
+    labels: [Label]
+    kinds: [Name, Program]
+    commands: [call]

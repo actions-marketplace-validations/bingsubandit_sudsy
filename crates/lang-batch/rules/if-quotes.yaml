@@ -1,0 +1,33 @@
+id: quote-if-operand
+message: "quote the variable in the comparison (`\"%name%\"==\"value\"`): when it is empty the line is a syntax error"
+description: >-
+  Reports an `IF` that compares a plain `%name%` with `==` and does not put it in quotes (or
+  brackets). An `IF /I` is left alone.
+why: >-
+  When the variable is empty or holds a blank, `if %a%==b` reads `if ==b` and fails to run, and when it holds
+  a space or `)` the line is split in the wrong place.
+
+  To fix, write `if "%a%"=="b"`.
+example: "if %mode%==fast echo go"
+severity: off
+category: suspicious
+rule:
+  kind: IfCommand
+  regex: '(?i)^if\s+(?:not\s+)?%[a-z_][\w-]*(?::[^%\s]*)?%\s*=='
+---
+id: quote-if-operands-both
+message: "the comparison has unquoted operands on both sides, or blanks around `==`; quote each operand"
+description: >-
+  Reports an `IF` that compares a plain `%name%` with `==` where the line has blanks around `==`, or
+  the other side is an unquoted word of two or more characters.
+why: >-
+  Blanks around `==` are part of the operands, so the comparison is never true in the way it reads,
+  and an unquoted variable on either side breaks the line when it is empty.
+
+  To fix, write `if "%a%"=="%b%"` with no blanks around `==`.
+example: "if %a% == b echo go"
+severity: off
+category: suspicious
+rule:
+  kind: IfCommand
+  regex: '(?i)^if\s+(?:not\s+)?%[a-z_][\w-]*(?::[^%\s]*)?%(?:\s+==|==\s+|==(?:[%!\\]\w+[%!]?\w*|\w{2,})(?:\s|$))'

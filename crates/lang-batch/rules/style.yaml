@@ -1,0 +1,36 @@
+id: cmd-extension
+message: "the file has the `.bat` extension; `.cmd` sets ERRORLEVEL the same way on every Windows"
+description: >-
+  Reports a file with the `.bat` extension, at its first token.
+why: >-
+  A `.cmd` file is run by `cmd.exe` only and sets `ERRORLEVEL` after every command. A `.bat` file is
+  also run by the DOS-era interpreters and, on old Windows, sets it only after some commands, so an
+  `IF ERRORLEVEL` test can read a stale value.
+
+  To fix, rename the file to `.cmd`.
+example: "echo off   # in a file named build.bat"
+severity: off
+category: style
+rule: { kind: File, path: '(?i)\.bat$' }
+report-on: first-token
+---
+id: no-late-at-sign
+message: "`@` in front of a command after the first line; write `@echo off` once and drop it here"
+description: >-
+  Reports an `@` in front of a command on any line but the first.
+why: >-
+  `@` hides one command from the echo. After `@echo off` the echo is off for the file, so the `@`
+  does nothing and hints that the file is not sure whether the echo is on.
+
+  To fix, remove the `@`.
+example: "@echo off\n@set x=1"
+severity: off
+category: style
+rule:
+  kind: Sequence
+  regex: '^@'
+  not: { any: [{ nth: 1, parent: { kind: File } }, { regex: '(?i)^@(?:rem\b|echo\s+off\b)' }] }
+  any: [{ parent: { kind: File } }, { parent: { kind: Block } }]
+token: { kind: [At] }
+fix: ""
+fix-kind: unsafe

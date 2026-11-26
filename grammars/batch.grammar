@@ -59,7 +59,7 @@ token Quote "\"" #quote
 token Eof
 token Unknown #error
 
-node File = lines:Sequence* Eof
+node File #document = lines:Sequence* Eof
 node Sequence = items:#item*
 node Simple #item = command:#word? arguments:#argument-item*
 node Argument #word #argument-item = parts:#part*

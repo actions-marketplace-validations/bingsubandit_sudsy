@@ -1,0 +1,18 @@
+id: no-long-one-liner
+message: "the line chains commands with `&&` or `||`; split it over lines"
+description: >-
+  Reports a line of more than 80 characters that joins commands with `&&` or `||` outside quotes.
+why: >-
+  A long chain hides which command decides what runs next: the `||` or `&&` after a long pipe is
+  read as applying to the whole chain, and an error in the middle is hard to find.
+
+  To fix, write the commands on separate lines, with `if errorlevel` or `||` on a line of their own.
+example: "echo start & type log.txt | find \"err\" && echo found || echo clean && echo done"
+severity: off
+category: style
+rule:
+  kind: Sequence
+  any: [{ parent: { kind: File } }, { parent: { kind: Block } }]
+  all:
+    - regex: '^[^\n]{81}'
+    - regex: '^(?:[^"\n|&]|&[^&\n]|\|[^|\n]|"[^"\n]*")*(?:&&|\|\|)'

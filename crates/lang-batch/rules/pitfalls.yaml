@@ -1,0 +1,53 @@
+id: stderr-redirect-last
+message: "write `2>&1` last in the command, after the other redirections"
+description: >-
+  Reports a command that has more words or redirections after `2>&1` or `>&2`.
+why: >-
+  `2>&1` copies stderr to where stdout goes at that moment, so a redirection written after it does
+  not move stderr with it.
+
+  To fix, write `> file 2>&1`, not `2>&1 > file`.
+example: "dir 2>&1 > out.txt"
+severity: off
+category: suspicious
+rule:
+  kind: Simple
+  regex: '>&[12]\s+[^\s;&|)(]'
+  not: { regex: '(?i)^set\b' }
+report-on: first-token
+---
+id: parse-time-variable-in-block
+message: "`${V}` is read once, when the whole block is parsed, not when its line runs"
+description: >-
+  Reports a `%errorlevel%`, `%random%`, `%time%` or `%date%` inside a parenthesised block.
+why: >-
+  The block is expanded as a whole before its first command runs, so these variables keep the
+  value they had before the block, and every round of a loop reads the same one.
+
+  To fix, enable delayed expansion and write `!errorlevel!`, or test with `if errorlevel`.
+example: "if exist a (\n  del a\n  echo %errorlevel%\n)"
+severity: off
+category: suspicious
+rule:
+  kind: Argument
+  inside: { kind: Block }
+token:
+  kind: [Var]
+  deep: true
+  regex: '^(?i)%(?<V>errorlevel|random|time|date)%$'
+---
+id: if-compare-wildcard
+message: "`*` and `?` in an `==` comparison are plain characters, not wildcards"
+description: >-
+  Reports an `IF` line with a `==` comparison and a `*` or `?` after or before it.
+why: >-
+  The `==` comparison matches text exactly, so a pattern written with a wildcard only equals the
+  same characters.
+
+  To fix, test with `findstr` or `for`, or compare a fixed text.
+example: "if \"%1\"==\"*.txt\" echo wildcard"
+severity: off
+category: suspicious
+rule:
+  kind: IfCommand
+  regex: '(?i)^if\s[^(]*(?:==[^(]*[*?]|[*?][^(]*==)'

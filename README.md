@@ -78,25 +78,25 @@ Each number is measured on real-world code against the default rule set of the r
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
 | Dockerfile | ████████░░ 86% dockerfmt | █████████░ 91% hadolint | Ready |
 | SQL | ████████░░ 85% sqlfluff | █████████░ 90% sqlfluff | Ready |
-| Jupyter Notebook | ████████░░ 88% ruff format | 22 rules · no reference tool | Ready |
+| Jupyter Notebook | ████████░░ 88% ruff format | 30 rules · no reference tool | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 87% actionlint | Ready |
 | C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>░░░░░░░░░░ 0% Roslynator | Ready |
 | PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |
 | Makefile | ████████░░ 88% mbake | ██████████ 100% checkmake | Ready |
-| TOML | █████████░ 98% taplo | 22 rules · no reference tool | Ready |
-| XML | ██████████ 100% CSharpier XML | 24 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 30 rules · no reference tool | Ready |
+| XML | ██████████ 100% CSharpier XML | 32 rules · no reference tool | Ready |
 | Go | none | █████████░ 97% revive | Lint only: Ready |
 | CMake | █████████░ 90% gersemi | █████████░ 97% cmake-lint | Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Vue / Svelte | █████████░ 91% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
 | Angular templates | █████████░ 99% Prettier | █████████░ 99% angular-eslint | Ready |
-| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 31 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 39 rules · no reference tool | Ready |
 | Ruby | ████████░░ 86% RuboCop | █████████░ 96% RuboCop | Ready |
-| GraphQL | █████████░ 99% Prettier | 29 rules · no reference tool | Ready |
+| GraphQL | █████████░ 99% Prettier | 37 rules · no reference tool | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 89% buf | Ready |
-| Batchfile | ░░░░░░░░░░ 0% stable · █████████░ 96% agreement · no reference tool | 22 rules · no reference tool | In progress |
+| Batchfile | ░░░░░░░░░░ 0% stable · █████████░ 96% agreement · no reference tool | ████████░░ 85% Blinter | In progress |
 | C / C++ | ███████░░░ 72% clang-format | not measured clang-tidy | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 

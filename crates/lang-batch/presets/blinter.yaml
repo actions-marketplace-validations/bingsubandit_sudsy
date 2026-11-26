@@ -1,0 +1,39 @@
+# Blinter's rules as the Sudsy rules that cover them, with the settings that match what Blinter reports (line length 100, its list of
+# commands that need an error check, the `:` form of `goto` as the first one written). Rule ids and the Blinter codes they cover are in
+# docs/ai/parity/blinter.yaml.
+batch:
+  lint:
+    rules:
+      max-line-length: {level: warn, options: {max: 100, allow_non_breakable_words: false}}
+      no-trailing-whitespace: warn
+      cmd-extension: warn
+      no-late-at-sign: warn
+      no-magic-numbers: warn
+      blank-line-before-label: warn
+      command-case: warn
+      quote-if-operand: warn
+      quote-if-operands-both: warn
+      no-unconfirmed-delete-tree: warn
+      no-forced-registry-delete: warn
+      no-redundant-parens: warn
+      nested-for: warn
+      no-duplicate-label: warn
+      for-f-options: warn
+      no-shift-in-block: warn
+      no-long-one-liner: warn
+      unchecked-command: {level: warn, options: {kinds: [Name, Program], commands: [reg, erase, xcopy, robocopy, sc, net, powershell, wmic, 'del:2', 'copy:2', 'move:2', 'mkdir:2', 'rmdir:2'], window: 3, checks: [errorlevel]}}
+      argument-prefix: {level: warn, options: {kinds: [Name, Program], commands: [goto], prefix: ':', except: [eof]}}
+      missing-terminator: {level: warn, options: {terminators: [exit, 'goto :eof'], skip: [')', ':*', endlocal, '@endlocal'], lines: 5}}
+      commented-block: {level: warn, options: {block: [Block], parents: [IfCommand], lines: 5, indented: true}}
+      feature-not-enabled: {level: warn, options: {kinds: [DelayedVar, Text], use: '![^!\s%]+!', on: [enabledelayedexpansion, '/v:on'], off: [disabledelayedexpansion, '/v:off']}}
+      delayed-expansion-in-loop: warn
+      stderr-redirect-last: warn
+      parse-time-variable-in-block: warn
+      if-compare-wildcard: warn
+      documented-subroutine: {level: warn, options: {labels: [Label], kinds: [Name, Program], commands: [call]}}
+      quote-cd-variable: warn
+      no-execution-policy-bypass: warn
+      no-if-not-errorlevel-zero: warn
+      no-non-ascii: warn
+      repeated-command: {level: warn, options: {kinds: [Name, Program], commands: [setlocal, 'echo off:1'], nth: 2, first-exempt: true}}
+      unused-opener: {level: warn, options: {kinds: [Name, Program], open: [setlocal], args: [enabledelayedexpansion], use-kinds: [DelayedVar, Text], use: '![^!\s%]+!'}}

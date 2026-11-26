@@ -1,0 +1,18 @@
+id: delayed-expansion-in-loop
+message: "this line of a FOR loop expands two or more `!variables!`"
+description: >-
+  Reports a line in the body of a `FOR` loop that reads two or more variables with `!name!`.
+why: >-
+  Delayed expansion runs again on every round of the loop and turns every `!` in the text into
+  a marker, so a loop that reads many variables this way is slower and easy to get wrong.
+
+  To fix, read the value into a loop variable with `for /f`, or move the body to a subroutine.
+example: "for %%a in (1 2) do echo !x!"
+severity: off
+category: performance
+rule:
+  kind: Sequence
+  any: [{ parent: { kind: File } }, { parent: { kind: Block } }]
+  inside: { kind: ForCommand }
+  regex: '^[^(]*![^!\s%]+![^(]*![^!\s%]+!'
+report-on: first-token

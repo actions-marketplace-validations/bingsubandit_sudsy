@@ -1,0 +1,21 @@
+id: command-case
+family: token-case
+params:
+  option: command_case
+  message: "write `{name}` as `{fixed}`"
+  only: call cd cls copy del dir endlocal exit goto mkdir move pause popd pushd rmdir set setlocal type if for
+description: >-
+  Reports a command or keyword (`cd`, `set`, `if`, `for`, `goto`, ...) written in another case than
+  the file mostly writes the same word in; a tie goes to the first one written. The `policy` option
+  can instead name one case, or `consistent`. The fix writes the word as the file mostly does.
+why: >-
+  `cmd` reads its commands without case, so `ECHO` and `echo` are the same command, but a file that
+  mixes them looks like it was merged from different sources.
+
+  To fix, write the commands in the case that the policy gives.
+example: "set a=1\nset b=2\nSET c=3   # SET is reported"
+severity: off
+category: style
+fix-kind: safe
+options:
+  - { name: policy, type: string, default: majority, choices: [consistent, upper, lower, capitalise, majority], description: "The case the words must be in: `consistent` follows the first one written; `majority`: the spelling the file uses most for each command." }

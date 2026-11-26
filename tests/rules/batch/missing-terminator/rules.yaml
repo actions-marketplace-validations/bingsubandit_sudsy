@@ -1,0 +1,6 @@
+missing-terminator:
+  level: warn
+  options:
+    terminators: [exit, 'goto :eof']
+    skip: [')', ':*', endlocal]
+    lines: 3

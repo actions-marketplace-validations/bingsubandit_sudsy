@@ -1,0 +1,7 @@
+argument-prefix:
+  level: warn
+  options:
+    kinds: [Name, Program]
+    commands: [goto]
+    prefix: ':'
+    except: [eof]

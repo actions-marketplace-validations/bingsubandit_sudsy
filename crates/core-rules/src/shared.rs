@@ -39,6 +39,14 @@ pub static RULES: &[&dyn Rule] = &[
     &crate::documented_command::DocumentedCommand,
     &crate::statement_blank_lines::StatementBlankLines,
     &crate::statement_indent::StatementIndent,
+    &crate::command_check::UncheckedCommand,
+    &crate::argument_prefix::ArgumentPrefix,
+    &crate::documented_label::DocumentedSubroutine,
+    &crate::feature_state::FeatureNotEnabled,
+    &crate::commented_block::CommentedBlock,
+    &crate::final_terminator::MissingTerminator,
+    &crate::repeated_command::RepeatedCommand,
+    &crate::unused_opener::UnusedOpener,
 ];
 
 rule! {

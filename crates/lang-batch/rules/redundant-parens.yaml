@@ -1,0 +1,35 @@
+id: no-redundant-parens
+message: "the parentheses hold one command; write it without them"
+description: >-
+  Reports an `IF` without `ELSE` whose body is one command in parentheses on the same line, as in
+  `if exist x (del x)`.
+why: >-
+  Parentheses are needed for several commands or for lines that continue. Around one command they
+  only invite a misplaced `)`, and a `)` inside the command (a path with `(x86)`) ends the block early.
+
+  To fix, remove the parentheses.
+example: "if exist x (del x)"
+severity: off
+category: style
+rule:
+  kind: Sequence
+  regex: '^(?i:if)\s+[^\s(][^\n]*\([^()&|\n]*\)$'
+  not: { regex: '\)\s*(?i:else)\b' }
+  any: [{ parent: { kind: File } }, { parent: { kind: Block } }]
+---
+id: nested-for
+message: "a FOR loop inside another FOR loop; move the inner one to a subroutine called with `call`"
+description: >-
+  Reports a `FOR` that is inside the body of another `FOR`.
+why: >-
+  The inner loop is parsed again for every round of the outer one, and a loop variable is easy to
+  mix up. A subroutine keeps each loop short and gives the inner one a name.
+
+  To fix, move the inner loop to a label and `call` it from the outer loop.
+example: "for %%i in (a) do (\n  for %%j in (b) do echo %%i%%j\n)"
+severity: off
+category: style
+rule:
+  kind: ForCommand
+  inside: { kind: ForCommand }
+report-on: first-token

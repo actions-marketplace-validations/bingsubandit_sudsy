@@ -628,6 +628,61 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an argument list of a call that the Kotlin formatter would wrap or join differently: the arguments on one line when they fit, one per line when they do not."
             },
+            "argument-prefix": {
+              "description": "Reports the first argument of a command listed in the option `commands` that is written with the option `prefix` when the first such command of the file has none, or the other way round.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands whose first argument is checked (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "except": {
+                          "default": [],
+                          "description": "Arguments, without the prefix, that have one form only (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "default": "",
+                          "description": "The text an argument may start with.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "aria-hidden-body": {
               "$ref": "#/definitions/rule",
               "description": "Reports `aria-hidden=\"true\"` on `<body>`."
@@ -1031,6 +1086,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a comparison, logical or bitwise operator (`== != === <=> =~ > >= < <= | ^ && ||`) whose two sides are the same code (`x == x`)."
             },
+            "blank-line-before-label": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a label that has no blank line before it, unless a comment stands on the line right before."
+            },
             "blank-line-between-declarations": {
               "$ref": "#/definitions/rule",
               "description": "Reports a declaration (function, property, class, object, typealias) with a blank line before it that the formatter would add or remove."
@@ -1229,6 +1288,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an element with a click handler (`(click)`, `@click`) and no `keydown`, `keyup` or `keypress` handler."
             },
+            "cmd-extension": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a file with the `.bat` extension, at its first token."
+            },
             "collapsible-if": {
               "$ref": "#/definitions/rule",
               "description": "Reports an `if` whose only statement is another `if`, when neither has an `elif` or `else`."
@@ -1284,6 +1347,44 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a hex color that does not have 3, 4, 6 or 8 digits (`#ab`)."
             },
+            "command-case": {
+              "description": "Reports a command or keyword (`cd`, `set`, `if`, `for`, `goto`, ...) written in another case than the file mostly writes the same word in; a tie goes to the first one written.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "majority",
+                          "description": "The case the words must be in: `consistent` follows the first one written; `majority`: the spelling the file uses most for each command.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise",
+                            "majority"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "commands-show-output": {
               "$ref": "#/definitions/rule",
               "description": "Reports a fenced code block in which every non-blank line starts with `$ `, so it shows commands without their output."
@@ -1331,6 +1432,58 @@
             "comment-syntax": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `//` comment where `#` is the convention."
+            },
+            "commented-block": {
+              "description": "Reports an outermost block of the kind named in the option `block` that is the body of a statement of the kinds in `parents`, has at least `lines` lines of code, and has no comment inside it or on the line right above it.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "block": {
+                          "default": [],
+                          "description": "The node kinds of a block.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "indented": {
+                          "default": true,
+                          "description": "Only blocks whose body is indented deeper than the line that opens them.",
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "default": 5,
+                          "description": "The least number of lines of code in the block.",
+                          "type": "integer"
+                        },
+                        "parents": {
+                          "default": [],
+                          "description": "The node kinds of the statements whose block is checked.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "consistent-type-definitions": {
               "$ref": "#/definitions/rule",
@@ -1695,6 +1848,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports `Generator[X, None, None]` and `AsyncGenerator[X, None]` when the `target_version` gives the last arguments a default (3.13 and later)."
             },
+            "delayed-expansion-in-loop": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a line in the body of a `FOR` loop that reads two or more variables with `!name!`."
+            },
             "delete-apt-lists": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `RUN` that updates the apt package lists and does not delete them."
@@ -2012,6 +2169,56 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an `output` block with no `description` argument."
             },
+            "documented-subroutine": {
+              "description": "Reports a label of a kind in the option `labels` that a command in `commands` calls (the first argument of the command is the label) and that has no comment on the line above, two lines above with a blank line between, or on the line below.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands whose first argument names a label (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "labels": {
+                          "default": [],
+                          "description": "The token kinds of a label.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "documented-variables": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `variable` block with no `description` argument."
@@ -2246,6 +2453,61 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an f-string that has no replacement field in any of its parts."
             },
+            "feature-not-enabled": {
+              "description": "Reports a token of the kinds in the option `kinds` that matches the regex of the option `use` while a feature is off.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds that can use the feature.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "off": {
+                          "default": [],
+                          "description": "The words that turn the feature off.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "on": {
+                          "default": [],
+                          "description": "The words that turn the feature on.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "use": {
+                          "default": "",
+                          "description": "A regex the text of a token that uses the feature matches.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "fenced-code-language": {
               "$ref": "#/definitions/rule",
               "description": "Reports a fenced code block that has no info string after the opening fence."
@@ -2420,6 +2682,10 @@
             "font-family-no-missing-generic-family-keyword": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `font-family` (or `font`) list that has no generic family (`serif`, `sans-serif`, `monospace`, ...)."
+            },
+            "for-f-options": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `for /f` whose first argument is not a quoted string with `tokens=`, `delims=`, `skip=` or `eol=`."
             },
             "form-submit": {
               "$ref": "#/definitions/rule",
@@ -2822,6 +3088,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "if-compare-wildcard": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` line with a `==` comparison and a `*` or `?` after or before it."
             },
             "if-condition": {
               "$ref": "#/definitions/rule",
@@ -3748,6 +4018,53 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a `switch` statement that has no `default` label."
             },
+            "missing-terminator": {
+              "description": "Reports a file whose last lines of code (as many as the option `lines`) hold none of the token sequences of the option `terminators`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "lines": {
+                          "default": 5,
+                          "description": "How many of the last lines of code are searched.",
+                          "type": "integer"
+                        },
+                        "skip": {
+                          "default": [],
+                          "description": "Tokens that do not count as code when the report line is chosen; an entry ending in `*` is a prefix.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "terminators": {
+                          "default": [],
+                          "description": "Token sequences that end a script, such as `exit` or `goto :eof` (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "mixed-regexp-capture-types": {
               "$ref": "#/definitions/rule",
               "description": "Reports a regexp literal that has both named groups (`(?<name>...)`) and plain groups (`(...)`)."
@@ -4011,6 +4328,10 @@
             "negation-of-excluded-parent": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `!` pattern for a path whose parent directory is excluded by an earlier pattern (`!a/b` after `a/`)."
+            },
+            "nested-for": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `FOR` that is inside the body of another `FOR`."
             },
             "nested-with": {
               "$ref": "#/definitions/rule",
@@ -4386,6 +4707,10 @@
                 }
               ]
             },
+            "no-duplicate-label": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a label that is defined twice in a file (compared without case)."
+            },
             "no-duplicate-pattern": {
               "$ref": "#/definitions/rule",
               "description": "Reports a pattern that appears twice with no opposite pattern (`!x` for `x`) between the two, on the second."
@@ -4648,6 +4973,10 @@
                 }
               ]
             },
+            "no-execution-policy-bypass": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a command that starts PowerShell with `-ExecutionPolicy Bypass`."
+            },
             "no-explicit-any": {
               "$ref": "#/definitions/rule",
               "description": "Reports the `any` type wherever a type is written (`let a: any`, `any[]`, a constraint such as `T extends any`)."
@@ -4729,6 +5058,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "no-forced-registry-delete": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `reg delete` with `/f`, which deletes without a prompt."
             },
             "no-from-platform": {
               "$ref": "#/definitions/rule",
@@ -4884,6 +5217,10 @@
                 }
               ]
             },
+            "no-if-not-errorlevel-zero": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `if not errorlevel 0`."
+            },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `<button>` with no `type`."
@@ -4936,6 +5273,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports unusual whitespace characters: vertical tab, form feed, no-break space (U+00A0), the spaces and zero-width characters U+2000 to U+200B, line and paragraph separators, narrow no-break space, medium mathematical space, ideographic space, and a byte order mark that is not at the start of the file."
             },
+            "no-late-at-sign": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `@` in front of a command on any line but the first."
+            },
             "no-latest-tag": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `FROM` whose image has the tag `latest` (`alpine:latest`)."
@@ -4948,6 +5289,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an `if` that is the only statement of an `else` block (`else { if (b) { ... } }`), also when that `if` has its own `else`."
             },
+            "no-long-one-liner": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a line of more than 80 characters that joins commands with `&&` or `||` outside quotes."
+            },
             "no-loss-of-precision": {
               "$ref": "#/definitions/rule",
               "description": "Reports a number literal that the 64-bit double it becomes does not hold exactly: `9007199254740993` (above 2^53), `0x20000000000001`, a value that is too large (`1e400`, becomes `Infinity`) or too small (`2e-400`, becomes `0`)."
@@ -4955,6 +5300,10 @@
             "no-ls-grep": {
               "$ref": "#/definitions/rule",
               "description": "Reports a pipeline from `ls` into `grep`."
+            },
+            "no-magic-numbers": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a number of three or more digits written in a command, which is not one of the common values (powers of two, ports, a thousand, a day in seconds) the rule lists."
             },
             "no-maintainer": {
               "$ref": "#/definitions/rule",
@@ -5007,6 +5356,10 @@
             "no-nested-style-tag": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `<style>` that is inside an element."
+            },
+            "no-non-ascii": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a word or a comment with a character that is not ASCII."
             },
             "no-non-null-asserted-optional-chain": {
               "$ref": "#/definitions/rule",
@@ -5138,6 +5491,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a `<label>` whose `for` names a control that is inside the label."
             },
+            "no-redundant-parens": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` without `ELSE` whose body is one command in parentheses on the same line, as in `if exist x (del x)`."
+            },
             "no-redundant-role": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `role` on an element that already has that role by its name (`<nav role=\"navigation\">`, `<button role=\"button\">`, `<ul role=\"list\">`)."
@@ -5232,6 +5589,10 @@
             "no-shell-symlink": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `RUN` that replaces `/bin/sh`."
+            },
+            "no-shift-in-block": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `shift` inside a block of several lines (`( ... )` after `if`, `for` or alone)."
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
@@ -5351,6 +5712,10 @@
             "no-typename-prefix": {
               "$ref": "#/definitions/rule",
               "description": "Reports a field of an object or interface type that starts with the name of the type (`type User { userId: ID }`); case is ignored."
+            },
+            "no-unconfirmed-delete-tree": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `rmdir /s /q` (a directory tree deleted without asking), `format` with `/q`, and `shutdown` with a switch."
             },
             "no-undefined-alias": {
               "$ref": "#/definitions/rule",
@@ -5626,6 +5991,10 @@
             "parentheses-as-grouped-expression": {
               "$ref": "#/definitions/rule",
               "description": "Reports a space between a method name and a `(` that holds its only argument (`puts (x)`)."
+            },
+            "parse-time-variable-in-block": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `%errorlevel%`, `%random%`, `%time%` or `%date%` inside a parenthesised block."
             },
             "percent-format-expected-mapping": {
               "$ref": "#/definitions/rule",
@@ -5980,9 +6349,21 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an unquoted `$@` or `${array[@]}` in the arguments of a command."
             },
+            "quote-cd-variable": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `%CD%` written in an argument without quotes."
+            },
             "quote-command-substitution": {
               "$ref": "#/definitions/rule",
               "description": "Reports an unquoted `$(...)` or backtick substitution in the arguments of a command."
+            },
+            "quote-if-operand": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` that compares a plain `%name%` with `==` and does not put it in quotes (or brackets)."
+            },
+            "quote-if-operands-both": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` that compares a plain `%name%` with `==` where the line has blanks around `==`, or the other side is an unquoted word of two or more characters."
             },
             "quote-in-quotes": {
               "$ref": "#/definitions/rule",
@@ -6225,6 +6606,58 @@
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `using` directive that nothing in the file needs."
+            },
+            "repeated-command": {
+              "description": "Reports the `nth` use (the option, default 2) and every later one of a command listed in the option `commands`; an entry `word arg` counts only the uses with `arg` after the word; the command words are the tokens of the kinds in `kinds`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands that are counted (ignoring case): `word`, or `word`, `word arg`, with `:N` at the end for its own `nth`.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "first-exempt": {
+                          "default": false,
+                          "description": "A use in the first command of the file is counted but not reported.",
+                          "type": "boolean"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "nth": {
+                          "default": 2,
+                          "description": "The use that is reported.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "require-component-is": {
               "$ref": "#/definitions/rule",
@@ -7545,6 +7978,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports `\"sep\".join([a, b])` where the list or tuple is written out in the call."
             },
+            "stderr-redirect-last": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a command that has more words or redirections after `2>&1` or `>&2`."
+            },
             "string-dot-format-extra-named-arguments": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `.format` call with keyword arguments that no field names."
@@ -7709,6 +8146,61 @@
             "unassigned-variable": {
               "$ref": "#/definitions/rule",
               "description": "Reports a lower case variable that the file reads and never assigns, reads with `read`, `getopts`, `local` or a `for` loop, or guards with a default (`${name:-x}`)."
+            },
+            "unchecked-command": {
+              "description": "Reports a command listed in the option `commands` that starts a line and has no text of the option `checks` (compared ignoring case) on its line or the lines after it, as many as the option `window` says (an entry `word:N` of `commands` says N for that command).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "checks": {
+                          "default": [],
+                          "description": "The texts that count as a check of the result (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "commands": {
+                          "default": [],
+                          "description": "The commands that need a check, `word` or `word:N` (a window of N lines).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "window": {
+                          "default": 3,
+                          "description": "The lines after the command's line that may hold the check.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "undefined-export": {
               "$ref": "#/definitions/rule",
@@ -8123,6 +8615,69 @@
             "unused-method-argument": {
               "$ref": "#/definitions/rule",
               "description": "Reports a method parameter that the method never reads."
+            },
+            "unused-opener": {
+              "description": "Reports a command of the option `open`, with one of the words of `args` after it when that option is set, in a file where no token of the kinds in `use-kinds` matches the regex of the option `use`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "args": {
+                          "default": [],
+                          "description": "Words one of which must follow the command to make it count (ignoring case); empty: any.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "open": {
+                          "default": [],
+                          "description": "The commands that open the feature or scope (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "use": {
+                          "default": "",
+                          "description": "A regex the text of a token that uses the feature matches.",
+                          "type": "string"
+                        },
+                        "use-kinds": {
+                          "default": [],
+                          "description": "The token kinds that can use the feature.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "unused-parameter": {
               "description": "Reports a parameter of a function with a body (a declaration or a literal) that its body never mentions.",
@@ -8871,6 +9426,17 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "command_case": {
+              "default": "lower",
+              "description": "Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it).",
+              "enum": [
+                "lower",
+                "upper",
+                "capitalise",
+                "consistent"
+              ],
+              "type": "string"
+            },
             "continued_indent": {
               "default": "as_written",
               "description": "Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content).",
@@ -10934,6 +11500,7 @@
       "description": "Presets (`preset:<language>/<name>`) or config files, applied in order.",
       "items": {
         "examples": [
+          "preset:batch/blinter",
           "preset:cmake/cmake-lint",
           "preset:cpp/chromium",
           "preset:cpp/gnu",
@@ -13391,6 +13958,17 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "command_case": {
+                    "default": "lower",
+                    "description": "Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it).",
+                    "enum": [
+                      "lower",
+                      "upper",
+                      "capitalise",
+                      "consistent"
+                    ],
+                    "type": "string"
+                  },
                   "continued_indent": {
                     "default": "as_written",
                     "description": "Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content).",

@@ -1,0 +1,7 @@
+feature-not-enabled:
+  level: warn
+  options:
+    kinds: [DelayedVar, Text]
+    use: '![^!\s%]+!'
+    on: [enabledelayedexpansion]
+    off: [disabledelayedexpansion]

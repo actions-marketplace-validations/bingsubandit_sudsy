@@ -477,10 +477,11 @@ pub fn format(cx: &FormatCtx<'_>, rows: &crate::rules::RuleFormatter, root: &Syn
     let mut tks = collect(cx.grammar, root, rules);
     pair_brackets(&mut tks, &rules.brackets);
     let cased = !rows.cases().is_empty();
+    let mut recase = rows.cases().recaser(cx.options);
     for tk in &mut tks {
         tk.newline = tk.breaks > 0 || tk.cont;
         if cased {
-            tk.restyled = rows.cases().fixed(tk.kind, tk.text());
+            tk.restyled = recase.word(tk.kind, tk.text());
         }
     }
     let spacing = |tks: &[Tk], i: usize| {

@@ -3,6 +3,7 @@ extensions: [bat, cmd]
 formatter: FORMAT
 parse: parser::parse_file
 rules: "&[]"
+families: "&[core_rules::blank_lines::FAMILY, core_rules::token_case::FAMILY, core_rules::unique::FAMILY]"
 format-rows:
   source-indent: true
   flush: [Label]
@@ -21,6 +22,11 @@ options:
       values: [as_written, none]
       default: as_written
       doc: "Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content)."
+  - command_case:
+      values: [lower, upper, capitalise, consistent]
+      default: lower
+      doc: "Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it)."
   - space_after_colons:
       default: true
       doc: "At least one blank after `::` before a comment that starts with a letter or digit (more blanks stay as written)."
+presets: [blinter]

@@ -1,0 +1,7 @@
+commented-block:
+  level: warn
+  options:
+    block: [Block]
+    parents: [IfCommand]
+    lines: 3
+    indented: true

@@ -1,0 +1,35 @@
+id: for-f-options
+message: "`for /f` without a string of options (`tokens=`, `delims=`, `skip=`, `eol=`); the defaults split at blanks and skip lines that start with `;`"
+description: >-
+  Reports a `for /f` whose first argument is not a quoted string with `tokens=`, `delims=`, `skip=`
+  or `eol=`.
+why: >-
+  Without options `for /f` takes the first blank-separated word of each line and drops a line that
+  starts with `;`. That is rarely what a script about file or command output means, and the
+  intent is not written down.
+
+  To fix, write the options (`"tokens=1 delims="`) even when they equal the defaults.
+example: "for /f %%i in ('dir /b') do echo %%i"
+severity: off
+category: suspicious
+rule:
+  kind: ForCommand
+  regex: '(?i)^for\s+/f\b'
+  not: { regex: '(?i)^for\s+/f\s+"[^"]*(?:tokens|delims|skip|eol)=' }
+---
+id: no-shift-in-block
+message: "`shift` inside a block: the block is read once, so the later `%1` in it still has the old value"
+description: >-
+  Reports a `shift` inside a block of several lines (`( ... )` after `if`, `for` or alone).
+why: >-
+  `cmd` expands `%1` for the whole block before it runs the first line, so a `%1` after the
+  `shift` in the same block still reads the value from before it.
+
+  To fix, move the loop to labels with `goto`, where each line is read when it runs.
+example: "if defined x (\n  shift\n  echo %1\n)"
+severity: off
+category: suspicious
+rule:
+  kind: Simple
+  regex: '(?i)^shift\b'
+  inside: { kind: Block, regex: '\n' }

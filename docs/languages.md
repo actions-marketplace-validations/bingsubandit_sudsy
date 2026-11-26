@@ -231,7 +231,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-jupyter-notebook -->
 - **Measured:** Ready.
   - Format, ruff format: 88% of the files identical (861 of 974 files).
-  - Lint: 22 rules, no reference tool to compare with.
+  - Lint: 30 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Config section: `jupyter`, on top of `json`.
@@ -331,7 +331,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-toml -->
 - **Measured:** Ready.
   - Format, taplo: 98% of the files identical (1,282 of 1,307 files).
-  - Lint: 22 rules, no reference tool to compare with.
+  - Lint: 30 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - **Formatter:** taplo 0.10. Corpus: the .toml files of rust-analyzer, Bevy, Tokio, clap, serde, uv and Cargo (1,310 files); toml-test and the repository fixtures are listed apart.
@@ -349,7 +349,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-xml -->
 - **Measured:** Ready.
   - Format, CSharpier XML: 100% of the files identical (321 of 321 files).
-  - Lint: 24 rules, no reference tool to compare with.
+  - Lint: 32 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Covers `.csproj`, `.props`, `.config`.
@@ -433,7 +433,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-ini-editorconfig-gitignore -->
 - **Measured:** Ready.
   - Format, stable: 100% of the files format stably, by the rules of the formatter (129 of 129 files).
-  - Lint: 31 rules, no reference tool to compare with.
+  - Lint: 39 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Small formatters and a few rules. No reference tool, so no comparison: the format column is the stable share.
@@ -459,7 +459,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-graphql -->
 - **Measured:** Ready.
   - Format, Prettier: 99% of the files identical (123 of 124 files).
-  - Lint: 29 rules, no reference tool to compare with.
+  - Lint: 37 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - **Presets:** `graphql/graphql-eslint-recommended`.
@@ -489,11 +489,12 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-batchfile -->
 - **Measured:** In progress.
   - Format, stable: 0% of the files format stably, by the rules of the formatter (0 of 547 files).
-  - Lint: 22 rules, no reference tool to compare with.
+  - Lint, Blinter: 85% of its findings also reported (15,595 of 18,324 findings).
 <!-- /generated -->
 
 - Files: `*.bat` and `*.cmd`.
 - The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Lint:** 33 rules, all off by default; `preset:batch/blinter` turns them on with the settings that match Blinter (coverage in the measured block above, [ai/design/batchfile.md](ai/design/batchfile.md)).
 - **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
 - **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
 

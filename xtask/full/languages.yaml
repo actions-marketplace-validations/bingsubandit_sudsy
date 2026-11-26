@@ -148,8 +148,6 @@
   parser: ~1.2 # tree-sitter: Beaglefoot/tree-sitter-awk (26 stars, pushed 2025-09)
   format: {tool: "gawk --pretty-print", gain: ~0.4, cost: {est: true}, why: "only tool found; GNU, native; drops some comments; canonical, no width"}
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
-- language: Batchfile
-  lint: {tool: "Blinter", gain: ~0.7, cost: {est: true}, why: "only tool found: PyPI Blinter 20,445 downloads a month, BatchLang/Blinter 54 stars, pushed 2026-11-16; Python"}
 - language: Beancount / hledger
   parser: ~1.2 # tree-sitter: polarmutex/tree-sitter-beancount (56 stars, pushed 2026-11)
   format: {tool: "hledger-fmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; aligns amounts; whitespace only"}

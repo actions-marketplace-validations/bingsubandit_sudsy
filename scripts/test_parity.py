@@ -629,6 +629,11 @@ class LintLanding(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(self.check(tmp, self.GOOD), ([], None))
 
+    def test_the_work_folder_re_includes_what_a_parent_gitignore_hides(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.check(tmp, self.GOOD)
+            self.assertEqual((Path(tmp) / "work" / ".gitignore").read_text(encoding="utf-8"), "!*\n")
+
     def test_a_wrong_hash_fails_and_names_the_file_and_the_way_to_record_it(self):
         with tempfile.TemporaryDirectory() as tmp:
             problems, _ = self.check(tmp, f"{'0' * 16} a.txt\n{pld.lint_digest(set())} b.txt\n")
