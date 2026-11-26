@@ -1,0 +1,11 @@
+a:
+  b:
+      c: 1
+#     ^ block-indentation
+list:
+- x
+^ block-indentation
+- y
+d:
+    e: 1
+#   ^ block-indentation

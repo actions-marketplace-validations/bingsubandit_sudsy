@@ -1,0 +1,21 @@
+id: ansible-task-name-casing
+message: the name should start with an uppercase letter
+description: >-
+  Reports a `name` of a task or a play, in a tasks file, handlers file or playbook, whose first
+  character is a lowercase letter (after an opening quote, if any). Names that start with an
+  uppercase letter, a digit, a symbol or a template are not reported. The rule runs on files named
+  like Ansible's: `tasks/`, `handlers/`, `playbooks/`, `*playbook*.yml` and `molecule/<scenario>/`.
+why: >-
+  Task names are what a run prints and what `--start-at-task` takes, so a uniform style makes the
+  output easy to scan: each name is a sentence that starts with a capital.
+example: "- name: install nginx   # write Install nginx"
+severity: off
+category: style
+rule:
+  kind: BlockMappingEntry
+  path: '(^|/)(tasks|handlers)/|(^|/)playbooks/[^/]+$|(^|/)[^/]*playbook[^/]*\.ya?ml$|(^|/)molecule/[^/]+/[^/]+\.ya?ml$'
+  fields:
+    key: { regex: '^name$' }
+    value: { regex: '^["'']?\p{Ll}' }
+  parent: { kind: BlockMapping, key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$' }
+report-on: field key

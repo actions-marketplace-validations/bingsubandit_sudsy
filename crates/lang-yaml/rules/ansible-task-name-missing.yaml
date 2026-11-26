@@ -1,0 +1,23 @@
+id: ansible-task-name-missing
+message: the task has no name
+description: >-
+  Reports a task, in a tasks file, handlers file or playbook, that has no `name` key. A task is an
+  entry of `tasks`, `pre_tasks`, `post_tasks`, `handlers`, `block`, `rescue` or `always`, or of the
+  top level of a tasks file; blocks count as tasks, plays (an entry with `hosts` or
+  `import_playbook`) do not. The rule runs on files named like Ansible's: `tasks/`, `handlers/`,
+  `playbooks/`, `*playbook*.yml` and `molecule/<scenario>/`.
+why: >-
+  The name is what a run prints for the task, and `--start-at-task` and handler `listen` need it. A
+  run of unnamed tasks shows only the module name, so a failure is hard to place.
+example: "- ansible.builtin.debug: msg=hi   # add a name"
+severity: off
+category: style
+rule:
+  kind: BlockMapping
+  path: '(^|/)(tasks|handlers)/|(^|/)playbooks/[^/]+$|(^|/)[^/]*playbook[^/]*\.ya?ml$|(^|/)molecule/[^/]+/[^/]+\.ya?ml$'
+  key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+  not:
+    child:
+      kind: BlockMappingEntry
+      fields: { key: { regex: '^(name|hosts|import_playbook)$' } }
+report-on: first-token

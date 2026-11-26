@@ -1,0 +1,67 @@
+id: ansible-no-free-form
+message: write the arguments of the module as a mapping, not as `key=value` text
+description: >-
+  Reports a task, in a tasks file, handlers file or playbook, whose module gets a string with an
+  `=` in it (`service: name=ntpd state=started`). The key of the task is the module: a key that is
+  not in the `keywords` option (task and play keywords, `with_*` loops) and not one of the
+  `exempt` modules (the include and import modules, `raw`). For `command`, `shell` and their
+  Windows twins (`commands`) only an option of the module in the text (`chdir=`, `creates=`, ...)
+  is reported. The rule runs on files named like Ansible's: `tasks/`, `handlers/`, `playbooks/`,
+  `*playbook*.yml` and `molecule/<scenario>/`.
+why: >-
+  Free-form text is split by the module's own parser, so a value with a space, a quote or an `=`
+  of its own is cut in the wrong place, and an unknown option is not caught until the run. A
+  mapping keeps each argument apart, validated and diffable.
+
+  To fix, write the arguments as a mapping under the module (or under `args`).
+example: "service: name=ntpd state=started   # service: {name: ntpd, state: started}"
+severity: off
+category: suspicious
+options:
+  - name: keywords
+    type: list
+    description: "Keys of a task or play that are not a module."
+    default: [
+      action, always, any_errors_fatal, args, async, become, become_exe, become_flags,
+      become_method, become_user, block, changed_when, check_mode, collections, connection,
+      debugger, delay, delegate_facts, delegate_to, diff, environment, fact_path, failed_when,
+      force_handlers, gather_facts, gather_subset, gather_timeout, handlers, hosts,
+      ignore_errors, ignore_unreachable, listen, local_action, loop, loop_control,
+      max_fail_percentage, module_defaults, name, no_log, notify, order, poll, port, post_tasks,
+      pre_tasks, register, remote_user, rescue, retries, roles, run_once, serial, strategy,
+      tags, tasks, throttle, timeout, until, validate_argspec, vars, vars_files, vars_prompt,
+      when
+    ]
+  - name: exempt
+    type: list
+    description: "Modules whose text is not checked."
+    default: [
+      include, include_tasks, import_tasks, import_playbook, ansible.builtin.include,
+      ansible.builtin.include_tasks, ansible.builtin.import_tasks,
+      ansible.builtin.import_playbook, raw, ansible.builtin.raw, ansible.legacy.raw
+    ]
+  - name: commands
+    type: list
+    description: "Modules that take a command line."
+    default: [
+      command, shell, win_command, win_shell, ansible.builtin.command, ansible.builtin.shell,
+      ansible.windows.win_command, ansible.windows.win_shell
+    ]
+rule:
+  kind: BlockMapping
+  path: '(^|/)(tasks|handlers)/|(^|/)playbooks/[^/]+$|(^|/)[^/]*playbook[^/]*\.ya?ml$|(^|/)molecule/[^/]+/[^/]+\.ya?ml$'
+  key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+  child:
+    kind: BlockMappingEntry
+    fields:
+      key:
+        not:
+          any:
+            - { in-option: keywords }
+            - { in-option: exempt }
+            - { regex: '^with_' }
+      value: { any: [{ kind: Scalar }, { kind: BlockScalar }], regex: '=' }
+    any:
+      - fields: { key: { in-option: commands }, value: { regex: '(chdir|creates|executable|removes|stdin|stdin_add_newline|warn)=' } }
+      - fields: { key: { not: { in-option: commands } } }
+report-on: first-token

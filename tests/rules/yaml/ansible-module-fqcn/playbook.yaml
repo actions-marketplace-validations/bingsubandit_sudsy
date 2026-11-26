@@ -1,0 +1,17 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Copy
+      copy:
+#     ^^^^ ansible-module-fqcn
+        src: a
+        dest: b
+    - name: Qualified
+      ansible.builtin.copy:
+        src: a
+        dest: b
+    - name: Block
+      block:
+        - name: Install
+          yum: name=nginx
+#         ^^^ ansible-module-fqcn

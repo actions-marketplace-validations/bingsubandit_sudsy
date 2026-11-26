@@ -13,6 +13,7 @@
 
 pub mod allowed_values;
 pub mod blank_lines;
+pub mod block_indent;
 pub mod cases;
 pub mod checks;
 pub mod clause_style;

@@ -95,3 +95,36 @@ fn max_line_length_allows_non_breakable_words() {
         3
     );
 }
+
+fn rule_lines(path: &str, text: &str, rule: &str) -> Vec<usize> {
+    lint(&lang_yaml::provider(), path, text, &format!("{rule}: warn"))
+        .iter()
+        .filter(|d| d.rule == rule)
+        .map(|d| 1 + text[..usize::from(d.range.start())].matches('\n').count())
+        .collect()
+}
+
+#[test]
+fn role_variables_need_the_role_name_as_prefix() {
+    let rule = "ansible-role-var-prefix";
+    let defaults = "nginx_port: 80\n_nginx_hidden: 1\nwww_port: 8080\nansible_user: x\nBad: 1\n";
+    assert_eq!(
+        rule_lines("roles/nginx/defaults/main.yml", defaults, rule),
+        [3]
+    );
+    assert!(rule_lines("defaults/main.yml", defaults, rule).is_empty());
+    let tasks = "- name: A\n  ansible.builtin.ping:\n  register: result\n- name: B\n  ansible.builtin.set_fact:\n    nginx_ok: 1\n    other: 2\n";
+    assert_eq!(
+        rule_lines("r/roles/nginx/tasks/main.yml", tasks, rule),
+        [1, 4]
+    );
+    let included =
+        "- ansible.builtin.include_role:\n    name: web\n  vars:\n    web_a: 1\n    b: 2\n";
+    assert_eq!(rule_lines("play/tasks/main.yml", included, rule), [5]);
+}
+
+#[test]
+fn flow_closer_may_sit_one_column_left_of_the_content() {
+    let parsed = lang_yaml::parse("k:\n  v: [\n    a,\n   ]\n  w: {\n   a: 1,\n  }\n");
+    assert!(parsed.errors.is_empty(), "{:?}", parsed.errors);
+}

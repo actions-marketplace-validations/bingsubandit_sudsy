@@ -20,6 +20,7 @@ pub static RULES: &[&dyn Rule] = &[
     &core_rules::references::NoUnusedAnchors,
     &core_rules::references::NoRecursiveAlias,
     &core_rules::references::NoMergeKeys,
+    &core_rules::block_indent::BlockIndentation,
     &value_rules::NoEmptyValues,
     &value_rules::FloatStyle,
     &quoted_strings::QuotedStrings,

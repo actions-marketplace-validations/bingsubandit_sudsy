@@ -6,11 +6,12 @@
 //! tools: eslint-plugin-jsonc pathPattern
 //! reads: grammar:keys
 
+use crate::hooks::RuleHooks;
 use crate::names;
 use crate::options::{Check, Opt, OptionDecl};
 use crate::rule::RuleContext;
 use crate::sorting::cached_regex;
-use core_syntax::SyntaxNode;
+use core_syntax::{Grammar, SyntaxNode};
 
 pub const PATH_PATTERNS: OptionDecl = OptionDecl {
     name: "path_patterns",
@@ -28,15 +29,15 @@ pub fn in_scope(node: &SyntaxNode, ctx: &RuleContext<'_>) -> bool {
     if patterns.is_empty() {
         return true;
     }
-    let path = key_path(node, ctx);
+    let path = key_path(node, ctx.file.grammar, ctx.file.hooks, ctx.file.text);
     patterns
         .into_iter()
         .filter_map(cached_regex)
         .any(|r| r.is_match(&path))
 }
 
-fn key_path(node: &SyntaxNode, ctx: &RuleContext<'_>) -> String {
-    let (grammar, hooks, text) = (ctx.file.grammar, ctx.file.hooks, ctx.file.text);
+/// The key path of `node`: `a.b[0].c`, empty for the root.
+pub fn key_path(node: &SyntaxNode, grammar: &Grammar, hooks: &dyn RuleHooks, text: &str) -> String {
     let mut segments: Vec<String> = Vec::new();
     let key_of = |n: &SyntaxNode, out: &mut Vec<String>| {
         if let Some(key) = grammar.slot(n, "key") {

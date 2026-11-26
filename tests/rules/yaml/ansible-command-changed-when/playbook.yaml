@@ -1,0 +1,14 @@
+- hosts: all
+  tasks:
+    - name: Plain
+#     ^^^^ ansible-command-changed-when
+      ansible.builtin.command: ls
+    - name: Guarded
+      ansible.builtin.command: ls
+      changed_when: false
+    - name: Creates
+      ansible.builtin.shell: touch x
+      args:
+        creates: x
+    - name: Inline creates
+      ansible.builtin.command: touch x creates=x

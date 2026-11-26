@@ -10,8 +10,9 @@
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
 use crate::metavar::{Meta, captured, template};
 use core_rules::doc_comments::{holder, leading_doc_text};
+use core_rules::paths::key_path;
 use core_rules::tree::TraversalCache;
-use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleOptions};
+use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleHooks, RuleOptions};
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 use serde::Deserialize;
 use std::cell::{Cell, RefCell};
@@ -42,8 +43,11 @@ pub struct Spec {
     pub pattern: Option<String>,
     pub kind: Option<String>,
     pub regex: Option<String>,
-    /// The file path (with `/`) matches this regex.
+    /// The file path (with `/`) matches this regex; its named groups are captured.
     pub path: Option<String>,
+    /// The key path of the node (`a.b[0].c`: [`core_rules::paths`]) matches this regex.
+    #[serde(rename = "key-path")]
+    pub key_path: Option<String>,
     /// The node is the Nth (from 1) of the children of its parent that have its kind.
     pub nth: Option<usize>,
     pub inside: Option<Box<Spec>>,
@@ -118,6 +122,7 @@ pub struct Ctx<'a> {
     pub grammar: &'a Grammar,
     pub path: &'a Path,
     pub text: &'a str,
+    pub hooks: &'a dyn RuleHooks,
     pub options: &'a RuleOptions,
     /// Matching steps left for this evaluation (see [`STEP_BUDGET`]); 0 means it ran out and
     /// the result is not to be trusted.
@@ -151,7 +156,9 @@ pub enum Expr {
     /// A `regex` with `${NAME}` (captures of the atoms before it, escaped), built for each match.
     RegexTemplate(String, RegexCache),
     Doc(Re),
-    Path(Re),
+    Path(Re, Vec<String>),
+    /// The key path of the node.
+    KeyPath(Re),
     Nth(usize),
     Inside(Box<Expr>),
     Has(Box<Expr>),
@@ -366,8 +373,13 @@ impl Expr {
             ));
         }
         if let Some(text) = &spec.path {
-            all.push(Expr::Path(
-                regex(text).map_err(|e| format!("path regex `{text}`: {e}"))?,
+            let re = regex(text).map_err(|e| format!("path regex `{text}`: {e}"))?;
+            let groups = re.groups();
+            all.push(Expr::Path(re, groups));
+        }
+        if let Some(text) = &spec.key_path {
+            all.push(Expr::KeyPath(
+                regex(text).map_err(|e| format!("key-path regex `{text}`: {e}"))?,
             ));
         }
         if let Some(n) = spec.nth {
@@ -497,7 +509,7 @@ impl Expr {
         match all.len() {
             0 => Err(
                 "a rule needs at least one of pattern, kind, regex, path, nth, inside, not-inside, \
-                      has, not-has, parent, child, option, in-option, all, any, not, role, operator, fields, \
+                      has, not-has, parent, child, key-path, option, in-option, all, any, not, role, operator, fields, \
                       items, single, same, empty, bare, commented, inner, regex-option, rethrows"
                     .into(),
             ),
@@ -540,10 +552,21 @@ impl Expr {
                 let doc = leading_doc_text(&holder(cx.grammar, node), cx.grammar, &[])?;
                 re.is_match(&doc).then(Captures::new)
             }
-            Expr::Path(re) => {
+            Expr::Path(re, groups) => {
                 let path = cx.path.to_string_lossy().replace('\\', "/");
-                re.is_match(&path).then(Captures::new)
+                if groups.is_empty() {
+                    return re.is_match(&path).then(Captures::new);
+                }
+                let spans = re.groups_in(&path, false)?;
+                let named = groups.iter().zip(spans).filter_map(|(name, span)| {
+                    let (from, to) = span.filter(|_| !name.is_empty())?;
+                    Some((name.clone(), Capture::path_group(&path[from..to])))
+                });
+                Some(named.collect())
             }
+            Expr::KeyPath(re) => re
+                .is_match(&key_path(node, cx.grammar, cx.hooks, cx.text))
+                .then(Captures::new),
             Expr::Nth(n) => {
                 let mut same = node
                     .parent()?
@@ -728,7 +751,8 @@ impl Expr {
             | Expr::Regex(..)
             | Expr::RegexTemplate(..)
             | Expr::Doc(_)
-            | Expr::Path(_)
+            | Expr::Path(..)
+            | Expr::KeyPath(_)
             | Expr::Nth(_)
             | Expr::ChildToken(_)
             | Expr::Option(_)
@@ -769,7 +793,7 @@ impl Expr {
     pub fn metas(&self, out: &mut Vec<Meta>) {
         match self {
             Expr::Pattern(p) => out.extend(p.metas().iter().cloned()),
-            Expr::Regex(_, groups) => {
+            Expr::Regex(_, groups) | Expr::Path(_, groups) => {
                 out.extend(groups.iter().filter(|n| !n.is_empty()).map(|name| Meta {
                     multi: false,
                     name: name.clone(),
@@ -781,7 +805,7 @@ impl Expr {
             Expr::Kind(_)
             | Expr::RegexTemplate(..)
             | Expr::Doc(_)
-            | Expr::Path(_)
+            | Expr::KeyPath(_)
             | Expr::Nth(_)
             | Expr::Option(_)
             | Expr::InOption(_)

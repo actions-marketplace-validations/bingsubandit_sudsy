@@ -45,6 +45,11 @@ Loaded from our tree. Core schema (`yes`, `on`, `0b1`, `1_000` are strings), tag
 - `sudsy-ignore` before an entry and `-start`/`-end` among entries of a block collection keep them as written.
 - Safety: generic tree comparison, then the data-model comparison.
 
+## Lint
+- `block-indentation` (shared, `core_rules::block_indent`, off by default): yamllint `indentation` with `spaces: consistent` and `indent-sequences: true` on the tree. A value or sequence entry that starts on a later line than its key (or dash) sits at the key's column plus the file's first width (option `spaces` fixes it); a flush sequence under a key is reported (`indent_sequences: false` allows it).
+- The parser accepts a closing `]` or `}` one column left of the content of a multi-line flow collection, as libyaml and PyYAML do.
+- Ansible rules (pattern files `crates/lang-yaml/rules/ansible-*.yaml`, off by default, on in `yaml/ansible-lint`): module names, keyword sets and path kinds are options and regexes of the files; see [../design/ansible.md](../design/ansible.md).
+
 ## Known gaps
 Long plain/quoted scalars and comments are not re-wrapped; properties split over lines with a comment between them print as written; trailing blanks at a block scalar's end and a `keep` scalar's blank lines at EOF survive only via the printer's protected output length; files whose flow closing bracket sits at its key's column are rejected as the spec requires.
 

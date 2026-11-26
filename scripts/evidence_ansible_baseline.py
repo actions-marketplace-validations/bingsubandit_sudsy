@@ -14,7 +14,9 @@ import evidence_ansible as mod  # noqa: E402
 
 MAP = {  # ansible-lint rule -> Sudsy rule (yamllint equivalents with the ansible-lint yamllint configuration)
     "yaml[truthy]": "ambiguous-booleans", "yaml[line-length]": "max-line-length", "yaml[octal-values]": "no-octal-values",
-    "yaml[trailing-spaces]": "no-trailing-whitespace", "yaml[comments]": "comment-space",
+    "yaml[trailing-spaces]": "no-trailing-whitespace", "yaml[comments]": "comment-space", "yaml[indentation]": "block-indentation",
+    "fqcn[action-core]": "ansible-module-fqcn", "name[casing]": "ansible-task-name-casing", "name[missing]": "ansible-task-name-missing",
+    "no-changed-when": "ansible-command-changed-when", "no-free-form": "ansible-no-free-form", "var-naming[no-role-prefix]": "ansible-role-var-prefix",
 }
 res = json.load(open(sys.argv[1] + "/lint.json"))
 sud = defaultdict(set)

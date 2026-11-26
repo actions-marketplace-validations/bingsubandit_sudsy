@@ -161,13 +161,20 @@ The status and the numbers of every language are in the generated table "Languag
 - Config section: `yaml`.
 - **Formatter:** Prettier 3.9.10. Corpus: YAML files of real projects (awesome-compose, the Kubernetes website, GitHub starter workflows, actionlint). The yaml-test-suite valid cases parse, round-trip and keep their data model.
 - **Linter:** yamllint.
-- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`.
+- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`.
 - **Options:** `quote_style`, `sequence_indent`, `document_start`, `document_end`, `max_blank_lines`, `comment_spacing`, `bracket_spacing`. Default `line_width` is 80.
 - **Differences:**
   - Long scalars and comments are not re-wrapped.
   - A broken flow sequence has no trailing comma; Prettier writes one.
   - A comment before a dedented item takes the next line's column; Prettier keeps its own.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier`, `scripts/parity.sh coverage yamllint`.
+
+### Ansible (YAML)
+
+- Ansible playbooks, roles, tasks and handlers are YAML files: the YAML formatter and the `yaml` config section apply. The preset `yaml/ansible-lint` turns on the Ansible rules (`ansible-module-fqcn`, `ansible-task-name-casing`, `ansible-task-name-missing`, `ansible-command-changed-when`, `ansible-no-free-form`, `ansible-role-var-prefix`) and the yamllint rules that ansible-lint runs (`block-indentation`, line length 160, truthy values, octal values, trailing spaces, comment spacing). They run on files named like Ansible's: `tasks/`, `handlers/`, `playbooks/`, `*playbook*.yml` and `molecule/<scenario>/`.
+- **Linter:** ansible-lint with its default rule set; the preset covers most of its findings on real projects. Rules that need the installed collections or the Ansible runtime (`fqcn[action]`, `args[module]`, `syntax-check`) are not covered.
+- **Jinja2 is not supported:** templates in values are not parsed, so template checks such as `jinja[spacing]` are not covered.
+- **Reproduce (needs a source checkout):** `scripts/evidence_ansible_baseline.py` (see [ai/design/ansible.md](ai/design/ansible.md)).
 
 ## Shell
 

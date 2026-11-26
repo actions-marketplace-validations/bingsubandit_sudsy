@@ -1,0 +1,10 @@
+- hosts: all
+  tasks:
+    - ansible.builtin.ping:
+#     ^^^^^^^^^^^^^^^^^^^^ ansible-task-name-missing
+    - name: Named
+      ansible.builtin.ping:
+    - block:
+#     ^^^^^ ansible-task-name-missing
+        - ansible.builtin.ping:
+#         ^^^^^^^^^^^^^^^^^^^^ ansible-task-name-missing

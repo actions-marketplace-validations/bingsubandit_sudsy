@@ -1,0 +1,25 @@
+# The default rule set of ansible-lint on Ansible files (tasks, handlers, playbooks, roles): the
+# Ansible rules plus the yamllint rules it runs with its own yamllint configuration (160 columns,
+# one space before a comment). Rules for modules of the controller's environment (`fqcn[action]`,
+# `args[module]`, `syntax-check`) and for Jinja2 templates are not covered.
+yaml:
+  lint:
+    rules:
+      max-line-length:
+        level: warn
+        options:
+          max: 160
+      ambiguous-booleans:
+        level: warn
+        options:
+          check_keys: true
+      no-octal-values: warn
+      no-trailing-whitespace: warn
+      comment-space: warn
+      block-indentation: warn
+      ansible-module-fqcn: warn
+      ansible-task-name-casing: warn
+      ansible-task-name-missing: warn
+      ansible-command-changed-when: warn
+      ansible-no-free-form: warn
+      ansible-role-var-prefix: warn

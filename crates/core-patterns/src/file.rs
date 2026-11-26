@@ -926,6 +926,7 @@ struct Light {
     category: Category,
     /// The Rust family that builds the rule (a `family` document, which has no `rule`).
     family: Option<Cow<'static, str>>,
+    options: &'static [OptionDecl],
 }
 
 impl Light {
@@ -947,15 +948,118 @@ impl Light {
             fix: None,
             requires: &[],
             uses: &[],
-            options: &[],
+            options: self.options,
         }))
     }
 }
 
-/// The spec of a document of a rule that is off by default, only plain top-level scalars and a `rule` or `token` body, for
+/// The `options:` of a default-off rule read from its lines, when every option is of the plain
+/// shape (`name`, `type` list, string, bool or int, a one-line `description` scalar, a `default`
+/// of plain words in `[ ]` or a one-line scalar): the words are borrowed from the rule file, so a
+/// run that never uses the rule does not read its tables. `None` for anything else (a `choices`,
+/// a quoted word, a `regex`): the rule is then read in full.
+fn light_options(lines: &[&'static str]) -> Option<&'static [OptionDecl]> {
+    let mut out: Vec<OptionDecl> = Vec::new();
+    let mut it = lines.iter().copied().peekable();
+    while let Some(line) = it.next() {
+        let head = line.trim_start();
+        if head.is_empty() || head.starts_with('#') {
+            continue;
+        }
+        let name = scalar(head.strip_prefix("- name:")?.trim_start())?;
+        let (mut ty, mut description, mut default) = (None, None, None);
+        while let Some(line) = it.next_if(|l| !l.trim_start().starts_with("- ")) {
+            let t = line.trim_start();
+            if t.is_empty() || t.starts_with('#') {
+                continue;
+            }
+            let (key, value) = t.split_once(':')?;
+            let value = value.trim_start();
+            match key {
+                "type" => ty = Some(value.trim_end()),
+                "description" => description = Some(scalar(value)?),
+                "default" => {
+                    default = Some(match value.strip_prefix('[') {
+                        Some(rest) => Opt::List(light_words(rest, &mut it)?),
+                        None => match value.trim_end() {
+                            "true" => Opt::Bool(true),
+                            "false" => Opt::Bool(false),
+                            n if n.parse::<i64>().is_ok() => Opt::Int(n.parse().ok()?),
+                            _ => Opt::Str(match scalar(value)? {
+                                Cow::Borrowed(s) => s,
+                                Cow::Owned(s) => leak(s),
+                            }),
+                        },
+                    });
+                }
+                _ => return None,
+            }
+        }
+        let default = default?;
+        let fits = matches!(
+            (ty?, default),
+            ("list", Opt::List(_))
+                | ("string", Opt::Str(_))
+                | ("bool", Opt::Bool(_))
+                | ("int", Opt::Int(_))
+        );
+        if !fits || out.iter().any(|d| d.name == &*name) {
+            return None;
+        }
+        out.push(OptionDecl {
+            name: match name {
+                Cow::Borrowed(s) => s,
+                Cow::Owned(s) => leak(s),
+            },
+            default,
+            check: Check::Any,
+            description: match description? {
+                Cow::Borrowed(s) => s,
+                Cow::Owned(s) => leak(s),
+            },
+        });
+    }
+    Some(Box::leak(out.into_boxed_slice()))
+}
+
+/// The plain words of a `[ ... ]` list that starts with `first` and may go on in the next lines.
+fn light_words(
+    first: &'static str,
+    lines: &mut std::iter::Peekable<impl Iterator<Item = &'static str>>,
+) -> Option<&'static [&'static str]> {
+    let mut words: Vec<&'static str> = Vec::new();
+    let mut part = Some(first);
+    while let Some(text) = part {
+        let (text, closed) = match text.split_once(']') {
+            Some((before, after)) if after.trim().is_empty() => (before, true),
+            Some(_) => return None,
+            None => (text, false),
+        };
+        for w in text.split(',').map(str::trim).filter(|w| !w.is_empty()) {
+            let plain = w.starts_with(|c: char| c.is_ascii_alphabetic())
+                && w.chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '-'))
+                && !matches!(
+                    w,
+                    "true" | "false" | "null" | "yes" | "no" | "on" | "off" | "y" | "n"
+                );
+            if !plain {
+                return None;
+            }
+            words.push(w);
+        }
+        if closed {
+            return Some(Box::leak(words.into_boxed_slice()));
+        }
+        part = lines.next();
+    }
+    None
+}
+
+/// The spec of a document of a rule that is off by default, only plain top-level scalars, `report-on`, a `rule` or `token` body and plain `options`, for
 /// a language that gives its rules no row; `None` for any other document.
 fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
-    if doc.contains("role") {
+    if doc.contains("\nrole:") || doc.contains(" role:") {
         return None;
     }
     let (mut id, mut message, mut description, mut why, mut example) =
@@ -964,6 +1068,8 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
     let mut family = None;
     let mut lazy = false;
     let mut category = Category::Style;
+    let mut option_lines: Vec<&'static str> = Vec::new();
+    let mut in_options = false;
     let mut lines = doc.lines().peekable();
     while let Some(line) = lines.next() {
         if line.trim().is_empty() || line.starts_with('#') {
@@ -971,6 +1077,9 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         }
         if line.starts_with([' ', '\t']) {
             if inside {
+                if in_options {
+                    option_lines.push(line);
+                }
                 continue;
             }
             return None;
@@ -978,7 +1087,11 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         let (key, value) = line.split_once(':')?;
         let value = value.trim_start();
         inside = false;
+        in_options = key == "options";
         match key {
+            "options" if value.is_empty() => inside = true,
+            // Read in full when the rule first runs.
+            "report-on" => {}
             "rule" => (has_rule, inside) = (true, true),
             "token" => inside = true,
             "family" => family = Some(scalar(value)?),
@@ -1013,7 +1126,13 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
     if has_rule == family.is_some() || !off || grammar.rule_row(&id).is_some() {
         return None;
     }
+    let options = if option_lines.is_empty() {
+        &[]
+    } else {
+        light_options(&option_lines)?
+    };
     Some(Light {
+        options,
         id,
         message: message?,
         description,
@@ -1408,6 +1527,7 @@ impl Rule for PatternRule {
             grammar: file.grammar,
             path: file.path,
             text: file.text,
+            hooks: file.hooks,
             options: ctx.options,
             budget: Cell::new(STEP_BUDGET),
             ranges,
@@ -1544,7 +1664,7 @@ impl PatternRule {
 
 #[cfg(test)]
 mod tests {
-    use super::documents;
+    use super::{declared_options, documents, light_options, read_specs};
 
     #[test]
     fn documents_split_at_separator_lines_only() {
@@ -1555,5 +1675,26 @@ mod tests {
             ["id: a\nregex: 'x---y'\n", "id: b\n", "id: c\n  ---\n"]
         );
         assert_eq!(documents("---\nid: a\n"), ["id: a\n"]);
+    }
+
+    #[test]
+    fn plain_options_read_light_equal_the_full_read() {
+        let doc = "id: x\nmessage: m\nseverity: off\nrule:\n  kind: A\noptions:\n  - name: words\n    type: list\n    description: \"Some words.\"\n    default: [\n      a, b_c,\n      d.e\n    ]\n  - name: flag\n    type: bool\n    description: A flag\n    default: true\n  - name: n\n    type: int\n    description: A number\n    default: 3\n  - name: s\n    type: string\n    description: A string\n    default: word\n  - name: none\n    type: list\n    description: Empty\n    default: []\n";
+        let lines: Vec<&'static str> = Box::leak(doc.to_string().into_boxed_str())
+            .lines()
+            .skip_while(|l| *l != "options:")
+            .skip(1)
+            .collect();
+        let light = light_options(&lines).expect("plain options are read light");
+        let full = declared_options(&read_specs(doc).unwrap()[0].options).unwrap();
+        assert_eq!(format!("{light:?}"), format!("{full:?}"));
+        assert_eq!(light.len(), 5);
+        let quoted = [
+            "  - name: w",
+            "    type: list",
+            "    description: D",
+            "    default: ['a']",
+        ];
+        assert!(light_options(&quoted).is_none());
     }
 }
