@@ -21,7 +21,7 @@
 # `exempt: true` and `evidence: <folder>`: a leg with no reference tool. A new language's leg needs `evidence` (a folder of
 #     tests/parity with `agreement` for the format leg beside `stability`, `checklist` and `precision` for the lint leg) and is
 #     Ready at stable 100% and agreement 80%, checklist 85% and precision 90% (docs/ai/development/no-reference-tool.md);
-#     the six legs that predate it (INI, EditorConfig, .gitignore, Dockerfile, Makefile, GitHub Actions format) are `exempt`.
+#     the five legs that predate it (INI, EditorConfig, .gitignore, Dockerfile, GitHub Actions format) are `exempt`.
 # `section` is the heading of the section of docs/languages.md of rows that share one (default: the row's `language`).
 # `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
@@ -36,6 +36,10 @@
   speed: [Python]
   format: [{tool: ruff, name: ruff format, groups: [real-world]}]
   lint: [{tool: ruff, name: ruff}]
+- language: Jupyter Notebook
+  popularity: [{name: Jupyter Notebook, gh: 1018851}]
+  ids: [jupyter]
+  format: [{tool: ruff-notebook, name: ruff format, groups: [real-world]}]
 - language: Protobuf
   popularity: [{name: Protobuf, estimate: {value: 0.2, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   ids: [protobuf]
@@ -77,6 +81,7 @@
   ids: [angular]
   speed: [Angular]
   format: [{tool: prettier-angular, name: Prettier, groups: [components, angular, realworld-app]}]
+  lint: [{tool: angular-eslint, name: angular-eslint, primary: true}]
 - language: CSS / SCSS / Less
   popularity: [{name: CSS, gh: 6577861, so: 59.0}, {name: SCSS, gh: 570377}, {name: Less, gh: 65081}]
   ids: [css, scss, less]
@@ -158,6 +163,7 @@
   popularity: [{name: Ruby, gh: 449257, so: 5.9}]
   ids: [ruby]
   speed: [Ruby]
+  format: [{tool: rubocop, name: RuboCop, groups: [real-world]}]
   lint: [{tool: rubocop, name: RuboCop}]
 - language: CMake
   popularity: [{name: CMake, gh: 608541, so: 11.7}]
@@ -172,18 +178,22 @@
   lint: [{tool: revive, name: revive}]
 - language: Dockerfile
   popularity: [{name: Dockerfile, gh: 2143139, so: 46.3}]
-  exempt: true
   ids: [dockerfile]
   speed: [Dockerfile]
-  stability: [dockerfile]
+  format: [{tool: dockerfmt, name: dockerfmt, groups: [deciding, held-out]}]
   lint: [{tool: hadolint, name: hadolint}]
 - language: Makefile
   popularity: [{name: Makefile, gh: 966194, so: 17.8}]
-  exempt: true
   ids: [makefile]
   speed: [Makefile]
-  stability: [makefile]
+  format: [{tool: mbake, name: mbake, groups: [real-world]}]
   lint: [{tool: checkmake, name: checkmake}]
+- language: Batchfile
+  popularity: [{name: Batchfile, gh: 815225}]
+  evidence: batchfile
+  ids: [batch]
+  speed: [Batchfile]
+  stability: [batchfile]
 - language: GitHub Actions
   popularity: [{name: GitHub Actions, estimate: {value: 0.5, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   exempt: true

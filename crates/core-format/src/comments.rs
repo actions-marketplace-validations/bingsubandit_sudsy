@@ -133,6 +133,8 @@ pub struct CommentStyle {
     pub keep_tight: bool,
     /// Block comments that end with one of these (`=*/`) have no blank before the token after them.
     pub glued: &'static [&'static str],
+    /// A comment on a line of its own starts in the column the source has (blanks as written).
+    pub keep_indent: bool,
 }
 
 impl CommentStyle {
@@ -161,6 +163,7 @@ impl Default for CommentStyle {
             block_as_line: false,
             keep_tight: false,
             glued: &[],
+            keep_indent: false,
         }
     }
 }
@@ -1097,6 +1100,44 @@ pub fn column(tok: &SyntaxToken) -> usize {
     col
 }
 
+/// The blanks in front of `tok` on its source line; empty when another token stands before it
+/// on the line.
+pub fn line_prefix(tok: &SyntaxToken) -> String {
+    // (a token may hold the blanks in front of its text)
+    let mut line: String = tok
+        .text()
+        .chars()
+        .take_while(|c| matches!(c, ' ' | '\t'))
+        .collect();
+    let mut prev = tok.prev_token();
+    while let Some(t) = prev {
+        let text = t.text();
+        if let Some(i) = text.rfind(['\n', '\r']) {
+            line.insert_str(0, &text[i + 1..]);
+            break;
+        }
+        line.insert_str(0, text);
+        prev = t.prev_token();
+    }
+    if line.chars().all(|c| matches!(c, ' ' | '\t')) {
+        line
+    } else {
+        String::new()
+    }
+}
+
+/// The first token after `tok` that holds more than blanks and line breaks.
+pub fn next_with_text(tok: &SyntaxToken) -> Option<SyntaxToken> {
+    let mut next = tok.next_token();
+    while let Some(t) = next {
+        if t.text().chars().any(|c| !c.is_whitespace()) {
+            return Some(t);
+        }
+        next = t.next_token();
+    }
+    None
+}
+
 /// The first token after `tok` that is not trivia.
 pub fn next_significant(g: &Grammar, tok: &SyntaxToken) -> Option<SyntaxToken> {
     std::iter::successors(tok.next_token(), SyntaxToken::next_token)
@@ -1191,6 +1232,24 @@ pub fn break_after(g: &Grammar, tok: &SyntaxToken) -> bool {
         }
     })
     .unwrap_or(false)
+}
+
+/// The value of the parser directive `<marker> name=value` that stands among the comments before
+/// the first token of `root`'s text (names compare ignoring case, blanks around the value go).
+pub fn parser_directive(g: &Grammar, root: &SyntaxNode, name: &str) -> Option<String> {
+    let marker = g.comments.line.as_deref()?;
+    let first = root
+        .descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .find(|t| !g.is_trivia(t.kind()))?;
+    leading_comments(g, &first).iter().find_map(|c| {
+        let text = c.text();
+        let body = text.trim_start_matches(marker);
+        let (key, value) = body.split_once('=')?;
+        key.trim()
+            .eq_ignore_ascii_case(name)
+            .then(|| value.replace(' ', ""))
+    })
 }
 
 #[cfg(test)]

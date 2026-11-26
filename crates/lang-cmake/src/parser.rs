@@ -16,7 +16,6 @@ use core_syntax::block_pair::Pairing;
 use core_syntax::parse::{self, MAX_DEPTH, Parsed};
 use provider_api::{ParseResult, SourceFile};
 
-/// Each paren group is two levels of the tree.
 const MAX_GROUPS: usize = MAX_DEPTH / 2;
 
 pub fn parse_file(file: &SourceFile) -> ParseResult {
@@ -68,17 +67,8 @@ fn command(p: &mut parse::Parser<'_>, closers: &[u32], pairing: &mut Pairing) {
     let limit = limit(p, closers, open);
     p.bump(); // (
     arguments(p, limit);
-    close(p, open);
+    p.close_group(&GROUP, open);
     p.finish();
-}
-
-/// The `)` of the group opened at real token `open`, or the error.
-fn close(p: &mut parse::Parser<'_>, open: usize) {
-    if p.cur() == k::R_PAREN {
-        p.bump();
-    } else {
-        p.error_at(open, "unclosed-paren", "expected `)` for this `(`");
-    }
 }
 
 /// Where the arguments of the command whose `(` is the real token `open` stop at most: the end
@@ -107,26 +97,11 @@ fn arguments(p: &mut parse::Parser<'_>, limit: usize) {
 }
 
 fn group(p: &mut parse::Parser<'_>, limit: usize) {
-    if !p.enter(MAX_GROUPS) {
-        too_deep(p, limit);
+    let Some(open) = p.group_start(&GROUP, limit) else {
         return;
-    }
-    p.start(k::PAREN_GROUP);
-    let open = p.pos;
-    p.bump();
+    };
     arguments(p, limit);
-    close(p, open);
-    p.finish();
-    p.leave();
-}
-
-/// A group nested too deep: its tokens, up to its `)`, are one `ERROR` node.
-fn too_deep(p: &mut parse::Parser<'_>, limit: usize) {
-    p.error(
-        "nesting-too-deep",
-        format!("parentheses are nested deeper than {MAX_GROUPS} levels"),
-    );
-    p.error_group(k::L_PAREN, k::R_PAREN, limit);
+    p.group_end(&GROUP, open);
 }
 
 /// The words that touch one another, with no blank between.
@@ -137,10 +112,19 @@ fn argument(p: &mut parse::Parser<'_>) {
         // A quoted or bracket text that ends at a line break had no end.
         let open_ended = t.kind != k::UNQUOTED && p.src[..t.end].ends_with(['\n', '\r']);
         p.bump();
-        let next = p.pos < p.eof_index() && p.tok(p.pos).start == t.end;
+        let next = p.touches_prev();
         if open_ended || !(next && matches!(p.cur(), k::UNQUOTED | k::QUOTED | k::BRACKET)) {
             break;
         }
     }
     p.finish();
 }
+
+/// Each paren group is two levels of the tree.
+const GROUP: parse::Group = parse::Group::parens(
+    k::PAREN_GROUP,
+    (k::L_PAREN, k::R_PAREN),
+    "parentheses",
+    MAX_GROUPS,
+    "unclosed-paren",
+);

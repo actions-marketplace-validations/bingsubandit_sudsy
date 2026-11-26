@@ -4,7 +4,10 @@
 
 use crate::position::apply_change;
 use core_config::{ConfigError, EditorConfig};
-use core_incremental::{Database, Db, File, Siblings};
+use core_incremental::{
+    Database, Db, File, Siblings, is_manifest, is_source, manifest_changed, manifests,
+    open_projects, reads_index, source_globs,
+};
 use languages::{Project, installed::Checker};
 use lsp_types::TextDocumentContentChangeEvent;
 use provider_api::LanguageProvider;
@@ -36,6 +39,13 @@ pub struct Workspace {
     /// The files of a directory rule's unit that are not open, read from disk and kept while
     /// their modification time and size stay the same.
     pub(crate) siblings: Arc<Siblings>,
+    /// Set once an active rule reads the symbol index: the projects are opened and follow the
+    /// files (`refresh_index`). Until then the workspace opens no project.
+    index_open: bool,
+    /// The files that make up the projects changed since the last `refresh_index`.
+    index_dirty: bool,
+    /// Source files that changed on disk while not open, applied by the next `refresh_index`.
+    changed_sources: Vec<PathBuf>,
 }
 
 impl Workspace {
@@ -52,6 +62,9 @@ impl Workspace {
             docs: HashMap::new(),
             background: None,
             siblings: Arc::default(),
+            index_open: false,
+            index_dirty: false,
+            changed_sources: Vec::new(),
         };
         workspace.db.prestart();
         let error = workspace.reload_config();
@@ -90,6 +103,7 @@ impl Workspace {
             }
         };
         self.background = None;
+        self.index_dirty = true;
         for (path, doc) in &self.docs {
             self.db
                 .set_file_editorconfig(doc.file, EditorConfig::for_file(path));
@@ -173,6 +187,7 @@ impl Workspace {
             Arc::make_mut(background).remove(&path);
         }
         self.docs.insert(path, Doc { file, skipped });
+        self.index_dirty = true;
         !skipped
     }
 
@@ -205,12 +220,14 @@ impl Workspace {
             );
             self.docs
                 .insert(path.to_path_buf(), Doc { file: new, skipped });
+            self.index_dirty = true;
         } else {
             self.db.set_file_text(file, version as u64, text);
         }
     }
 
     pub fn close(&mut self, path: &Path) {
+        self.index_dirty = true;
         if self.docs.remove(path).is_some_and(|d| !d.skipped)
             && let Some(file) = self.background.is_some().then(|| self.read(path)).flatten()
             && let Some(background) = &mut self.background
@@ -223,6 +240,114 @@ impl Workspace {
     /// queries of other handles: call it while none runs.
     pub fn bump_revision(&mut self) {
         self.db.bump_workspace_revision();
+    }
+
+    /// Opens the projects the index rules read, or keeps them in step with the documents. Opens
+    /// none while no active rule of an open document reads the index. Sets inputs: call it while
+    /// no request runs.
+    pub fn refresh_index(&mut self) {
+        if !self.index_dirty {
+            return;
+        }
+        if !self.index_open {
+            let wanted = self
+                .docs
+                .values()
+                .filter(|d| !d.skipped)
+                .any(|d| reads_index(&self.db, d.file));
+            if !wanted {
+                return;
+            }
+            self.index_open = true;
+        }
+        self.index_dirty = false;
+        if !self.changed_sources.is_empty() {
+            self.reread_sources();
+            manifest_changed(&mut self.db);
+        }
+        self.load_project();
+        let mut files: Vec<File> = (self.docs.values())
+            .filter(|d| !d.skipped)
+            .map(|d| d.file)
+            .collect();
+        if let Some(background) = &self.background {
+            files.extend(background.values().copied());
+        }
+        open_projects(&mut self.db, &files, std::slice::from_ref(&self.root));
+    }
+
+    /// Whether the workspace opened its projects for the index rules.
+    pub fn index_open(&self) -> bool {
+        self.index_open
+    }
+
+    /// A watched file changed: when it is a package manifest, the projects find their packages
+    /// again. True when it was one.
+    pub fn manifest_changed(&mut self, path: &Path) -> bool {
+        if !is_manifest(&self.db, path) {
+            return false;
+        }
+        if self.index_open {
+            manifest_changed(&mut self.db);
+            self.index_dirty = true;
+        }
+        true
+    }
+
+    /// A watched file changed: when it is a source file of a language with a package system that
+    /// is not open, it is read again at the next `refresh_index` (created, changed or deleted by
+    /// something else: a checkout, a generator). True when it was one.
+    pub fn source_changed(&mut self, path: &Path) -> bool {
+        if !self.index_open || self.docs.contains_key(path) || !is_source(&self.db, path) {
+            return false;
+        }
+        self.changed_sources.push(path.to_path_buf());
+        self.index_dirty = true;
+        true
+    }
+
+    /// Globs of the manifests of the languages with a package system.
+    pub fn manifest_globs(&self) -> Vec<String> {
+        manifests(&self.db)
+            .into_iter()
+            .map(|m| format!("**/{m}"))
+            .collect()
+    }
+
+    /// File name globs of the sources `source_changed` takes.
+    pub fn source_globs(&self) -> Vec<String> {
+        source_globs(&self.db)
+    }
+
+    /// The background files after the changes on disk: a walk finds created and deleted files,
+    /// the changed ones are read again, the rest keep their inputs.
+    fn reread_sources(&mut self) {
+        let changed = std::mem::take(&mut self.changed_sources);
+        let (Some(old), Some(project)) = (self.background.take(), self.project.clone()) else {
+            return;
+        };
+        let paths =
+            core_workspace::discover_files(std::slice::from_ref(&self.root), &project.filter())
+                .unwrap_or_default();
+        let mut checker = Checker::new(self.db.providers());
+        let mut background = HashMap::new();
+        for path in paths {
+            if !self.db.supports(&path) || self.docs.contains_key(&path) {
+                continue;
+            }
+            let kept = old.get(&path).copied().filter(|_| !changed.contains(&path));
+            let file = kept.or_else(|| {
+                checker
+                    .missing(&path)
+                    .is_none()
+                    .then(|| self.read(&path))
+                    .flatten()
+            });
+            if let Some(file) = file {
+                background.insert(path, file);
+            }
+        }
+        self.background = Some(Arc::new(background));
     }
 
     /// Does the config ask for `analysis: deep`?

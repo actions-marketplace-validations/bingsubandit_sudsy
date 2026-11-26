@@ -1,9 +1,15 @@
 id: no-name-underscore
 message: "`$0` must not start or end with an underscore"
 description: >-
-  A name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and
-  every reference to one. A field selected in a query is not checked (`__typename`). Equivalent - graphql-eslint naming-convention
-  without `allowLeadingUnderscore` and `allowTrailingUnderscore`.
+  Reports a name that starts or ends with an underscore: a type, field, argument, enum value,
+  directive, operation, fragment or alias, and every reference to one. A field selected in a query
+  is not reported (`__typename`).
+why: >-
+  Names that begin with two underscores are reserved for introspection, and one underscore is a mark
+  that style guides use for private or generated names, which GraphQL has no concept of. A schema
+  that avoids them has names that clients can use in generated code without escaping.
+
+  To fix, rename without the underscore.
 example: "type _Entity {   # reported\n  a: Int\n}"
 severity: off
 category: style

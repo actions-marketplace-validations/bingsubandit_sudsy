@@ -29,6 +29,7 @@ struct Frame {
     decl: bool,
     params: bool,
     inert: bool,
+    deep: bool,
     /// The scope this node is outside of, put back when it is left.
     hidden: Option<ScopeId>,
 }
@@ -48,6 +49,8 @@ struct Binder<'a> {
     params: Vec<ScopeId>,
     /// How many enclosing nodes are inert: names under them are no references.
     inert: u32,
+    /// How many enclosing nodes make the table's deep tokens names.
+    deep: u32,
     arena: Vec<Option<(State, bool)>>,
     /// Every name once: symbols, scopes and references share it.
     names: HashSet<Rc<str>>,
@@ -63,6 +66,7 @@ pub fn bind(root: &SyntaxNode, grammar: &Grammar, table: &Table) -> Model {
         ctxs: Vec::new(),
         params: Vec::new(),
         inert: 0,
+        deep: 0,
         arena: Vec::new(),
         names: HashSet::default(),
     };
@@ -97,6 +101,9 @@ pub fn bind(root: &SyntaxNode, grammar: &Grammar, table: &Table) -> Model {
                     if frame.inert {
                         b.inert -= 1;
                     }
+                    if frame.deep {
+                        b.deep -= 1;
+                    }
                     b.scopes.extend(frame.hidden);
                 }
             }
@@ -118,8 +125,10 @@ impl Binder<'_> {
             decl: false,
             params: false,
             inert: false,
+            deep: self.table.is_deep(kind),
             hidden: if outside { self.scopes.pop() } else { None },
         };
+        self.deep += u32::from(frame.deep);
         let outer = self.scopes.last().copied();
         if self.table.is_params(kind) {
             self.params.push(outer.unwrap_or(ScopeId(0)));
@@ -590,13 +599,16 @@ impl Binder<'_> {
             return;
         }
         let table = self.table;
+        let deep = self.deep > 0;
         let labels = table.has_labels();
         let implicit = row.and_then(|r| r.implicit);
         let green = node.green();
         let base = node.text_range().start();
         let is_name = |c: &NodeOrToken<&GreenNodeData, &GreenTokenData>| match c {
             NodeOrToken::Token(t) => {
-                table.is_name_token(SyntaxKind(t.kind().0)) && table.name_of(t.text()).is_some()
+                let kind = SyntaxKind(t.kind().0);
+                (table.is_name_token(kind) || (deep && table.is_deep_token(kind)))
+                    && table.name_of(t.text()).is_some()
             }
             NodeOrToken::Node(_) => false,
         };

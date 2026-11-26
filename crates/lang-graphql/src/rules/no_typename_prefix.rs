@@ -10,9 +10,12 @@ rule! {
         id: "no-typename-prefix",
         category: Style,
         default: Off,
-        description: "A field of an object or interface type starts with the name of the type \
-                  (`type User { userId: ID }`); the type already says it (case ignored). No fix: \
-                  renaming a field changes the schema.",
+        description: "Reports a field of an object or interface type that starts with the name of the type \
+                  (`type User { userId: ID }`); case is ignored. No fix: renaming a field changes the \
+                  schema.",
+        why: "The field is always read as `user.userId`, so the type name is said twice. It gets \
+                  worse when a query is written with aliases or a field moves to another type.\n\
+                  To fix, drop the prefix (`id`).",
         example: "type User {\n  userId: ID   # reported\n}",
         kinds: &[kind::FIELD_DEF],
     }

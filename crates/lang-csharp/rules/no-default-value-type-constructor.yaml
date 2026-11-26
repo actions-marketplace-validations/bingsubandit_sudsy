@@ -2,7 +2,17 @@ id: no-default-value-type-constructor
 family: finding
 params: { check: default_value_constructor, empty: default, fix-title: "Replace the constructor call" }
 message: "do not use the default constructor of a value type: use `{text}`"
-description: "`new S()` of a value type with an implicit parameterless constructor and no initializer: write `default(S)` (`Guid.Empty`, `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0 where they exist). No fix for a target-typed `new()`."
+description: >-
+  Reports `new S()` of a value type that has an implicit parameterless constructor and no
+  initializer: write `default(S)`, or the named constant where there is one (`Guid.Empty`,
+  `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0). No fix for a target-typed
+  `new()`.
+why: >-
+  `new S()` of such a struct is the zero value, the same as `default(S)`, but it reads as a call
+  that does something. `default` states that the value is the zero value, and a named constant
+  (`Guid.Empty`) says what that value means.
+
+  To fix, write `default(S)` or the constant.
 example: "var d = new DateTime();   // write: default(DateTime)"
 severity: off
 category: style

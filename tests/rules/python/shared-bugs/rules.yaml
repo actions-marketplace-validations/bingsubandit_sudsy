@@ -5,3 +5,4 @@ no-assignment-in-condition: warn
 no-empty-block: warn
 no-duplicate-case: warn
 no-duplicate-keys: warn
+no-empty-catch: warn

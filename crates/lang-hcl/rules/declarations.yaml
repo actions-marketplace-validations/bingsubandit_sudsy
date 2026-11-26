@@ -1,7 +1,13 @@
 id: typed-variables
 message: 'the variable has no type'
 description: >-
-  A `variable` block with no `type` argument (tflint terraform_typed_variables).
+  Reports a `variable` block with no `type` argument.
+why: >-
+  Without a type any value is accepted and converted when it is used, so a wrong value (a string
+  where a list was meant) is found late, with an error far from the variable. A type checks the
+  value when it is given and documents what is expected.
+
+  To fix, add `type`.
 example: 'variable "x" {}'
 severity: off
 category: style
@@ -11,7 +17,12 @@ report-on: first-token
 id: documented-variables
 message: 'the variable has no `description`'
 description: >-
-  A `variable` block with no `description` argument (tflint terraform_documented_variables).
+  Reports a `variable` block with no `description` argument.
+why: >-
+  The description is what the person who uses the module reads to know what to put in the variable.
+  Without it, they have to read the code that uses it.
+
+  To fix, add `description`.
 example: 'variable "x" {}'
 severity: off
 category: style
@@ -21,7 +32,12 @@ report-on: first-token
 id: documented-outputs
 message: 'the output has no `description`'
 description: >-
-  An `output` block with no `description` argument (tflint terraform_documented_outputs).
+  Reports an `output` block with no `description` argument.
+why: >-
+  The description is what a user of the module reads in the registry and in generated documentation.
+  An output without one has to be understood from the name and the expression.
+
+  To fix, add `description`.
 example: 'output "x" { value = 1 }'
 severity: off
 category: style
@@ -31,8 +47,14 @@ report-on: first-token
 id: empty-list-equality
 message: 'compare with `length(x) == 0`, not with `[]`'
 description: >-
-  A comparison with an empty list, `x == []` or `x != []` (tflint terraform_empty_list_equality):
-  it is false for an empty set or a tuple of another type.
+  Reports a comparison with an empty list, `x == []` or `x != []`. It is false for an empty set or a
+  tuple of another type.
+why: >-
+  `[]` is a tuple, and Terraform compares values of different types as not equal, so the comparison
+  is false for an empty set or an empty list of another type, and the condition silently does the
+  wrong thing.
+
+  To fix, compare the length: `length(x) == 0`.
 example: 'x = var.a == []'
 severity: warn
 category: suspicious

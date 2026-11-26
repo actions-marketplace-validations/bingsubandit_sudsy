@@ -629,7 +629,7 @@ def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before, pinned
     found, _ = run_plain(tool, prefix, after)
     left = [f for f in found if f[1] in layout and f[0] not in fatal and not pinned(f)]
     per = collections.Counter(f[1] for f in left)
-    rejected = sorted({Path(m).name for m in re.findall(r"^error: (.+?): \d+:\d+:", run.stderr, re.M)})
+    rejected = sorted({Path(m).name for m in re.findall(r"^error: (.+?): (?:\d+:\d+:|\1 is not valid UTF-8)", run.stderr, re.M)})
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
           + (", ".join(f"{r} {n}" for r, n in per.most_common(12)) or "none"))
     print(f"proof: `sudsy format` rejects {len(rejected)} files (Sudsy bugs, counted)" + "".join(f"\n  bug: {n}" for n in rejected))
@@ -786,7 +786,7 @@ def coverage(tool, sudsy, version, prefix, exe):
             row = per.setdefault(rule, [0, 0])
             row[0] += 1
             target = mapping.get(rule)
-            n = message_name(message)
+            n = message_name(message) if (spec or {}).get("names", True) else None  # `names: false`: the tool's messages quote code, not the name of the finding
             reports = [(m, l) for m, l in ours.get((file, target), []) if target not in named or n is None or n in m] if target else []
             last = instruction_end(work / file, line, instruction["continuation"]) if instruction and rule.startswith(instruction["rule_prefix"]) and line else line
             on_line = any(line <= l <= last for _, l in reports) if line is not None else False  # a finding at line 0 is a file-level one: only a file-level report of the mapped rule covers it

@@ -2,7 +2,16 @@ id: ambiguous-block-association
 family: check
 params: { check: ambiguous-block-association }
 message: "the braces block binds to `{name}`, not to the outer call: add parentheses"
-description: "A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`)."
+description: >-
+  Reports a call without parentheses whose last argument is a call with a braces block (`expect { x
+  }.to change { y }`); also a `do` block that binds to the outer call while a block method is an
+  argument.
+why: >-
+  A `{}` block binds to the nearest call and a `do ... end` block to the outermost one, so without
+  parentheses it is easy to attach the block to a different method from the one that was meant, and
+  the code runs without the block being used as intended.
+
+  To fix, add parentheses around the arguments.
 example: "puts [1].map { |x| x }"
 severity: off
 category: suspicious
@@ -11,7 +20,14 @@ id: float-comparison
 family: check
 params: { check: float-comparison }
 message: "comparing floats with `{name}` is unreliable: compare with a tolerance"
-description: "`==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when` (RuboCop Lint/FloatComparison); comparing with 0 or `nil` is fine."
+description: >-
+  Reports `==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on
+  a float), and a float in a `when`. Comparing with `0` or `nil` is not reported.
+why: >-
+  Floating point numbers are binary approximations: `0.1 + 0.2 == 0.3` is `false`. A comparison that
+  is true in the test with round numbers can fail with real data.
+
+  To fix, compare with a tolerance (`(a - b).abs < Float::EPSILON`) or use `BigDecimal`.
 example: "x == 0.1"
 severity: warn
 category: suspicious
@@ -20,7 +36,13 @@ id: boolean-symbol
 family: check
 params: { check: boolean-symbol }
 message: "`{name}` is a symbol, not a boolean"
-description: "The symbol `:true` or `:false`, which is probably meant to be the boolean (RuboCop Lint/BooleanSymbol)."
+description: >-
+  Reports the symbol `:true` or `:false`.
+why: >-
+  `:true` is a symbol, and in a condition it is truthy like any other symbol, including `:false`. It
+  is almost always a boolean meant to be `true` or `false`.
+
+  To fix, write `true` or `false`.
 example: "x = :true"
 severity: warn
 category: suspicious
@@ -29,7 +51,13 @@ id: interpolation-check
 family: check
 params: { check: interpolation-check }
 message: "a single-quoted string does not interpolate `#{...}`: use double quotes"
-description: "A single-quoted string that holds `#{...}`, which would interpolate in double quotes (RuboCop Lint/InterpolationCheck)."
+description: >-
+  Reports a single-quoted string that holds `#{...}`.
+why: >-
+  Single quotes do not interpolate, so the text `#{b}` stays as it is. It is a typical slip when
+  quotes are changed.
+
+  To fix, use double quotes, or remove the `#{...}`.
 example: "x = 'a#{b}'"
 severity: warn
 category: suspicious
@@ -38,7 +66,14 @@ id: ineffective-access-modifier
 family: check
 params: { check: ineffective-access-modifier }
 message: "`{name}` does not make singleton methods {name}: use `private_class_method` or `class << self`"
-description: "`private` or `protected` before `def self.name`, which it does not affect (RuboCop Lint/IneffectiveAccessModifier); `private_class_method :name` in the class makes the method private on purpose."
+description: >-
+  Reports `private` or `protected` before `def self.name`, which does not affect it.
+  `private_class_method :name` in the class makes the method private on purpose and is not reported.
+why: >-
+  `private` applies to instance methods only, so the singleton method stays public although it looks
+  private.
+
+  To fix, use `private_class_method`, or open `class << self` and put the methods after `private`.
 example: "class A\n  private\n  def self.f; end\nend"
 severity: warn
 category: correctness
@@ -47,7 +82,15 @@ id: constant-definition-in-block
 family: check
 params: { check: constant-definition-in-block }
 message: "a constant or class defined in a block belongs to the enclosing scope, not to the block"
-description: "A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed."
+description: >-
+  Reports a constant, class or module defined directly in a block. `enums` blocks (Sorbet) are not
+  reported.
+why: >-
+  A constant in a block belongs to the scope that encloses the block, not to the block, so the
+  definition is global to the file or class, and runs again each time the block does, with a warning
+  about a constant that is already defined.
+
+  To fix, define the constant outside the block, or use a variable or `let`.
 example: "describe 'x' do\n  FOO = 1\nend"
 severity: off
 category: suspicious
@@ -56,7 +99,15 @@ id: missing-super
 family: check
 params: { check: missing-super }
 message: "call `super` to invoke the callback `{name}` defined in the parent class"
-description: "`initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper)."
+description: >-
+  Reports `initialize` of a class with a parent other than `Object`, and the callbacks `inherited`
+  and `method_added`, that do not call `super`.
+why: >-
+  The parent's `initialize` sets up the object, so a subclass that does not call it leaves the
+  parent's state unset. The `inherited` and `method_added` hooks of a base class do work that a
+  subclass must not skip.
+
+  To fix, call `super`.
 example: "class A < B\n  def initialize; end\nend"
 severity: off
 category: suspicious
@@ -65,7 +116,14 @@ id: useless-access-modifier
 family: check
 params: { check: useless-access-modifier }
 message: "useless `{name}` access modifier"
-description: "A bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition (RuboCop Lint/UselessAccessModifier)."
+description: >-
+  Reports a bare `private`, `protected`, `public` or `module_function` that repeats the visibility
+  already in force, or is followed by no method definition.
+why: >-
+  The modifier does nothing, so a reader who relies on it believes methods are private that are not,
+  or the other way round.
+
+  To fix, delete it, or move the methods it was meant to cover under it.
 example: "class A\n  private\nend"
 severity: warn
 category: suspicious
@@ -74,7 +132,13 @@ id: raise-exception
 family: check
 params: { check: raise-exception }
 message: "raising `Exception` is rescued only by `rescue Exception`: raise `StandardError` or a subclass"
-description: "Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException)."
+description: >-
+  Reports `raise Exception` and `raise Exception.new`.
+why: >-
+  A plain `rescue` does not catch `Exception`, only `StandardError`, so the error goes past every
+  handler that is written for normal errors and ends the program.
+
+  To fix, raise `StandardError` or a subclass.
 example: 'raise Exception, "m"'
 severity: off
 category: suspicious
@@ -83,7 +147,16 @@ id: parentheses-as-grouped-expression
 family: check
 params: { check: parentheses-as-grouped-expression }
 message: "`{name}` is read as a grouped expression, not as the arguments: remove the space before it"
-description: "A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression)."
+description: >-
+  Reports a space between a method name and a `(` that holds its only argument (`puts (x)`). A call
+  whose argument goes on after the parentheses (`puts (1 + 2) * 3`) is not reported.
+why: >-
+  Ruby reads the parentheses as grouping the argument, not as enclosing the arguments of the call.
+  With one argument the result is the same, but the form changes meaning when
+  the code is edited: `puts (1 + 2).abs` calls `abs` on the group inside the call, while
+  `puts(1 + 2).abs` calls it on the result of `puts`.
+
+  To fix, remove the space before `(`.
 example: "puts (x)"
 severity: off
 category: suspicious
@@ -92,7 +165,13 @@ id: hash-compare-by-identity
 family: check
 params: { check: hash-compare-by-identity }
 message: "use `Hash#compare_by_identity` instead of `object_id` as the key"
-description: "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity)."
+description: >-
+  Reports a hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`).
+why: >-
+  The hash then emulates identity with an integer, which also keeps no reference to the object and
+  may collide after the object is freed. `compare_by_identity` does it by design.
+
+  To fix, call `h.compare_by_identity` and use the object as the key.
 example: "h[x.object_id]"
 severity: off
 category: suspicious
@@ -101,7 +180,13 @@ id: useless-times
 family: simplify
 params: { check: repeat-once, method: times, max: "1", with: "block pass" }
 message: "the block runs at most once: do not call `times`"
-description: "`0.times` and `1.times` with a block (RuboCop Lint/UselessTimes)."
+description: >-
+  Reports `0.times` and `1.times` with a block.
+why: >-
+  The block runs at most once, so the loop is a way to write `if`. It is usually left from a value
+  that was a variable.
+
+  To fix, delete the loop, or call the code directly.
 example: "1.times { x }"
 severity: off
 category: suspicious
@@ -110,7 +195,14 @@ id: struct-new-override
 family: check
 params: { check: struct-new-override }
 message: "`{name}` replaces a method of `Struct`"
-description: "A `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`) (RuboCop Lint/StructNewOverride)."
+description: >-
+  Reports a `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`,
+  `:count`).
+why: >-
+  The generated accessor replaces the method of `Struct`, which other code and the class itself
+  depend on. `hash` breaks use as a hash key and `size` breaks code that reads the members.
+
+  To fix, rename the member.
 example: "Struct.new(:hash)"
 severity: warn
 category: suspicious
@@ -119,7 +211,13 @@ id: redundant-string-coercion
 family: check
 params: { check: redundant-string-coercion }
 message: "`to_s` is redundant here: the value is converted anyway"
-description: "`to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion)."
+description: >-
+  Reports `to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or
+  `warn`.
+why: >-
+  Interpolation and these methods already convert the value with `to_s`, so the call adds nothing.
+
+  To fix, delete `.to_s`.
 example: '"#{x.to_s}"'
 severity: off
 category: suspicious
@@ -128,7 +226,14 @@ id: literal-in-interpolation
 family: check
 params: { check: literal-in-interpolation }
 message: "a literal in `#{...}` belongs in the string itself"
-description: "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation)."
+description: >-
+  Reports a number, symbol, `true`, `false`, `nil` or string literal that is the whole content of a
+  `#{...}`.
+why: >-
+  A literal does not need interpolation, and in `"a #{1}"` the value is known to the reader. Often
+  it is a leftover of an expression that was replaced by a constant.
+
+  To fix, write the literal in the string itself.
 example: '"a #{1}"'
 severity: off
 category: suspicious
@@ -137,7 +242,13 @@ id: mixed-regexp-capture-types
 family: check
 params: { check: mixed-regexp-capture-types }
 message: "a regexp with named captures does not capture the numbered groups"
-description: "A regexp literal that has both `(?<name>...)` and plain `(...)` groups (RuboCop Lint/MixedRegexpCaptureTypes)."
+description: >-
+  Reports a regexp literal that has both named groups (`(?<name>...)`) and plain groups (`(...)`).
+why: >-
+  When a regexp has named groups, Ruby does not capture the plain groups, so `$2` and `match[2]` are
+  `nil`, which is not what the numbered group in the source suggests.
+
+  To fix, name every group you need, or use `(?:...)` for the ones you do not.
 example: "/(?<a>x)(y)/"
 severity: warn
 category: suspicious
@@ -146,7 +257,14 @@ id: binary-operator-with-identical-operands
 family: simplify
 params: { check: identical-operands, operators: "== != === <=> =~ > >= < <= | ^ && ||" }
 message: "binary operator `{name}` has identical operands"
-description: "`x == x`, `a && a` and other comparison, logical and bitwise operators whose two sides are the same code (RuboCop Lint/BinaryOperatorWithIdenticalOperands)."
+description: >-
+  Reports a comparison, logical or bitwise operator (`== != === <=> =~ > >= < <= | ^ && ||`) whose
+  two sides are the same code (`x == x`).
+why: >-
+  The result is constant, or the operand is repeated by mistake: the second one was meant to be
+  another variable.
+
+  To fix, correct one operand, or write the constant result.
 example: "x == x"
 severity: warn
 category: suspicious
@@ -155,7 +273,13 @@ id: empty-when
 family: check
 params: { check: empty-when }
 message: "a `when` branch has no body"
-description: "A `when` with no statements and no comment (RuboCop Lint/EmptyWhen)."
+description: >-
+  Reports a `when` with no statements and no comment.
+why: >-
+  An empty `when` does nothing for that value, which usually means the code was never written, and
+  it does not fall through to the next branch in Ruby.
+
+  To fix, write the body, or add a comment that says that nothing is meant to happen.
 example: "case x\nwhen 1\nend"
 severity: off
 category: suspicious
@@ -164,7 +288,13 @@ id: post-condition-loop
 family: check
 params: { check: post-condition-loop }
 message: "`begin ... end {name}` runs the body once before the test: use `loop do ... break` instead"
-description: "A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop)."
+description: >-
+  Reports `begin ... end while cond` and `begin ... end until cond`.
+why: >-
+  This loop runs the body once before it tests the condition, unlike every other `while` or `until`,
+  and readers expect the test first. `loop do ... break if ... end` says what happens.
+
+  To fix, write `loop do`, with `break unless cond` at the end of the body.
 example: "begin\n  x\nend while y"
 severity: off
 category: suspicious
@@ -173,7 +303,15 @@ id: inherit-exception
 family: check
 params: { check: inherit-exception }
 message: "inheriting from `Exception` makes the class hard to rescue: inherit from `StandardError`"
-description: "A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException)."
+description: >-
+  Reports a class that inherits `Exception` directly (`class A < Exception`,
+  `Class.new(Exception)`).
+why: >-
+  A plain `rescue` catches `StandardError` and its subclasses only. An exception that inherits
+  `Exception` is not caught by it, and it is also not caught by code that handles all normal errors,
+  so it ends the program, as does `exit`.
+
+  To fix, inherit from `StandardError`.
 example: "class A < Exception; end"
 severity: off
 category: suspicious
@@ -182,7 +320,12 @@ id: useless-method-definition
 family: check
 params: { check: useless-method-definition }
 message: "the method only calls `super`: remove it"
-description: "A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition)."
+description: >-
+  Reports a method whose whole body is a bare `super`.
+why: >-
+  The method does what the inherited one does, so the definition adds only code.
+
+  To fix, delete the method.
 example: "def f(a)\n  super\nend"
 severity: off
 category: suspicious
@@ -191,7 +334,13 @@ id: return-in-void-context
 family: check
 params: { check: return-in-void-context }
 message: "do not return a value in `{name}`"
-description: "`return value` in `initialize` or a setter method, whose result is ignored (RuboCop Lint/ReturnInVoidContext)."
+description: >-
+  Reports `return value` in `initialize` or a setter method, whose result is ignored.
+why: >-
+  `new` always returns the new object, and an assignment `a.x = 1` evaluates to `1` whatever the
+  setter returns. The value cannot be used by anyone, so it is a sign of a misunderstanding.
+
+  To fix, return nothing: `return` alone is fine.
 example: "def initialize\n  return 1\nend"
 severity: warn
 category: suspicious
@@ -199,9 +348,15 @@ category: suspicious
 id: no-assignment-in-logical-condition
 message: an assignment is the right operand of a condition (was `==` meant?)
 description: >-
-  `if a && b = c`: the condition is a logical operation whose right operand is an assignment not
-  wrapped in parentheses (RuboCop Lint/AssignmentInCondition); a plain assignment condition is
+  Reports a condition that is a logical operation (`&&`, `||`) with an assignment as the right
+  operand not in parentheses (`if a && b = c`). An assignment as the whole condition is
   `no-assignment-in-condition`.
+why: >-
+  In `a && b = c` the assignment is easy to read as a comparison (`==`), and the value of the whole
+  condition is the assigned value, so the code branches on the wrong thing.
+
+  To fix, use `==` if a comparison was meant, or put the assignment in parentheses if it is on
+  purpose.
 example: 'if a && b = c; end'
 severity: warn
 category: suspicious

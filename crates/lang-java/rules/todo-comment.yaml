@@ -5,8 +5,13 @@ params:
   word: todo
   required: 'TODO:'
 description: >-
-  A line of a comment starts with `todo` in any other case, or with `TODO` and no colon
-  (Checkstyle TodoComment with the Google format). Javadoc comments are not read.
+  Reports a line of a comment that starts with `todo` in any other case, or with `TODO` and no
+  colon. Javadoc comments are not read.
+why: >-
+  A fixed form (`TODO:`) lets people and tools find the open items by one search. A variant spelled
+  differently is not found.
+
+  To fix, write `TODO:`.
 example: '// todo fix'
 severity: off
 category: style

@@ -2,7 +2,14 @@ id: doc-partial-summary-required
 family: doc-element
 params: { check: required, element: summary, scope: summary, partial: only, skip-inheritdoc: true, fallback: content, report: names }
 message: "the documentation of a partial element should have a <summary>"
-description: "A documentation comment of a partial type or method without `<summary>` or `<content>` (and without `<inheritdoc />`). Each part is checked on its own. No fix."
+description: >-
+  Reports a documentation comment of a partial type or method that has no `<summary>` or `<content>`
+  (and no `<inheritdoc />`). Each part is checked on its own. No fix.
+why: >-
+  The summary is the part of the comment that tools show in a list or a hover. A comment of a
+  partial type without it is shown with no description.
+
+  To fix, add a `<summary>`.
 example: "/// <remarks>x</remarks>\npublic partial class A { }   // add a <summary>"
 severity: off
 category: style

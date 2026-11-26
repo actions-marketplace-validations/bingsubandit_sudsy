@@ -1,0 +1,23 @@
+# A backslash ends a continued line
+# (syntax: crates/core-format/src/stream.rs).
+[lines]
+continuation = \
+
+# Blanks between two tokens of a line (RuboCop Layout/Space*); no row: the source's, so that
+# blanks that line up with a neighbouring line (Layout/ExtraSpacing) stay.
+[space]
+* / kind=Comma|Semi : no
+kind=LParen / * : no
+* / kind=RParen : no
+kind=LBracket&parent=Array / * : no
+* / kind=RBracket&parent=Array : no
+kind=LBrace&parent=Hash|Block / kind=RBrace : no
+kind=LBrace&parent=Hash|Block / * : yes
+* / kind=RBrace&parent=Hash|Block : yes
+kind=EmbBegin / * : no
+* / kind=RBrace&parent=EmbeddedStatements : no
+
+[at_least_one]
+kind=Comma|Semi / kind!=RParen|RBracket|RBrace|Operator
+* / kind=Assign
+kind=Assign / *

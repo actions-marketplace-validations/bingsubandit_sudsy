@@ -5,9 +5,11 @@ use provider_api::ParserProvider;
 
 core_syntax::include_generated!();
 
+static SYMBOLS: provider_api::SymbolLang = provider_api::SymbolLang::new(include_str!("../symbols.rows"));
+
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("protobuf", tree_sitter_proto::LANGUAGE), grammar: grammars::PROTOBUF, mapping: &MAPPING, extensions: &["proto"], file_names: &[], schema: option_schema(), formatter: &ProtoFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[core_rules::file_name::FAMILY], validate: None })
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("protobuf", tree_sitter_proto::LANGUAGE), grammar: grammars::PROTOBUF, mapping: &MAPPING, extensions: &["proto"], file_names: &[], schema: option_schema(), formatter: &ProtoFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[core_rules::file_name::FAMILY, core_rules::index_rules::IMPORT_USED, core_rules::index_rules::MEMBER_REF_UNIQUE], validate: None }).with_symbols(&SYMBOLS)
 }
 
 pub const MAPPING: Mapping = Mapping {

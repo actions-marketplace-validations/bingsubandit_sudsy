@@ -7,7 +7,7 @@ use crate::diagnostic::{Diagnostic, Severity};
 use crate::layout::LayoutSink;
 use crate::options::RuleOptions;
 use crate::project::{DirectoryScope, ProjectContext, ProjectFacts, Scope};
-use crate::rule::{BodyContext, FileContext, Rule, RuleContext};
+use crate::rule::{BodyContext, FileContext, Rule, RuleContext, RuleMeta};
 use crate::suppress::Suppressions;
 use core_semantics::Layers;
 use core_syntax::SyntaxKind;
@@ -117,6 +117,9 @@ pub fn run_file_rules<'a>(
     diagnostics
 }
 
+/// A group of rules run as one ([`Rule::cluster`]): its name and the active members.
+type Cluster = (&'static str, Vec<(&'static RuleMeta, Severity)>);
+
 /// The rules subscribed to one node kind, in rule order: the first few inline, so a kind with
 /// few rules costs no allocation per file.
 #[derive(Default)]
@@ -161,7 +164,19 @@ pub(crate) fn traverse(
     let mut diagnostics = Vec::new();
     // Sorted by kind: a handful of kinds, looked up once per node, so a binary search beats hashing.
     let mut by_kind: Vec<(SyntaxKind, Subscribed)> = Vec::new();
+    // The groups of rules that share one run per node: the lead (first active) and the members.
+    let mut clusters: Vec<Cluster> = Vec::new();
     for (i, a) in active.iter().enumerate() {
+        if let Some(name) = a.rule.cluster() {
+            let member = (a.rule.meta(), a.severity);
+            match clusters.iter_mut().find(|c| c.0 == name) {
+                Some(c) => {
+                    c.1.push(member);
+                    continue;
+                }
+                None => clusters.push((name, vec![member])),
+            }
+        }
         // A tag resolves through the file's grammar to the node kinds carrying it.
         let tagged = a
             .rule
@@ -190,6 +205,9 @@ pub(crate) fn traverse(
             &mut diagnostics,
         );
         ctx.layout = layout.as_deref_mut();
+        if let Some(name) = a.rule.cluster() {
+            ctx.members = clusters.iter().find(|c| c.0 == name).map_or(&[], |c| &c.1);
+        }
         ctx.ranges = Some(&ranges);
         ctx.format_changes = changes;
         f(a.rule, &mut ctx);

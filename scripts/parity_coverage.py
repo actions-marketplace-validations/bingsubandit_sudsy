@@ -1,10 +1,10 @@
 """Findings of an upstream tool on its corpus for the generic coverage mode (scripts/parity_lint.py `coverage`).
 
 A tool entry of parity_tools.json has a `coverage` object (docs/ai/development/parity.md#coverage-mode):
-`corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `esm` `[module, script]` suffixes by content (ESLint), `invalid_marker` (the file name next to an input that marks it invalid: the proof run leaves those out when Sudsy rejects them), `reference_parser` (a command with `{file}` that exits non-zero on a syntax error: a file Sudsy rejects and it rejects too is invalid, as a marked one), `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
+`corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `esm` `[module, script]` suffixes by content (ESLint), `invalid_marker` (the file name next to an input that marks it invalid: the proof run leaves those out when Sudsy rejects them), `reference_parser` (a command with `{file}` that exits non-zero on a syntax error: a file Sudsy rejects and it rejects too is invalid, as a marked one), `parse_error` (the rule id the tool reports for a file it cannot parse, with the same effect), `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
 (`{exe}`, `{prefix}`, `{group}` and `{files}`), `group` (a regex over the file's path: files of one group run in one
 command; `cwd: group` runs it in the folder `group` names), `chunk` (files per command), `ok_codes` (exit codes with an empty report meaning no findings), `timeout` (seconds) and `memory_gb` (address space) per command, `env`, `stream` (`stdout` or `stderr`: where the report is), `files` (config files
-written next to the corpus), `group_files` (config files written into the folder of each group, `{group}` and `{prefix}` replaced: a project's own config), `parse` (how the report turns into findings) and `sudsy` (the Sudsy side's config).
+written next to the corpus), `group_files` (config files written into the folder of each group, `{group}` and `{prefix}` replaced: a project's own config; a file whose value is a dict maps a group to its text and is written for those groups only), `parse` (how the report turns into findings) and `sudsy` (the Sudsy side's config).
 """
 import json
 import os
@@ -32,6 +32,8 @@ def corpus_files(spec, filters):
                     filters["skip"] += 1
                 elif p.is_file():
                     name = f"{source['as']}/{inside}" if "as" in source else p.relative_to(base.parent).as_posix()
+                    if "suffix" in source and not name.endswith(source["suffix"]):  # the tool and Sudsy read the file by its name (`*.component.html` is Angular)
+                        name = name.removesuffix(Path(name).suffix) + source["suffix"]
                     if "esm" in source:  # `[module suffix, script suffix]`: a `.js` with `import`/`export` is read as a module by both tools, the others as scripts
                         module = re.search(r"^(?:import|export)\b", p.read_text(encoding="utf-8", errors="replace"), re.M)
                         name = str(Path(name).with_suffix(source["esm"][0 if module else 1]))
@@ -110,11 +112,8 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
     # that name next to the input, as the yaml-test-suite's `error`): a marked file is invalid input and leaves the count, any other
     # rejected file is a Sudsy bug and its findings stay.
     sources = dict(corpus_files(spec, Counter()))
-    rejected = {n for n in (norm(m, after) for m in re.findall(r"^error: (.+?): \d+:\d+:", run.stderr, re.M)) if n in sources}
-    marker = spec.get("invalid_marker")
-    invalid = {n for n in rejected if marker and (sources[n].parent / marker).exists()}
-    reference = spec.get("reference_parser")  # a command (`{file}`) that exits non-zero on a syntax error: the language's own parser
-    invalid |= {n for n in rejected - invalid if reference and subprocess.run([a.format(python=sys.executable, file=sources[n]) for a in reference], capture_output=True, check=False).returncode}
+    rejected = rejected_files(run.stderr, after, sources)
+    invalid = invalid_inputs(spec, sources, rejected, found)
     left = [f for f in found if f[1] in layout and f[0] not in left_out and f[0] not in invalid and not pinned(f)]
     per = Counter(f[1] for f in left)
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
@@ -123,6 +122,22 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
           f"{len(rejected) - len(invalid)} that it does not (named gaps or Sudsy bugs, counted)"
           + "".join(f"\n  {'gap ' + ','.join(named[n]) if n in (named or {}) else 'bug'}: {n}" for n in sorted(rejected - invalid)))
     return left
+
+
+def rejected_files(stderr, work, sources):
+    """The corpus files `sudsy format` reports (`error: FILE: LINE:COL:`, or `error: FILE: FILE is not valid UTF-8 ...` for a file it cannot read)."""
+    return {n for n in (norm(m, work) for m in re.findall(r"^error: (.+?): (?:\d+:\d+:|\1 is not valid UTF-8)", stderr, re.M)) if n in sources}
+
+
+def invalid_inputs(spec, sources, rejected, found):
+    """The rejected files that are invalid input, which leave the count: marked by the corpus (`invalid_marker`), refused by the language's own
+    parser (`reference_parser`), or both rejected by Sudsy and reported by the tool as unparsable (`parse_error`). A file only Sudsy rejects is a bug."""
+    marker = spec.get("invalid_marker")
+    invalid = {n for n in rejected if marker and (sources[n].parent / marker).exists()}
+    reference = spec.get("reference_parser")  # a command (`{file}`) that exits non-zero on a syntax error: the language's own parser
+    invalid |= {n for n in rejected - invalid if reference and subprocess.run([a.format(python=sys.executable, file=sources[n]) for a in reference], capture_output=True, check=False).returncode}
+    parse_error = spec.get("parse_error")  # the rule the tool reports for a file it cannot parse
+    return invalid | {f[0] for f in found if parse_error and f[1] == parse_error and f[0] in rejected}
 
 
 def norm(path, work):
@@ -147,6 +162,9 @@ def findings(tool, spec, prefix, work, exe, rules, copy=True):
         groups.setdefault(m.group(1) if m else "", []).append(inside)
     for group in groups if copy else []:
         for name, text in spec.get("group_files", {}).items():
+            text = text.get(group) if isinstance(text, dict) else text  # a dict: the text of each group, none for the others
+            if text is None:
+                continue
             (work / group / name).write_text(text.replace("{prefix}", str(prefix)).replace("{group}", group), encoding="utf-8")
     limit = (lambda: resource.setrlimit(resource.RLIMIT_AS, (spec["memory_gb"] << 30,) * 2)) if "memory_gb" in spec else None
     found, skipped = [], []

@@ -14,10 +14,15 @@ rule! {
         id: "async-suffix",
         category: Style,
         default: Off,
-        description: "An async method returning Task or ValueTask has a name that does not end in \
-                  `Async`. Overrides, explicit interface implementations and `Main` are left alone \
-                  (their names are not the method's to choose). Renaming needs the binding layer, \
-                  so there is no fix.",
+        description: "Reports an `async` method that returns `Task` or `ValueTask` and whose name does not \
+                  end in `Async`. Overrides, explicit interface implementations and `Main` are not \
+                  reported, because their names are not the method's to choose. Renaming needs the \
+                  binding layer, so there is no fix.",
+        why: "The suffix tells the caller that the method returns a task that has to be awaited. A \
+                  call that forgets `await` on `Load()` compiles and runs on without waiting, but \
+                  `LoadAsync()` calls for it. It also leaves room for a synchronous `Load()` next to \
+                  it.\n\
+                  To fix, rename the method to end in `Async`.",
         example: "async Task<int> Load() { }   // rename to LoadAsync",
         uses: [Types],
         kinds: &[kind::METHOD_DECLARATION],

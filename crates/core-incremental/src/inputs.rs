@@ -72,3 +72,43 @@ pub struct ExtensionSet {
     #[returns(ref)]
     pub extensions: core_rules::Extensions,
 }
+
+/// The files of a project and how to find what they do not hold: the symbol index reads it
+/// (`crate::index`). Only an index query reads it, so a run without index rules never builds one.
+#[salsa::input]
+pub struct Project {
+    /// The project's own files.
+    #[returns(ref)]
+    pub files: Vec<File>,
+    /// `files` is every file of the project: only then can a name that none declares be absent.
+    #[returns(copy)]
+    pub complete: bool,
+    /// Finds the files of names and imports outside `files`; `None` when the language has no
+    /// package system or no manifest was found.
+    #[returns(ref)]
+    pub locator: Option<std::sync::Arc<dyn core_packages::Locator>>,
+    /// Bumped when a manifest or a dependency file changed on disk: files read on demand are
+    /// read again.
+    #[returns(copy)]
+    pub revision: u64,
+}
+
+/// One project of one language: the folder its manifest is in, and its [`Project`] input.
+#[derive(Clone)]
+pub struct ProjectEntry {
+    /// Position in the database's providers.
+    pub provider: usize,
+    pub root: PathBuf,
+    pub project: Project,
+    /// A file of the language under the root (not in the dependencies folder) that the run left
+    /// out: the project is not complete.
+    pub left_out: bool,
+}
+
+/// The projects of a run or a workspace, empty until a caller that runs index rules opens them
+/// (`Database::set_projects`).
+#[salsa::input(singleton)]
+pub struct Projects {
+    #[returns(ref)]
+    pub list: Vec<ProjectEntry>,
+}

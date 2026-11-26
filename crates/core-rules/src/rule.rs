@@ -211,6 +211,8 @@ pub struct RuleContext<'a> {
     /// The language's `format.rules` text: a rule that rewrites code reads its rows in the section
     /// named like it.
     pub rows: &'a str,
+    /// For the lead of a [`Rule::cluster`]: the metadata and severity of every active rule of it.
+    pub(crate) members: &'a [(&'static RuleMeta, Severity)],
 }
 
 impl<'a> RuleContext<'a> {
@@ -246,7 +248,32 @@ impl<'a> RuleContext<'a> {
             format: None,
             format_changes: None,
             rows: file.hooks.rows(),
+            members: &[],
         }
+    }
+
+    /// The active rules of the cluster this rule leads (see [`Rule::cluster`]), the lead included.
+    pub fn members(&self) -> &[(&'static RuleMeta, Severity)] {
+        self.members
+    }
+
+    /// Reports for `member`, one of [`RuleContext::members`], in its name and severity.
+    pub fn report_as(
+        &mut self,
+        member: (&'static RuleMeta, Severity),
+        range: TextRange,
+        message: impl Into<String>,
+    ) {
+        let (meta, severity) = member;
+        self.out.push(Diagnostic {
+            rule: meta.id.to_string(),
+            category: meta.category,
+            severity,
+            message: message.into(),
+            range,
+            related: Vec::new(),
+            fixes: Vec::new(),
+        });
     }
 
     /// The cache of [`crate::tree::significant_range`] shared by the rules run on one node (the
@@ -304,6 +331,14 @@ impl<'a> RuleContext<'a> {
 /// no state: options arrive through the context, project facts through [`ProjectFacts`].
 pub trait Rule: Send + Sync {
     fn meta(&self) -> &'static RuleMeta;
+
+    /// The name of a group of rules that read the same nodes through one analysis. The first
+    /// active rule of the group is the only one that is run (once per node, with
+    /// [`RuleContext::members`]) and reports for all of them, in the name of each; the others are
+    /// never called. The rules of a group must subscribe to the same kinds and tags.
+    fn cluster(&self) -> Option<&'static str> {
+        None
+    }
 
     /// Whether the rule attaches layout directives (`RuleContext::attach`) and whether it also
     /// reports. A layout rule is also run when the file is formatted, with its diagnostics dropped.
@@ -364,6 +399,16 @@ pub trait Rule: Send + Sync {
     fn reads_embedded(&self) -> bool {
         false
     }
+
+    /// Whether the rule reads the symbol index ([`Rule::check_index`]): only then does a run build
+    /// one.
+    fn reads_index(&self) -> bool {
+        false
+    }
+
+    /// Index scope: once per file, after the others, with what the index knows about the names
+    /// the file writes.
+    fn check_index(&self, _index: &dyn crate::index_rules::IndexView, _ctx: &mut RuleContext<'_>) {}
 
     /// Whether the rule reads the formatter's output (`FileContext::format_changes`).
     fn reads_formatted(&self) -> bool {

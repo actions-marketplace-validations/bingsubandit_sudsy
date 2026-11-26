@@ -262,3 +262,90 @@ fn a_rule_whose_layer_is_missing_is_skipped_not_failed() {
         1
     );
 }
+
+/// A member of a cluster: only the first active one runs, and reports for all in their names.
+struct Member {
+    meta: &'static RuleMeta,
+    kinds: Vec<SyntaxKind>,
+}
+
+static FIRST: RuleMeta = RuleMeta {
+    id: "first",
+    ..PROBE
+};
+static SECOND: RuleMeta = RuleMeta {
+    id: "second",
+    ..PROBE
+};
+
+impl Rule for Member {
+    fn meta(&self) -> &'static RuleMeta {
+        self.meta
+    }
+
+    fn cluster(&self) -> Option<&'static str> {
+        Some("pair")
+    }
+
+    fn kinds(&self) -> &[SyntaxKind] {
+        &self.kinds
+    }
+
+    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
+        for member in ctx.members().to_vec() {
+            ctx.report_as(member, node.text_range(), format!("by {}", self.meta.id));
+        }
+    }
+}
+
+#[test]
+fn a_cluster_runs_its_first_active_rule_and_reports_for_each_member() {
+    let provider = lang_json::provider();
+    let text = "{\"a\": 1}";
+    let parsed = provider.parse(&SourceFile::new("a.json", 1, text)).unwrap();
+    let lines = LineIndex::new(text);
+    let file = FileContext {
+        path: Path::new("a.json"),
+        text,
+        root: &parsed.tree,
+        grammar: provider.grammar(),
+        lines: &lines,
+        body_kinds: &[],
+        hooks: provider.rule_hooks(),
+        embedded: &[],
+        semantics: None,
+    };
+    let member = |meta| Member {
+        meta,
+        kinds: vec![kind("Member")],
+    };
+    let (a, b) = (member(&FIRST), member(&SECOND));
+    let both = [
+        ActiveRule {
+            rule: &a,
+            severity: Severity::Warning,
+            options: RuleOptions::default(),
+        },
+        ActiveRule {
+            rule: &b,
+            severity: Severity::Error,
+            options: RuleOptions::default(),
+        },
+    ];
+    let report = run_file(&file, &both, false);
+    let got: Vec<_> = report
+        .diagnostics
+        .iter()
+        .map(|d| (d.rule.as_str(), d.severity, d.message.as_str()))
+        .collect();
+    assert_eq!(
+        got,
+        [
+            ("first", Severity::Warning, "by first"),
+            ("second", Severity::Error, "by first")
+        ]
+    );
+    // The second alone leads for itself only.
+    let report = run_file(&file, &both[1..], false);
+    assert_eq!(messages(&report), ["by second"]);
+}

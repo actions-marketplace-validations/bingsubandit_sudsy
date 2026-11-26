@@ -282,6 +282,13 @@ fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
         facts,
     } = run_rules_with(&context, active, depth == Depth::Deep, changes.as_ref());
     diagnostics.extend(lint_embedded(db, file, &embedded_rules, &embedded)?);
+    if active.iter().any(|a| a.rule.reads_index())
+        && let Some(view) = crate::index_view::file_index(db, file, &root)
+    {
+        diagnostics.extend(core_rules::index_rules::run_index_rules(
+            &context, active, &view,
+        ));
+    }
     diagnostics.sort_by(|a, b| {
         (a.range.start(), a.range.end(), &a.rule).cmp(&(b.range.start(), b.range.end(), &b.rule))
     });

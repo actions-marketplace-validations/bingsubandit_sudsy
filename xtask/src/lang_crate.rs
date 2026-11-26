@@ -158,6 +158,121 @@ fn cargo_toml(krate: &str, v: &Value) -> String {
     )
 }
 
+/// The static of a language with `symbols: true` (its `symbols.rows`) and the call that hands it
+/// to the provider.
+fn symbols(v: &Value) -> (&'static str, &'static str) {
+    match v.get("symbols").and_then(Value::as_bool) {
+        Some(true) => (
+            "static SYMBOLS: provider_api::SymbolLang = provider_api::SymbolLang::new(include_str!(\"../symbols.rows\"));\n\n",
+            ".with_symbols(&SYMBOLS)",
+        ),
+        _ => ("", ""),
+    }
+}
+
+/// `format-rows` (`source-indent`, `exact-end`, `keep-comment-gap`): the static `FORMAT` of a language
+/// that is written by the rows of its `format.rules` alone.
+fn format_rows(name: &str, v: &Value) -> String {
+    let Some(f) = v.get("format-rows") else {
+        return String::new();
+    };
+    let flag = |key: &str| f.get(key).and_then(Value::as_bool).unwrap_or(false);
+    format!(
+        "static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::{}.get(), include_str!(\"../format.rules\")){}.facts(core_format::rules::RuleFacts {{ exact_end: &{:?}, keep_comment_gap: {}, ..core_format::rules::RuleFacts::DEFAULT }}){}{}{};\n\n",
+        name.to_uppercase(),
+        if flag("source-indent") {
+            ".source_indent()"
+        } else {
+            ""
+        },
+        list(f, "exact-end"),
+        flag("keep-comment-gap"),
+        blanks(f),
+        indents(f),
+        lines(f),
+    )
+}
+
+/// `flush`, `align-closers` and `option-blanks` of `format-rows`: the `.lines(..)` builder, or nothing.
+fn lines(f: &Value) -> String {
+    if ["flush", "align-closers", "option-blanks"]
+        .iter()
+        .all(|k| f.get(k).is_none())
+    {
+        return String::new();
+    }
+    let closers = f
+        .get("align-closers")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    format!(
+        ".lines(core_format::stream::LineFacts {{ flush: &{:?}, align_closers: {closers}, option_blanks: &[{}] }})",
+        list(f, "flush"),
+        option_blanks(f),
+    )
+}
+
+/// `option-blanks` of `format-rows`: `[prev kind, next kind, boolean option]` triples as a Rust list.
+fn option_blanks(f: &Value) -> String {
+    let rows = f.get("option-blanks").and_then(Value::as_array);
+    let rows = rows.into_iter().flatten();
+    rows.map(|r| {
+        let part = |i: usize| r.get(i).and_then(Value::as_str).unwrap_or_default();
+        format!("({:?}, {:?}, {:?}), ", part(0), part(1), part(2))
+    })
+    .collect()
+}
+
+/// `blanks` of `format-rows`: the `.blanks(..)` builder, or nothing.
+fn blanks(f: &Value) -> String {
+    let Some(b) = f.get("blanks") else {
+        return String::new();
+    };
+    let field = |name: &str, key: &str| format!("{name}: &{:?}, ", list(b, key));
+    format!(
+        ".blanks(core_format::stream_blank::BlankFacts {{ {}{}{}{}{}{}{}{}{}{} }})",
+        field("statements", "statements"),
+        field("guard", "guard"),
+        field("jump", "jump"),
+        field("jump_words", "jump-words"),
+        field("branch", "branch"),
+        field("directives", "directives"),
+        field("modifiers", "modifiers"),
+        field("magic", "magic"),
+        field("body", "body"),
+        field("defs", "defs"),
+    )
+}
+
+/// `indents` of `format-rows`: the `.indents(..)` builder, or nothing.
+fn indents(f: &Value) -> String {
+    let Some(b) = f.get("indents") else {
+        return String::new();
+    };
+    let field = |name: &str, key: &str| format!("{name}: &{:?}, ", list(b, key));
+    format!(
+        ".indents(core_format::stream_indent::IndentFacts {{ {}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{} }})",
+        field("statements", "statements"),
+        field("frames", "frames"),
+        field("operations", "operations"),
+        field("conditions", "conditions"),
+        field("opaque", "opaque"),
+        field("pairs", "pairs"),
+        field("chains", "chains"),
+        field("leaders", "leaders"),
+        field("attached", "attached"),
+        field("keyword_frames", "keyword-frames"),
+        field("branches", "branches"),
+        field("closers", "closers"),
+        field("heredoc_openers", "heredoc-openers"),
+        field("heredoc_bodies", "heredoc-bodies"),
+        field("heredoc_wrappers", "heredoc-wrappers"),
+        field("open_brackets", "open-brackets"),
+        field("close_brackets", "close-brackets"),
+        field("elements", "elements"),
+    )
+}
+
 fn provider(name: &str, v: &Value) -> String {
     let grammar = text(v, "grammar-crate", "").replace('-', "_");
     let language = text(v, "language-const", "LANGUAGE");
@@ -225,8 +340,9 @@ fn provider(name: &str, v: &Value) -> String {
     } else {
         format!("{body}.with_snippet_contexts(&[{}])", contexts.join(", "))
     };
+    let (statics, with) = symbols(v);
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}\n}}\n"
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}{with}\n}}\n"
     )
 }
 
@@ -274,8 +390,10 @@ fn adapter_provider(name: &str, v: &Value) -> String {
             .replace('[', "")
             .replace(']', "")
     };
+    let (statics, with) = symbols(v);
+    let statics = format!("{statics}{}", format_rows(name, v));
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}\n}}\n",
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}{with}\n}}\n",
         name.to_uppercase(),
         strings("extensions"),
         strings("file-names"),

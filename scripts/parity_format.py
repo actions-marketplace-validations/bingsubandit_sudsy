@@ -226,9 +226,18 @@ def fixtures(config, folder, filters):
         else:
             walk = base.rglob("*") if source.get("recursive") else base.iterdir()
             paths = [(p.relative_to(base).as_posix(), p) for p in sorted(walk) if p.is_file() and ".git" not in p.parts]
+        seen = Counter()  # `per_dir`: the first N files by path of each top folder (a project of a corpus)
         for rel, path in paths:
-            if not rel.endswith(suffixes) or path.name == "sudsy.yaml" or not rel.startswith(source.get("only", "")):
+            only = source.get("only", "")
+            if not rel.endswith(suffixes) or path.name == "sudsy.yaml" or not rel.startswith(tuple(only) if isinstance(only, list) else only):
                 continue
+            if "names" in source and not re.search(source["names"], path.name):  # the file names of a language with no extension (`Dockerfile`, `Dockerfile.dev`)
+                continue
+            if "per_dir" in source:
+                seen[rel.split("/")[0]] += 1
+                if seen[rel.split("/")[0]] > source["per_dir"]:
+                    filters["per_dir"] += 1
+                    continue
             if rel.startswith(source.get("skip", "\0")):
                 filters["skip"] += 1
                 continue
@@ -317,7 +326,7 @@ def upstream(config, prefix, version, copy, work, style=None, folder=None):
 def upstream_batch(config, prefix, found, work):
     """`input: batch`: one run of the tool over copies of all fixtures (a JVM tool starts too slowly for one run
     per file). Returns name -> the rewritten text, or None for a file the tool names in `reject` (its output)."""
-    exe = executable(prefix, config["install"]["exe"])
+    exe = executable(prefix, config["install"].get("exe", ""))
     folder = work / "theirs"
     folder.mkdir()
     names = {}
@@ -325,11 +334,19 @@ def upstream_batch(config, prefix, found, work):
         copy = name.replace("/", "__")
         shutil.copy(fixture, folder / copy)
         names[name] = copy
+    for rel, text in config.get("files", {}).items():  # config files the tool reads from the folder
+        (folder / rel).write_text(text.format(prefix=prefix), encoding="utf-8")
     command = [str(a).format(exe=exe, prefix=prefix, root=ROOT) for a in config["command"]]
     rejected = set()
+    if config.get("cache"):  # a slow tool: its output is kept per version, command and fixture contents (RuboCop over the whole Ruby corpus takes minutes)
+        key = hashlib.sha256(json.dumps([command, config.get("args"), config.get("files"), prefix.name, sorted((n, hashlib.sha256((folder / c).read_bytes()).hexdigest()) for n, c in names.items())]).encode()).hexdigest()[:16]
+        kept = ROOT / ".cargo/tmp/rb" / f"{config['catalog']}-batch-{key}"  # the slot may be wiped: the cache lives in the worktree, only the files the tool changed (the others are the input)
+        if kept.is_dir():
+            return {n: (kept / c if (kept / c).exists() else folder / c).read_bytes().decode("utf-8") for n, c in names.items()}
 
     def reject(r):
-        rejected.update(re.findall(config["reject"], (r.stdout + r.stderr).decode("utf-8", "replace"), re.M))
+        if "reject" in config:
+            rejected.update(re.findall(config["reject"], (r.stdout + r.stderr).decode("utf-8", "replace"), re.M))
 
     if "chunk" in config:  # a tool that stops at the first file that raises: runs of `chunk` files, a failed one file by file
         copies = list(names.values())
@@ -346,7 +363,20 @@ def upstream_batch(config, prefix, found, work):
                     rejected.add(copy)
     else:
         reject(run(command + (config.get("args") or sorted({"*" + Path(c).suffix for c in names.values()})), folder, check=False))
+    if config.get("cache"):
+        kept.mkdir(parents=True)
+        for name, fixture, _, _ in found:
+            if (folder / names[name]).read_bytes() != fixture.read_bytes():
+                shutil.copy(folder / names[name], kept / names[name])
     return {n: None if c in rejected else (folder / c).read_bytes().decode("utf-8") for n, c in names.items()}
+
+
+def regression_counts(found, results):
+    """Per group, the files the tool leaves alone that Sudsy changes: a formatter that is right today may only get better."""
+    changed = Counter()
+    for (_, path, group, _), (theirs, ours, _, _) in zip(found, results):
+        changed[group or "fixtures"] += theirs is not None and ours is not None and theirs == path.read_bytes().decode("utf-8") != ours
+    return changed
 
 
 def check_reference(spec, parity, known, rejected):
@@ -404,6 +434,7 @@ class Differences:
         self.target_files = data.get("target-files") or {}  # group -> files of the target (all minus the intentional ones, tool-rejected included): the README table's denominator
         self.by_group = {}  # group -> [files of the target, files measured]
         self.second_format = data.get("second-format") or {}  # group -> most files that may change on a second format
+        self.regressions = data.get("regressions") or {}  # group -> most files the tool leaves as they are that Sudsy changes
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.intentional = data.get("intentional") or {}
         self.pins = data.get("pins") or {}
@@ -482,6 +513,19 @@ class Differences:
             row = ", ".join(f"{n} {counts[n]}" for n, (k, _) in self.defs.items() if k == kind and counts[n])
             print(f"{kind}: {row or 'none'}")
         return bad
+
+
+def notebook_cells(text):
+    """What a notebook comparison keeps (`compare: notebook-cells`): the type and the source of each cell. The tool writes
+    the JSON with its own layout (indent, key order, escapes, ids, dropped null fields); Sudsy keeps every byte outside
+    the code cells as written, which its safety check guarantees."""
+    try:
+        cells = json.loads(text).get("cells")
+    except (ValueError, AttributeError):
+        return text
+    if cells is None:
+        return text
+    return json.dumps([[c.get("cell_type"), "".join(c["source"]) if isinstance(c.get("source"), list) else c.get("source")] for c in cells])
 
 
 def verdict(name, theirs, ours, diffs, label, quiet=False, group="fixtures"):
@@ -657,6 +701,8 @@ def main():
             theirs, ours = (parity_landing.normalize(config, t) if t is not None else None for t in (theirs, ours))
             masked = not before and theirs == ours
         flagged["ignore_trailing_blanks"] += masked
+        if config.get("compare") == "notebook-cells":
+            theirs, ours = (notebook_cells(t) if t is not None else None for t in (theirs, ours))
         if checker and theirs is not None:
             wrapped[name] = parity_wrap.file_result(checker, config["wrap_compare"], styles, style, theirs, ours, copy, controlled, lambda variant: upstream(config, prefix, version, copy, here, f"{style}~{variant}", work / "variants"))
         return theirs, ours, unstable, refused
@@ -719,6 +765,12 @@ def main():
             note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
             print(f"second format {group}: {now} files change ({note}: {top})")
             bad += now > top
+        changed = regression_counts(found, results)
+        for group in sorted(known.regressions):
+            now, top = changed[group], known.regressions[group]
+            note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
+            print(f"regressions {group}: {now} files the tool leaves alone change ({note}: {top})")
+            bad += now > top
         # (refused files are not formatted, so the second-format count above leaves them out)
         for group in sorted(set(refusals) | set(known.refused)):
             now, top = refusals[group], known.refused.get(group, 0)
@@ -736,7 +788,7 @@ def main():
     for flag, why in known.flags.items():  # reference-tool flags that turn a feature off: named gaps, with the files they apply to
         count = filters["skip_with"] if flag == "skip_with" else flagged[flag] if flag in flagged else len(found)
         print(f"flag {flag} (gap): {count} fixtures; {why}")
-    print("input filters: " + ", ".join(f"{k} {filters[k]}" for k in ("non-UTF-8 files", "skip", "skip_with", "generated") if k != "generated" or "generated" in config) + f", rejected by {tool} {rejected}")
+    print("input filters: " + ", ".join(f"{k} {filters[k]}" for k in ("non-UTF-8 files", "skip", "skip_with", "per_dir", "generated") if k != "generated" or "generated" in config) + f", rejected by {tool} {rejected}")
     if "--pin" in sys.argv:  # for the lead to paste into `pins:` after review: the runner never writes them
         print("pins (tool-wrong names):")
         for (name, *_), (_, ours, *_) in zip(found, results):

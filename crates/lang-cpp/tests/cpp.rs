@@ -328,6 +328,17 @@ fn a_backslash_before_a_line_break_continues_the_string() {
     assert_eq!(strings, ["\"a\\\r\nb\"", "'\\\\'", "\"open"]);
 }
 
+/// A `##` paste inside a `case` label is a part of the label, as in a macro body's `case X##_A:`.
+#[test]
+fn a_paste_in_a_case_label_fits_the_shape() {
+    let src = "#define M(X) switch (v) { case X##_A: return 1; case 2: break; }\nint f() { switch (v) { case A##B: break; } }\n";
+    let provider = provider(Dialect::C);
+    let parsed = provider.parse(&SourceFile::new("a.c", 1, src)).unwrap();
+    let checker = core_syntax::shape::ShapeChecker::new(provider.grammar());
+    let bad: Vec<String> = checker.violations(&parsed.tree).collect();
+    assert!(bad.is_empty(), "{bad:?}");
+}
+
 #[test]
 #[ignore]
 fn dump_tree() {
@@ -586,7 +597,7 @@ fn a_call_with_a_block_is_a_function_unless_it_is_a_loop_macro() {
     };
     assert_eq!(
         run(&["function"], &["my_loop"]),
-        "void f()\n{\n  list_for_each(a, b)\n  {\n    x();\n  }\n  my_loop(a) {\n    x();\n  }\n}\n"
+        "void f()\n{\n  list_for_each(a, b)\n  { x(); }\n  my_loop(a) {\n    x();\n  }\n}\n"
     );
     let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
     formatting.options = vec![
@@ -599,7 +610,7 @@ fn a_call_with_a_block_is_a_function_unless_it_is_a_loop_macro() {
     );
     assert_eq!(
         run(&[], &[]),
-        "void f() {\n  list_for_each(a, b) {\n    x();\n  }\n  my_loop(a) {\n    x();\n  }\n}\n"
+        "void f() {\n  list_for_each(a, b) { x(); }\n  my_loop(a) { x(); }\n}\n"
     );
 }
 
@@ -778,7 +789,7 @@ fn empty_bodies_have_one_line_or_two_by_their_construct_and_a_semicolon_body_its
         ("empty_body_own_line", V::Bool(true)),
     ];
     let src = "void g() {\n  for (;;) {}\n  while (x) {}\n  do {} while (x);\n  try {} catch (E) {}\n  { }\n  for (;;);\n  while (x);\n  auto f = [] {};\n  auto l = [x]\n  { return 1; };\n  auto m = [] noexcept\n  { return 1; };\n  std::vector<std::vector<int*>> v;\n  const auto&[k, v] = f();\n  for (auto&& [_, i] : f()) g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>>*, int*[3]);\n";
-    let want = "void g() {\n  for (;;) {\n  }\n  while (x) {\n  }\n  do {\n  } while (x);\n  try {\n  } catch (E) {\n  }\n  {\n  }\n  for (;;)\n    ;\n  while (x)\n    ;\n  auto f = [] {};\n  auto l = [x] { return 1; };\n  auto m = [] noexcept {\n    return 1;\n  };\n  std::vector<std::vector<int *>> v;\n  const auto &[k, v] = f();\n  for (auto &&[_, i] : f())\n    g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>> *, int *[3]);\n";
+    let want = "void g() {\n  for (;;) {\n  }\n  while (x) {\n  }\n  do {\n  } while (x);\n  try {\n  } catch (E) {\n  }\n  {\n  }\n  for (;;)\n    ;\n  while (x)\n    ;\n  auto f = [] {};\n  auto l = [x] { return 1; };\n  auto m = [] noexcept { return 1; };\n  std::vector<std::vector<int *>> v;\n  const auto &[k, v] = f();\n  for (auto &&[_, i] : f())\n    g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>> *, int *[3]);\n";
     assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
 }
 
@@ -860,7 +871,7 @@ fn macros_in_declarations_short_bodies_and_comments_before_labels() {
     // (attribute macros after the type, a `template(` macro, `NAME(arg)(params)`, an initializer list
     // that ends on its last value, and comments held at the indentation of their neighbours)
     let src = "static void __init f(void) { return; }\nvoid __iomem *g(int a) { return 0; }\n__CRTDECL operator new(int a) { return 0; }\ntemplate(typename T)(requires C<T>) void h(T t) { return; }\nRANGES_FUNC(count)(I first, S last) { return 1; }\nMEM_STATIC U16 MEM_read16(const void *p) { return 1; }\nnoinline void nf() { return; }\ntemplate <typename... Ts> void k(Ts&... args);\nint a[] = {1, 2,\n           3\n};\nclass A {\n  int x;\n  // c\npublic:\n  int y;\n};\nvoid m() {\n  /* c */ for_each_x(a, b) {\n    q();\n  }\n lbl:\n  // note\n  x();\n}\n";
-    let want = "static void __init f(void) { return; }\nvoid __iomem *g(int a) { return 0; }\n__CRTDECL operator new(int a) { return 0; }\ntemplate(typename T)(requires C<T>) void h(T t) { return; }\nRANGES_FUNC(count)(I first, S last) { return 1; }\nMEM_STATIC U16 MEM_read16(const void *p) { return 1; }\nnoinline void nf() { return; }\ntemplate <typename... Ts> void k(Ts &...args);\nint a[] = {1, 2,\n           3};\nclass A {\n  int x;\n  // c\npublic:\n  int y;\n};\nvoid m() {\n  /* c */ for_each_x(a, b) {\n    q();\n  }\nlbl:\n  // note\n  x();\n}\n";
+    let want = "static void __init f(void) { return; }\nvoid __iomem *g(int a) { return 0; }\n__CRTDECL operator new(int a) { return 0; }\ntemplate(typename T)(requires C<T>) void h(T t) { return; }\nRANGES_FUNC(count)(I first, S last) { return 1; }\nMEM_STATIC U16 MEM_read16(const void *p) { return 1; }\nnoinline void nf() { return; }\ntemplate <typename... Ts> void k(Ts &...args);\nint a[] = {1, 2,\n           3};\nclass A {\n  int x;\n  // c\npublic:\n  int y;\n};\nvoid m() {\n  /* c */ for_each_x(a, b) { q(); }\nlbl:\n  // note\n  x();\n}\n";
     assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
 }
 
@@ -978,6 +989,11 @@ fn clang_spellings_of_operators_casts_and_declarations() {
         fmt("void f() { auto [a, b] = g(); x[1] = 2; }\n"),
         "void f() {\n  auto [a, b] = g();\n  x[1] = 2;\n}\n"
     );
+    // a `*` before a lambda is a product, not a declarator
+    assert_eq!(
+        fmt("void f() { z = a*[] { return 1; }(); }\n"),
+        "void f() { z = a * [] { return 1; }(); }\n"
+    );
     assert_eq!(
         fmt("extern \"C\" int  f(void);\n"),
         "extern \"C\" int f(void);\n"
@@ -1022,5 +1038,52 @@ fn a_comment_at_column_zero_above_a_directive_stays_there() {
     assert_eq!(
         fmt("void f() {\n// a\n#  if X\n  h();\n#endif\n}\n"),
         "void f() {\n// a\n#if X\n  h();\n#endif\n}\n"
+    );
+}
+
+#[test]
+fn a_conversion_operator_with_a_ref_qualifier_is_a_function() {
+    let src = "struct A {\n  constexpr operator reference() & {\n    return reference(value_);\n  }\n  operator T &() && noexcept final {\n    return t_;\n  }\n  int g() const &noexcept { return 1; }\n};\n";
+    assert_eq!(
+        fmt(src),
+        "struct A {\n  constexpr operator reference() & { return reference(value_); }\n  operator T &() && noexcept final { return t_; }\n  int g() const & noexcept { return 1; }\n};\n"
+    );
+}
+
+#[test]
+fn a_macro_block_joins_when_it_fits_and_a_body_that_holds_one_does_not() {
+    let src = "void f() {\n  SCOPE_EXIT {\n    g();\n  };\n  SCOPE_EXIT {\n    a();\n    b();\n  };\n}\nvoid h() {\n  SCOPE_EXIT { g(); };\n}\n";
+    assert_eq!(
+        fmt(src),
+        "void f() {\n  SCOPE_EXIT { g(); };\n  SCOPE_EXIT {\n    a();\n    b();\n  };\n}\nvoid h() {\n  SCOPE_EXIT { g(); };\n}\n"
+    );
+}
+
+#[test]
+fn a_directive_in_the_signature_keeps_the_body_expanded() {
+    let src = "#if X\n[[noreturn]]\n#endif\nstatic void\nwrapped_abort() {\n  abort();\n}\nvoid g() {\n  abort();\n}\n";
+    assert_eq!(
+        fmt(src),
+        "#if X\n[[noreturn]]\n#endif\nstatic void\nwrapped_abort() {\n  abort();\n}\nvoid g() { abort(); }\n"
+    );
+}
+
+#[test]
+fn an_index_sum_gets_its_blanks() {
+    assert_eq!(
+        fmt("void f() { y = a[i-1] + b[2+n] + c[-1]; }\n"),
+        "void f() { y = a[i - 1] + b[2 + n] + c[-1]; }\n"
+    );
+}
+
+#[test]
+fn a_declaration_line_and_a_directive_follow_the_pointer_alignment() {
+    assert_eq!(
+        fmt_pointers(
+            "right",
+            false,
+            "SQLITE_API const char* sqlite3_f(void* p, const char * q);\n#define M static T* g\n"
+        ),
+        "SQLITE_API const char *sqlite3_f(void *p, const char *q);\n#define M static T *g\n"
     );
 }

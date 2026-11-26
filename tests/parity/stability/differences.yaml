@@ -1,13 +1,15 @@
 ratchet:
-  dockerfile: 211
-  makefile: 59
+  batchfile: 0
+  dockerfile: 554
+  makefile: 1008
   github-actions: 393
   ini: 8
   editorconfig: 3
   gitignore: 118
 target-files:
-  dockerfile: 211
-  makefile: 59
+  batchfile: 547
+  dockerfile: 563
+  makefile: 1021
   github-actions: 395
   ini: 8
   editorconfig: 3

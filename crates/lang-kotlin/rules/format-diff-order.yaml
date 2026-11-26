@@ -2,7 +2,12 @@ id: import-ordering
 family: format-diff
 params: { kind: ImportList, change: "edit split join", message: "the imports are not in the order the formatter writes them" }
 description: >-
-  An import list the formatter would reorder or rewrite (ktlint import-ordering).
+  Reports an import list that the formatter would reorder or rewrite.
+why: >-
+  Imports in a fixed order make it easy to find one, and two developers who add an import in the
+  same place do not conflict.
+
+  To fix, run the formatter.
 example: 'import b.B\nimport a.A'
 severity: off
 category: style

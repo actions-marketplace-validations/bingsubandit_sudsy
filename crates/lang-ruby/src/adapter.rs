@@ -95,9 +95,11 @@ fn tokens(src: &str, raw: &[ffi::Token]) -> (Vec<Tok>, Vec<Heredoc>) {
             // Another heredoc of the opener's line has its body first.
             let previous = heredocs.last().map_or(0, |h: &Heredoc| h.body.end);
             let from = (line as u32).max(if previous > end { previous } else { 0 });
+            // The line break after the closing label is not part of the body: it is trivia.
+            let close = src[..t.end as usize].trim_end_matches(['\n', '\r']).len() as u32;
             heredocs.push(Heredoc {
                 opener: start..end,
-                body: from..t.end,
+                body: from..close.max(from),
                 line_end: end,
             });
         }

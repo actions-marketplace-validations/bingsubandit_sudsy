@@ -9,9 +9,9 @@ params:
   visible: public protected
   implicit-public-in: interface @interface
 description: >-
-  A parameter of a documented public or protected method or constructor that has no `@param` tag
-  in its Javadoc (Checkstyle JavadocMethod). A comment with `{@inheritDoc}` is left out, and so is
-  a declaration without a comment. No fix.
+  Reports a parameter of a documented public or protected method or constructor that has no `@param`
+  tag in its Javadoc, on the parameter. A comment with `{@inheritDoc}` is not reported, and neither
+  is a declaration without a comment. No fix.
 example: "/** Adds. */\npublic int add(int a) { return a; }   // add @param a"
 severity: off
 category: style

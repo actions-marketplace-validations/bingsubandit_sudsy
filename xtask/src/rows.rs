@@ -1,4 +1,4 @@
-//! Row validation: every `format.rules` file is parsed against its language's grammar. An unknown
+//! Row validation: every `format.rules` and `symbols.rows` file is parsed against its language's grammar. An unknown
 //! kind, tag, key or shape fails here (the parsers of `core_format` panic on one), and so does a
 //! spacing row that an earlier row of its section always matches first.
 
@@ -22,6 +22,14 @@ pub fn check(root: &Path) -> Result<()> {
         let Some(lang) = name.strip_prefix("lang-") else {
             continue;
         };
+        if let Ok(rows) = std::fs::read_to_string(dir.join("symbols.rows")) {
+            let grammar = Grammar::parse(&std::fs::read_to_string(
+                root.join(format!("grammars/{lang}.grammar")),
+            )?)?;
+            if let Err(e) = core_semantics::symbols::Table::parse(&grammar, &rows) {
+                errors.push(format!("{name}/symbols.rows: {e}"));
+            }
+        }
         let Ok(text) = std::fs::read_to_string(dir.join("format.rules")) else {
             continue;
         };

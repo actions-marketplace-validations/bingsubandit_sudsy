@@ -1,0 +1,4 @@
+syntax = "proto3";
+package p;
+import "other.proto";
+message A {}

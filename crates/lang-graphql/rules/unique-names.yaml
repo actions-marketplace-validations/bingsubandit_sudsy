@@ -2,7 +2,13 @@ id: unique-operation-name
 family: unique-names
 params: { container: document, item: operation, related: first defined here }
 message: operation `{name}` is already defined
-description: Two operations of a document have the same name; a server cannot tell which to run and tools that key on the name (caches, persisted queries) collide. Checked within the file.
+description: >-
+  Reports two operations of a document with the same name, within one file.
+why: >-
+  A server cannot tell which operation a request with that name runs, and tools that key on the name
+  (caches, persisted queries, generated code) collide.
+
+  To fix, rename one of them.
 example: "query A { a }\nquery A { b }   # reported"
 severity: error
 category: correctness
@@ -11,7 +17,14 @@ id: unique-fragment-name
 family: unique-names
 params: { container: document, item: fragment, related: first defined here }
 message: fragment `{name}` is already defined
-description: Two fragments of a document have the same name; a spread cannot tell which one it means. Checked within the file.
+description: >-
+  Reports two fragments of a document with the same name, within one file.
+why: >-
+  A spread names the fragment it means, and with two of one name the tool cannot tell which, so it
+  takes one or fails depending on the order. Code generators write one type per fragment name and
+  collide.
+
+  To fix, rename one of them.
 example: "fragment F on T { a }\nfragment F on T { b }   # reported"
 severity: error
 category: correctness

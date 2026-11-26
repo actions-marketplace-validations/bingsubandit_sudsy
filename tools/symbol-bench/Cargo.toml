@@ -1,0 +1,21 @@
+# Symbol index benchmark (NOT PRODUCT CODE): extraction time and memory over a corpus. Not part
+# of perf-bench, whose sources the baseline build of scripts/bench.sh takes from the candidate.
+[package]
+name = "symbol-bench"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+
+[dependencies]
+core-config.workspace = true
+core-incremental.workspace = true
+core-semantics.workspace = true
+languages = { path = "../../crates/languages" }
+perf-bench = { path = "../perf-bench" }
+provider-api.workspace = true
+anyhow.workspace = true
+mimalloc = { workspace = true, optional = true }
+
+[features]
+# The CLI's global allocator; without it the bench measures the system allocator.
+mimalloc = ["dep:mimalloc"]

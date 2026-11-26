@@ -1,6 +1,7 @@
 """Tests of the parity runner (`scripts/parity.sh --test`): pins, filter counts and the `fix` command, on throwaway fixtures."""
 import contextlib
 import io
+import shutil
 import stat
 import tempfile
 import unittest
@@ -130,6 +131,16 @@ class Runner(unittest.TestCase):
             self.assertIn("target 100.0% (1 of 1); intentional: invalid-input 1", out)
             diffs.refuted.add("c.txt")  # Sudsy rejects it but the reference parser accepts it
             self.assertEqual(diffs.status("c.txt", None), "REVIEW")
+
+    def test_a_file_only_sudsy_rejects_stays_counted_and_a_nul_refusal_is_a_rejection(self):
+        err = "error: a.sql: 1:1: syntax error\nerror: n.kt: n.kt is not valid UTF-8 text (or holds a NUL byte)\nerror: z.sql: 2:2: x\n"
+        sources = {"a.sql": Path("a.sql"), "n.kt": Path("n.kt"), "z.sql": Path("z.sql")}
+        rejected = pc.rejected_files(err, Path("."), sources)
+        self.assertEqual(rejected, {"a.sql", "n.kt", "z.sql"})
+        found = [("a.sql", "PRS", "m", 1), ("z.sql", "LT01", "m", 1), ("n.kt", "PRS", "m", 1)]
+        invalid = pc.invalid_inputs({"parse_error": "PRS"}, sources, rejected, found)
+        self.assertEqual(invalid, {"a.sql", "n.kt"})  # z.sql: only Sudsy rejects it, the tool parsed it
+        self.assertEqual(pc.invalid_inputs({}, sources, rejected, found), set())
 
     def test_reviewed_finding_is_pinned_per_finding(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -323,6 +334,58 @@ def block_tree(src):
         lines.append(f"{'      ' if a <= j <= b else '    '}{k} {s}..{e} {src[s:e]!r}")
     lines.append(f"  EndOfFile {len(src)}..{len(src)} \"\"")
     return pw.Tree(WRAP_CFG, {**WRAP_TAGS, "Block": {"block", "huggable"}}, "\n".join(lines), src.encode())
+
+
+SHORT_CFG = {**WRAP_CFG, "short_bodies": {"owners": {"Func": "AllowShortFunctionsOnASingleLine"}, "nested": "AllowShortBlocksOnASingleLine", "class_kinds": [], "argument_kinds": [], "permits": {"AllowShortFunctionsOnASingleLine": {"All": ""}}}}
+
+
+def short_tree(src):
+    """A Tree of `src`: a Func node (tokens up to the first `{`), its Block, and one Stmt per `;` inside the block."""
+    import re
+
+    toks = [(m.lastgroup, m.start(), m.end()) for m in re.finditer("|".join(f"(?P<{k}>{r})" for k, r in WRAP_TOKENS), src)]
+    a, b = next(j for j, t in enumerate(toks) if t[0] == "Lbrace"), max(j for j, t in enumerate(toks) if t[0] == "Rbrace")
+    lines = [f"Unit 0..{len(src)}", f"  Func {toks[0][1]}..{toks[-1][2]}"]
+    lines += [f"    {k} {s}..{e} {src[s:e]!r}" for k, s, e in toks[:a]]
+    lines.append(f"    Block {toks[a][1]}..{toks[b][2]}")
+    lines.append(f"      Lbrace {toks[a][1]}..{toks[a][2]} '{{'")
+    open_stmt = False
+    for k, s, e in toks[a + 1 : b]:
+        if not open_stmt:
+            end = next(t[2] for t in toks[a + 1 : b] if t[2] > s and t[0] == "Semi")
+            lines.append(f"      Stmt {s}..{end}")
+        lines.append(f"        {k} {s}..{e} {src[s:e]!r}")
+        open_stmt = k != "Semi"
+    lines.append(f"      Rbrace {toks[b][1]}..{toks[b][2]} '}}'")
+    lines.append(f"  EndOfFile {len(src)}..{len(src)} \"\"")
+    tags = {"Func": {"statement"}, "Stmt": {"statement"}, "Block": {"block"}}
+    return pw.Tree(SHORT_CFG, tags, "\n".join(lines), src.encode())
+
+
+class ShortBody(unittest.TestCase):
+    ALL, NONE = {"AllowShortFunctionsOnASingleLine": "All"}, {"AllowShortFunctionsOnASingleLine": "None"}
+    ONE, MANY = "f ( ) { x ; }\n", "f ( ) {\n  x ;\n}\n"
+
+    def equal(self, theirs, ours, allow):
+        table = SHORT_CFG["short_bodies"]["permits"]
+        return pw.compare(short_tree(theirs), short_tree(ours), None, None, lambda ex: pw.joinable(ex, allow, table))[0]
+
+    def test_one_line_against_many_is_a_wrap_where_the_option_permits_the_join(self):
+        self.assertTrue(self.equal(self.ONE, self.MANY, self.ALL))
+        self.assertTrue(self.equal(self.MANY, self.ONE, self.ALL))
+        self.assertTrue(self.equal("f ( ) {\n  x ;\n  }\n", self.ONE, self.ALL))
+
+    def test_an_option_that_forces_the_form_stays_a_difference(self):
+        self.assertFalse(self.equal(self.ONE, self.MANY, self.NONE))
+        self.assertFalse(self.equal(self.ONE, self.MANY, {}))
+
+    def test_a_body_of_two_statements_or_with_a_comment_is_not_short(self):
+        two, many = "f ( ) { x ; y ; }\n", "f ( ) {\n  x ;\n  y ;\n}\n"
+        self.assertFalse(self.equal(two, many, self.ALL))
+        self.assertFalse(self.equal("f ( ) { x // c\n ; }\n", "f ( ) {\n x // c\n ; }\n", self.ALL))
+
+    def test_the_brace_placement_stays_exact(self):
+        self.assertFalse(self.equal(self.ONE, "f ( )\n{ x ; }\n", self.ALL))
 
 
 class Wrap(unittest.TestCase):
@@ -609,6 +672,64 @@ class LintLanding(unittest.TestCase):
         few, filled = pld.select_lint(states, {"r0.txt"})
         self.assertTrue(filled)
         self.assertIn("r0.txt", few)
+
+
+class BatchRun(unittest.TestCase):
+    """`input: batch` of a slow tool: config `files`, the `cache` of its output and the `regressions` count."""
+
+    def config(self, tool, **more):
+        return {"catalog": "unit-batch", "install": {"exe": tool}, "command": ["{exe}"], "args": ["a.txt"], **more}
+
+    def tool(self, tmp, body):
+        prefix = Path(tmp) / "prefix"
+        prefix.mkdir()
+        exe = prefix / "tool"
+        exe.write_text("#!/bin/sh\n" + body, encoding="utf-8")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        fixture = Path(tmp) / "a.txt"
+        fixture.write_text("in\n", encoding="utf-8")
+        return prefix, [("a.txt", fixture, None, None)]
+
+    def test_config_files_are_written_next_to_the_copies_with_the_prefix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix, found = self.tool(tmp, 'cat conf.txt > a.txt\n')
+            work = Path(tmp) / "work"
+            work.mkdir()
+            out = pf.upstream_batch(self.config("tool", files={"conf.txt": "root {prefix}\n"}), prefix, found, work)
+            self.assertEqual(out["a.txt"], f"root {prefix}\n")
+
+    def test_cache_keeps_the_changed_files_and_is_keyed_by_the_fixture_contents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix, found = self.tool(tmp, 'echo changed > a.txt\necho run >> "$COUNT"\n')
+            count = Path(tmp) / "count"
+            config = self.config("tool", cache=True)
+            kept = []
+            try:
+                with unittest.mock.patch.dict("os.environ", {"COUNT": str(count)}):
+                    for n in range(2):
+                        work = Path(tmp) / f"work{n}"
+                        work.mkdir()
+                        self.assertEqual(pf.upstream_batch(config, prefix, found, work)["a.txt"], "changed\n")
+                    self.assertEqual(count.read_text().count("run"), 1)  # the second call came from the cache
+                    found[0][1].write_text("other\n", encoding="utf-8")
+                    work = Path(tmp) / "work2"
+                    work.mkdir()
+                    pf.upstream_batch(config, prefix, found, work)
+                    self.assertEqual(count.read_text().count("run"), 2)  # other contents, other key
+            finally:
+                kept = list((pf.ROOT / ".cargo/tmp/rb").glob("unit-batch-*"))
+                for d in kept:
+                    shutil.rmtree(d)
+            self.assertEqual(len(kept), 2)
+
+    def test_regressions_count_the_files_the_tool_leaves_alone_that_sudsy_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            a, b, c = (Path(tmp) / n for n in "abc")
+            for p in (a, b, c):
+                p.write_text("x\n", encoding="utf-8")
+            found = [("a", a, "g", None), ("b", b, "g", None), ("c", c, None, None)]
+            results = [("x\n", "y\n", None, None), ("z\n", "y\n", None, None), ("x\n", "x\n", None, None)]
+            self.assertEqual(dict(pf.regression_counts(found, results)), {"g": 1, "fixtures": 0})
 
 
 if __name__ == "__main__":

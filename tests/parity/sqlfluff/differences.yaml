@@ -33,7 +33,7 @@ second-format:
 refused:
   real-world: 0
 unclassified: 106
-target: 88.7
+target: 90.2
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
@@ -45,13 +45,12 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 100738, total: 113542, main: 'b11e8bdd'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 102190, total: 113308, main: 'bede0bee'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 6040
-  CV06: 1452
+  LT02: 5920
   CP02: 1041
-  LT01: 438
   RF02: 413
+  LT01: 332
   CV11: 320
   PRS: 263
   LT03: 236
@@ -61,19 +60,19 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   ST06: 179
   CV10: 174
   AL09: 165
-  LT06: 159
+  LT06: 158
   AL08: 135
   LT08: 125
   RF03: 103
   ST12: 100
   ST09: 94
-  LT15: 71
+  LT15: 66
   CP05: 64
   CP03: 59
   TQ02: 54
-  LT09: 53
   AL03: 52
   LT05: 52
+  LT09: 51
   TQ03: 51
   AM03: 50
   ST05: 42

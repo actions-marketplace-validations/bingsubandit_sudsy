@@ -17,12 +17,15 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
 | [development/no-reference-tool.md](development/no-reference-tool.md) | Planning a language or leg that has no reference tool to compare with: corpus, decision table, checklist, numbers |
 | [design/symbol-index.md](design/symbol-index.md) | Plan: names across files and dependencies for lint rules (types, functions, members), phases and checkpoints |
+| [design/makefile.md](design/makefile.md) | Evidence for the Makefile format: sources (mbake is a partial tool), corpus and split, decision table, agreement, stable, step 2 |
+| [design/dockerfile.md](design/dockerfile.md) | Evidence for the Dockerfile format: sources (dockerfmt is primary), corpus and split, decision table, agreement, stable |
 | [design/go.md](design/go.md) | Plan: Go, parser and revive lint, phases and checkpoints |
 | [architecture/language-packs.md](architecture/language-packs.md) | Language packs, switched off (every release has all languages built in): the `pack-mode` feature, manifest, cache, ABI check |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
 | [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |
 | [formatting/csharp.md](formatting/csharp.md) | C# formatter and options |
 | [formatting/json.md](formatting/json.md) | JSON/JSONC parser, formatter, options |
+| [formatting/jupyter.md](formatting/jupyter.md) | Notebooks: JSON host, Python cells as embedded regions, parity |
 | [formatting/css.md](formatting/css.md) | CSS / SCSS / Less hand-written parser, Prettier-style formatter, options, conformance |
 | [formatting/yaml.md](formatting/yaml.md) | YAML parser, data model, formatter, options |
 | [formatting/github-actions.md](formatting/github-actions.md) | GitHub Actions workflows and `action.yml`: selection by path, embedded `run:` scripts, rules after actionlint |

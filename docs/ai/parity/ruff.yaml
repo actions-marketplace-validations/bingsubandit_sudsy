@@ -806,7 +806,7 @@ entries:
   S106: planned
   S107: planned
   S108: planned
-  S110: rule no-empty-catch
+  S110: rule no-empty-catch | The preset sets option `comment_handles` off because ruff reports an `except` whose only statement is `pass`, a comment or not.
   S112: planned
   S113: planned
   S201: planned

@@ -76,9 +76,13 @@ rule! {
         id: "debug-assert-message",
         category: Style,
         default: Off,
-        description: "`Debug.Assert` without a message, or with a constant blank one. With the type layer the \
-     call is checked against `System.Diagnostics.Debug`; without it any call written \
-     `Debug.Assert` is. No fix.",
+        description: "Reports a `Debug.Assert` call without a message, or with a message that is a \
+                  constant blank string. With the type layer the call is checked against \
+                  `System.Diagnostics.Debug`; without it any call written `Debug.Assert` is. No fix.",
+        why: "When an assertion fails in a debug build the message is all that is shown. Without \
+                  it the developer has the line number and the condition, and a long sequence of \
+                  asserts in a function does not tell which one broke or why it matters.\n\
+                  To fix, add a message that says what is wrong when the condition is false.",
         example: "Debug.Assert(ok);   // add a message",
         uses: [Types],
         kinds: &[kind::INVOCATION_EXPRESSION],
@@ -110,8 +114,13 @@ rule! {
         id: "debug-fail-message",
         category: Style,
         default: Off,
-        description: "`Debug.Fail` with a constant blank message. With the type layer the call is checked \
-     against `System.Diagnostics.Debug`; without it any call written `Debug.Fail` is. No fix.",
+        description: "Reports a `Debug.Fail` call with a constant blank message. With the type layer the \
+                  call is checked against `System.Diagnostics.Debug`; without it any call written \
+                  `Debug.Fail` is. No fix.",
+        why: "`Debug.Fail` is reached only when something is wrong, and the message is the only \
+                  information about what. An empty message leaves the reader of the failure with a \
+                  stack trace and no idea of the cause.\n\
+                  To fix, say what went wrong.",
         example: "Debug.Fail(\"\");   // say what went wrong",
         uses: [Types],
         kinds: &[kind::INVOCATION_EXPRESSION],

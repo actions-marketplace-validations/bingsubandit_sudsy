@@ -195,7 +195,9 @@ impl Parser<'_> {
                 j += 1;
             }
             let blank_line = j >= self.b.len() || is_break(self.at(j)) || self.comment_at(j);
-            if !blank_line && spaces < self.min_col {
+            // libyaml and PyYAML accept a closing bracket one column left of the content.
+            let closer = usize::from(matches!(self.at(j), b']' | b'}'));
+            if !blank_line && spaces + closer < self.min_col {
                 self.pos = j;
                 return self.fail("bad-indentation", "bad indentation inside a flow node");
             }

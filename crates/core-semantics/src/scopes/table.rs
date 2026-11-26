@@ -247,6 +247,8 @@ pub struct Table {
     name_tokens: Vec<SyntaxKind>,
     labels: Vec<SyntaxKind>,
     late: Vec<SyntaxKind>,
+    deep: Vec<SyntaxKind>,
+    deep_tokens: Vec<SyntaxKind>,
     operators: Vec<bool>,
     params: Vec<bool>,
     bare: bool,
@@ -286,6 +288,8 @@ impl Table {
             name_tokens: name_tokens.iter().map(|n| kind(n)).collect(),
             labels: Vec::new(),
             late: Vec::new(),
+            deep: Vec::new(),
+            deep_tokens: Vec::new(),
             operators: vec![false; size(true)],
             params: vec![false; size(false)],
             bare: false,
@@ -390,6 +394,27 @@ impl Table {
             .map(|k| grammar.kind_by_name(k).expect("scope table: late kind"))
             .collect();
         self
+    }
+
+    /// Under a node of one of the `nodes` kinds, tokens of the `tokens` kinds are names too: a
+    /// parser that reads `h[i][j]` as a type instantiation tags its operands as types (Go).
+    pub fn deep_names(mut self, nodes: &[&str], tokens: &[&str], grammar: &Grammar) -> Table {
+        let kinds = |list: &[&str]| -> Vec<SyntaxKind> {
+            list.iter()
+                .map(|k| grammar.kind_by_name(k).expect("scope table: deep kind"))
+                .collect()
+        };
+        self.deep = kinds(nodes);
+        self.deep_tokens = kinds(tokens);
+        self
+    }
+
+    pub(crate) fn is_deep(&self, kind: SyntaxKind) -> bool {
+        self.deep.contains(&kind)
+    }
+
+    pub(crate) fn is_deep_token(&self, kind: SyntaxKind) -> bool {
+        self.deep_tokens.contains(&kind)
     }
 
     pub(crate) fn is_late(&self, kind: SyntaxKind) -> bool {

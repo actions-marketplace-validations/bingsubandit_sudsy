@@ -202,6 +202,15 @@ impl Flow<'_> {
             "middle" => (true, true),
             _ => (true, false),
         };
+        // (a word that is no name behind a mark: `const & noexcept`)
+        if rules.is_mark(a)
+            && cx
+                .options
+                .strings(core_config::opt::POINTER_QUALIFIER_WORDS)
+                .any(|w| w == b.text())
+        {
+            return Some(true);
+        }
         rules.pointer_gap(a, b, before, after)
     }
 

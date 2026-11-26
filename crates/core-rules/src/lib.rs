@@ -13,6 +13,7 @@
 
 pub mod allowed_values;
 pub mod blank_lines;
+pub mod block_indent;
 pub mod cases;
 pub mod checks;
 pub mod clause_style;
@@ -51,6 +52,7 @@ pub mod heading_outline;
 pub mod heading_style;
 pub mod hooks;
 pub mod imports;
+pub mod index_rules;
 pub mod keys;
 pub mod layout;
 pub mod lines;

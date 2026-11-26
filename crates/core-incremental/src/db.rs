@@ -2,12 +2,15 @@
 //!
 //! concept: none (infrastructure: salsa database)
 
-use crate::inputs::{ConfigFile, ExtensionSet, File, WorkspaceRevision};
+use crate::inputs::{ConfigFile, ExtensionSet, File, ProjectEntry, Projects, WorkspaceRevision};
 use core_config::{ConfigChain, ConfigError, EditorConfig};
 use provider_api::{LanguageProvider, select_provider_index};
 use salsa::Setter;
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
+use std::sync::Mutex;
+use std::time::SystemTime;
 
 pub type Providers = Arc<[Box<dyn LanguageProvider>]>;
 
@@ -17,7 +20,19 @@ pub type Providers = Arc<[Box<dyn LanguageProvider>]>;
 #[salsa::db]
 pub trait Db: salsa::Database {
     fn providers(&self) -> &[Box<dyn LanguageProvider>];
+
+    /// The file at `path` read from disk when first asked for, and again when its size or
+    /// modification time changed (dependencies of a project: nothing lints them). `None` when it
+    /// cannot be read as source text.
+    fn dependency_file(&self, path: &Path) -> Option<File>;
 }
+
+/// Files read on demand, by path, with the stamp they were read at.
+#[derive(Default)]
+struct Dependencies(Mutex<HashMap<std::path::PathBuf, Read>>);
+
+/// A file read from disk: its modification time and size then, and its input (`None`: not source text).
+type Read = (Option<SystemTime>, u64, Option<File>);
 
 /// Callback for salsa's events (`WillExecute`, `DidValidateMemoizedValue`, ...). Tests use it to
 /// count query executions.
@@ -32,6 +47,7 @@ pub type EventHook = Box<dyn Fn(salsa::Event) + Send + Sync>;
 pub struct Database {
     storage: salsa::Storage<Self>,
     providers: Providers,
+    dependencies: Arc<Dependencies>,
 }
 
 #[salsa::db]
@@ -41,6 +57,26 @@ impl salsa::Database for Database {}
 impl Db for Database {
     fn providers(&self) -> &[Box<dyn LanguageProvider>] {
         &self.providers
+    }
+
+    fn dependency_file(&self, path: &Path) -> Option<File> {
+        let meta = std::fs::metadata(path).ok()?;
+        let stamp = (meta.modified().ok(), meta.len());
+        let mut cache = self
+            .dependencies
+            .0
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        if let Some((time, len, file)) = cache.get(path)
+            && (*time, *len) == stamp
+        {
+            return *file;
+        }
+        let file = std::fs::read(path).ok().and_then(|bytes| {
+            File::from_bytes(self, path.to_path_buf(), path.to_string_lossy(), 1, bytes).ok()
+        });
+        cache.insert(path.to_path_buf(), (stamp.0, stamp.1, file));
+        file
     }
 }
 
@@ -57,10 +93,12 @@ impl Database {
         let db = Database {
             storage: salsa::Storage::new(hook),
             providers: providers.into(),
+            dependencies: Arc::default(),
         };
         ConfigFile::new(&db, Ok(ConfigChain::default()));
         ExtensionSet::new(&db, core_rules::Extensions::default());
         WorkspaceRevision::new(&db, 0);
+        Projects::new(&db, Vec::new());
         db
     }
 
@@ -68,6 +106,11 @@ impl Database {
     /// reading them.
     pub fn supports(&self, path: &Path) -> bool {
         select_provider_index(&self.providers, path).is_some()
+    }
+
+    /// The position of the provider that handles `path`.
+    pub fn provider_index(&self, path: &Path) -> Option<usize> {
+        select_provider_index(&self.providers, path).map(|(i, _)| i)
     }
 
     /// Lets the providers start their background processes ahead of the first request.
@@ -129,6 +172,11 @@ impl Database {
             return;
         }
         let _previous = ExtensionSet::get(self).set_extensions(self).to(extensions);
+    }
+
+    /// Replaces the projects the index rules read.
+    pub fn set_projects(&mut self, list: Vec<ProjectEntry>) {
+        let _previous = Projects::get(self).set_list(self).to(list);
     }
 
     /// Replaces the config files.

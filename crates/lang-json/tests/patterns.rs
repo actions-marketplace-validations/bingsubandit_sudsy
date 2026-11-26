@@ -146,6 +146,9 @@ fn invalid_files_are_refused_with_a_reason() {
             .contains("at least one")
     );
     assert!(load(&format!("{base}rule: {{ kind: Array }}\nbogus: 1")).is_some());
+    // A user file is checked in release builds too (built-in files are checked in debug builds only).
+    let bad = load(&format!("{base}rule: {{ regex: '(' }}")).unwrap();
+    assert!(bad.contains("regex `(`"), "{bad}");
 }
 
 #[test]
@@ -164,4 +167,32 @@ rule:
     let found = lint_with(&lang_json::provider(), &ext, "a.json", &text, "");
     assert_eq!(found.len(), 1, "{found:?}");
     assert!(found[0].message.contains("too many steps"), "{found:?}");
+}
+
+#[test]
+fn key_path_and_path_captures_constrain_a_node() {
+    let ext = rules(
+        r#"
+id: object-in-list
+language: json
+message: object at a.b[0]
+severity: warn
+rule:
+  kind: Object
+  key-path: '^a\.b\[0\]$'
+  path: '(^|/)(?<DIR>\w+)/[^/]+\.json$'
+  has: { regex: '${DIR}' }
+"#,
+    );
+    let p = lang_json::provider();
+    let text = "{\"a\": {\"b\": [{\"cfg\": 1}, {\"cfg\": 2}]}, \"cfg\": {}}";
+    let at = |path: &str| {
+        lint_with(&p, &ext, path, text, "")
+            .iter()
+            .map(|d| d.rule.clone())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(at("dir/a.json"), Vec::<String>::new());
+    assert_eq!(at("cfg/a.json"), ["object-in-list"]);
+    assert_eq!(at("a.json"), Vec::<String>::new());
 }

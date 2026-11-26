@@ -2,7 +2,16 @@ id: tuple-element-names-in-signatures
 family: finding
 params: { check: unnamed_tuple_element }
 message: "tuple elements in a signature should have names"
-description: "A tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names. Overrides and implementations of interface members are left alone (their names are not the member's to choose). No fix."
+description: >-
+  Reports a tuple type in the signature of a method, constructor, property, indexer, conversion
+  operator or delegate whose elements have no names. Overrides and implementations of interface
+  members are not reported, since their names are not the member's to choose. No fix.
+why: >-
+  A caller sees `(int, int)` in the signature and `Item1` and `Item2` in the result, so it has to
+  read the body to know which is which. Names (`(int Width, int Height)`) make the signature the
+  documentation.
+
+  To fix, name the elements.
 example: "(int, int) Pair();   // write: (int x, int y) Pair();"
 severity: off
 category: style

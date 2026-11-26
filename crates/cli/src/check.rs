@@ -10,8 +10,8 @@ use core_syntax::{TextRange, TextSize};
 use std::process::ExitCode;
 
 pub fn run(args: ReportArgs) -> Result<ExitCode> {
-    let session = args.open()?;
-    let loaded = session.load_all(|db, file| {
+    let mut session = args.open()?;
+    let loaded = session.load_linted(|db, file| {
         lint_query(db, file);
         format(db, file);
     });

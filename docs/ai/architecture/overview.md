@@ -10,6 +10,7 @@ A Rust core owns everything language-neutral; each language contributes a provid
 | `core-incremental` | Salsa database: parse, options, format, lint, semantics as queries |
 | `core-format` | Layout doc, printer, shapes, directives, comments, safety check |
 | `core-rules` | Rule trait and scopes, diagnostics, fixes, suppressions, shared rules, extension set |
+| `core-packages` | Package locators: where the file of a type name or an import lives (Composer autoload, import path roots), by path arithmetic from the manifests |
 | `core-semantics` | Capability layers, per-file answers, symbol ids, behavior summaries, the scope model and binder (`scopes`, driven by a per-language table) |
 | `core-flow` | Flow graph, worklist solver, reachability, liveness, reaching defs, definite assignment |
 | `core-patterns` | Pattern matcher and YAML pattern rules |
@@ -20,7 +21,7 @@ A Rust core owns everything language-neutral; each language contributes a provid
 | `core-config` | `sudsy.yaml` model, chain, resolution, presets, `.editorconfig`, JSON Schema |
 | `core-workspace` | File discovery (ignore files, hidden dirs, `.git` excluded) |
 | `provider-api` | `LanguageProvider`, out-of-process proxy, protocol types, `format_file`, test harness |
-| <!-- generated:crates -->`lang-csharp`, `lang-cpp`, `lang-cmake`, `lang-css`, `lang-dockerfile`, `lang-editorconfig`, `lang-gitignore`, `lang-go`, `lang-graphql`, `lang-hcl`, `lang-html`, `lang-ini`, `lang-json`, `lang-java`, `lang-js`, `lang-kotlin`, `lang-makefile`, `lang-markdown`, `lang-php`, `lang-powershell`, `lang-protobuf`, `lang-python`, `lang-ruby`, `lang-sql`, `lang-shell`, `lang-toml`, `lang-xml`, `lang-github-actions`, `lang-yaml`<!-- /generated --> | Parser (JSON, YAML; JS/TS through oxc; TOML, XML and the rest through tree-sitter), formatter, rules, presets; C# adds the worker provider |
+| <!-- generated:crates -->`lang-batch`, `lang-csharp`, `lang-cpp`, `lang-cmake`, `lang-css`, `lang-dockerfile`, `lang-editorconfig`, `lang-gitignore`, `lang-go`, `lang-graphql`, `lang-hcl`, `lang-html`, `lang-ini`, `lang-json`, `lang-jupyter`, `lang-java`, `lang-js`, `lang-kotlin`, `lang-makefile`, `lang-markdown`, `lang-php`, `lang-powershell`, `lang-protobuf`, `lang-python`, `lang-ruby`, `lang-sql`, `lang-shell`, `lang-toml`, `lang-xml`, `lang-github-actions`, `lang-yaml`<!-- /generated --> | Parser (JSON, YAML; JS/TS through oxc; TOML, XML and the rest through tree-sitter), formatter, rules, presets; C# adds the worker provider |
 | `languages` | Built-in provider list, option schemas, `Project` (config found from a directory, validated) |
 | `cli`, `lsp` | Front ends. `lsp` is a library; the server is `sudsy lsp` (one binary) |
 | `plugin-sdk` | Public crate for rule authors |

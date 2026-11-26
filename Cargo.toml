@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "xtask", "xtask/full", "tools/wire-bench", "tools/perf-bench"]
+members = ["crates/*", "xtask", "xtask/full", "tools/wire-bench", "tools/perf-bench", "tools/symbol-bench"]
 # Builds for wasm32-wasip2 on its own (the plugin tests do that); not part of the host build.
 exclude = ["tests/plugins/sample"]
 
@@ -86,6 +86,7 @@ core-plugins = { path = "crates/core-plugins" }
 plugin-sdk = { path = "crates/plugin-sdk" }
 core-flow = { path = "crates/core-flow" }
 core-semantics = { path = "crates/core-semantics" }
+core-packages = { path = "crates/core-packages" }
 core-incremental = { path = "crates/core-incremental" }
 core-rules = { path = "crates/core-rules" }
 core-format = { path = "crates/core-format" }
@@ -97,6 +98,7 @@ lang-python = { path = "crates/lang-python" }
 lang-java = { path = "crates/lang-java" }
 lang-php = { path = "crates/lang-php" }
 lang-ruby = { path = "crates/lang-ruby" }
+lang-batch = { path = "crates/lang-batch" }
 lang-cmake = { path = "crates/lang-cmake" }
 lang-sql = { path = "crates/lang-sql" }
 lang-kotlin = { path = "crates/lang-kotlin" }
@@ -105,6 +107,7 @@ lang-html = { path = "crates/lang-html" }
 lang-cpp = { path = "crates/lang-cpp" }
 lang-yaml = { path = "crates/lang-yaml" }
 lang-github-actions = { path = "crates/lang-github-actions" }
+lang-jupyter = { path = "crates/lang-jupyter" }
 # generated:languages
 lang-dockerfile = { path = "crates/lang-dockerfile", default-features = false }
 lang-editorconfig = { path = "crates/lang-editorconfig", default-features = false }

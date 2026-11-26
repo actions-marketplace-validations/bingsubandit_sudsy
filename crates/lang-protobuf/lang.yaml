@@ -3,8 +3,9 @@ grammar-crate: tree-sitter-proto
 grammar-version: "0.6"
 extensions: [proto]
 formatter: ProtoFormatter
-families: "&[core_rules::file_name::FAMILY]"
+families: "&[core_rules::file_name::FAMILY, core_rules::index_rules::IMPORT_USED, core_rules::index_rules::MEMBER_REF_UNIQUE]"
 dev-deps: [insta]
+symbols: true
 options:
   - indent_size: 2
   - indent_style

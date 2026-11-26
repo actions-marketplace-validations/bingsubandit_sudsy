@@ -1,0 +1,103 @@
+id: ansible-role-var-prefix
+message: variables of a role should start with the role name and an underscore
+description: >-
+  Reports a variable of a role that does not start with the name of the role and `_` (leading
+  underscores are ignored; names that start with `ansible_` are accepted). The role is the folder
+  below the innermost `roles/` of the path. Four places are read: the top-level keys of the files in
+  `defaults/` and `vars/` of the role, the name a `register` of a task of the role gives, and the
+  keys of the `set_fact` of a task of the role, and the variables of a `vars` of a task that includes a role by plain name (`include_role` or `import_role`) which get that role's name (names that start with `__` are private and left
+  out). Names that are not lowercase with underscores, reserved names (the `exempt` option: keywords
+  of plays and tasks, special variables, words of Python) and roles whose name is not a plain word
+  are not reported. The rule runs on files below a `roles/` folder.
+why: >-
+  Variables of all roles and plays share one namespace per host. A role that calls a variable
+  `port` or `result` can overwrite the same name from another role or from the inventory, and the
+  bug shows only in the combination. The role name as prefix keeps the names apart and shows where
+  a variable comes from.
+example: "port: 80   # in roles/nginx/defaults/main.yml: write nginx_port"
+severity: off
+category: style
+options:
+  - name: exempt
+    type: list
+    description: "Names that are not checked: keywords of plays and tasks, special variables and words of Python."
+    default: [
+      action, always, and, any_errors_fatal, args, as, assert, async, async_val, await, become,
+      become_exe, become_flags, become_method, become_user, block, break, changed_when,
+      check_mode, class, collections, connection, continue, cycler, debugger, def, del, delay,
+      delegate_facts, delegate_to, dict, diff, elif, else, environment, except, fact_path,
+      failed_when, finally, for, force_handlers, from, gather_facts, gather_timeout, global,
+      group_names, groups, handlers, hosts, hostvars, if, ignore_errors, ignore_unreachable,
+      import, in, inventory_dir, inventory_file, inventory_hostname, inventory_hostname_short,
+      is, joiner, lambda, lipsum, local_action, lookup, loop, loop_control, loop_with,
+      max_fail_percentage, module_defaults, name, namespace, no_log, nonlocal, not, notify, now,
+      omit, or, order, pass, play_hosts, playbook_dir, poll, port, post_tasks, pre_tasks, q,
+      query, raise, range, register, remote_user, rescue, retries, return, role_name,
+      role_names, role_path, roles, run_once, serial, strategy, tags, tasks, throttle, timeout,
+      try, undef, until, validate_argspec, vars, vars_files, vars_prompt, when, while, with,
+      with_, yield
+    ]
+  - name: set_fact
+    type: list
+    description: "Modules whose arguments are variables."
+    default: [set_fact, ansible.builtin.set_fact, ansible.legacy.set_fact]
+rule:
+  any:
+    - kind: BlockMappingEntry
+      path: '(^|.*/)roles/(?<ROLE>\w+)/(defaults|vars)/'
+      parent: { kind: BlockMapping, key-path: '^$' }
+      fields:
+        key:
+          all:
+            - { regex: '^[a-z_][a-z0-9_]*$' }
+            - { not: { in-option: exempt } }
+            - { not: { regex: '^_*ansible_' } }
+            - { not: { regex: '^_*${ROLE}_' } }
+    - kind: BlockMapping
+      path: '(^|.*/)roles/(?<ROLE>\w+)/'
+      key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+      child:
+        kind: BlockMappingEntry
+        fields:
+          key: { regex: '^register$' }
+          value:
+            all:
+              - { not: { regex: '^__' } }
+              - { regex: '^[a-z_][a-z0-9_]*$' }
+              - { not: { in-option: exempt } }
+              - { not: { regex: '^_*ansible_' } }
+              - { not: { regex: '^_*${ROLE}_' } }
+    - kind: BlockMapping
+      path: '(^|.*/)roles/(?<ROLE>\w+)/'
+      key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+      child:
+        kind: BlockMappingEntry
+        fields:
+          key: { in-option: set_fact }
+          value:
+            kind: BlockMapping
+            child:
+              kind: BlockMappingEntry
+              fields:
+                key:
+                  all:
+                    - { not: { regex: '^(__|cacheable$)' } }
+                    - { regex: '^[a-z_][a-z0-9_]*$' }
+                    - { not: { in-option: exempt } }
+                    - { not: { regex: '^_*ansible_' } }
+                    - { not: { regex: '^_*${ROLE}_' } }
+    - kind: BlockMappingEntry
+      path: '(^|/)(tasks|handlers)/|(^|/)playbooks/[^/]+$|(^|/)[^/]*playbook[^/]*\.ya?ml$|(^|/)molecule/[^/]+/[^/]+\.ya?ml$'
+      parent: { kind: BlockMapping, key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]\.vars$' }
+      inside:
+        kind: BlockMapping
+        key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+        regex: '(?m)(include|import)_role:[ \t]*\n?\s*name:\s*(?<ROLE>\w+)[ \t]*(#|$)'
+      fields:
+        key:
+          all:
+            - { regex: '^[a-z_][a-z0-9_]*$' }
+            - { not: { in-option: exempt } }
+            - { not: { regex: '^_*ansible_' } }
+            - { not: { regex: '^_*${ROLE}_' } }
+report-on: first-token

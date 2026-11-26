@@ -2,7 +2,14 @@ id: max-body-length
 family: max
 params: { count: lines, tag: rule, of: command, report: head }
 message: "recipe has {count} lines, more than the {max} allowed"
-description: A rule whose recipe has more lines than allowed (checkmake `maxbodylength`). Every physical line counts, a continued command and a tab-indented comment included.
+description: >-
+  Reports a rule whose recipe has more lines than the `max` option. Every physical line counts, a
+  continued command and a tab-indented comment included.
+why: >-
+  A long recipe is a script that lives in a Makefile, where it is run by `make` through the shell
+  line by line, cannot be tested by itself and is hard to read. A limit moves it to a script file.
+
+  To fix, move the commands to a script and call it.
 example: "build:   # 6 lines with the default of 5"
 severity: off
 category: cleanup

@@ -2,8 +2,14 @@ id: trailing-comma-on-call-site
 family: format-diff
 params: { kind: ValueArgumentList, change: comma, multiline: "true", message: "the last argument of a call is followed by a comma as the formatter writes it" }
 description: >-
-  The last line of an argument list that the formatter would change, the trailing comma (ktlint
-  trailing-comma-on-call-site).
+  Reports the last argument of a multi-line call that has a trailing comma the formatter would add
+  or remove.
+why: >-
+  With a trailing comma, adding an argument at the end changes one line instead of two, and moving
+  arguments does not need the comma moved. A project that chooses one form gets the same diff
+  everywhere.
+
+  To fix, run the formatter.
 example: 'val a = f(\n    1,\n    2\n)'
 severity: off
 category: style
@@ -12,8 +18,13 @@ id: trailing-comma-on-declaration-site
 family: format-diff
 params: { kind: ValueParameterList, change: comma, multiline: "true", message: "the last parameter is followed by a comma as the formatter writes it" }
 description: >-
-  The last line of a parameter list that the formatter would change, the trailing comma (ktlint
-  trailing-comma-on-declaration-site).
+  Reports the last parameter of a multi-line declaration that has a trailing comma the formatter
+  would add or remove.
+why: >-
+  With a trailing comma, adding a parameter at the end changes one line instead of two, and
+  reordering parameters does not need the comma moved.
+
+  To fix, run the formatter.
 example: 'fun f(\n    a: Int,\n    b: Int\n) {}'
 severity: off
 category: style
@@ -22,8 +33,14 @@ id: multiline-expression-wrapping
 family: multiline-start
 params: { kind: "Property=Eq Fun=Eq PropertyAccessor=Eq BinaryExpression=OperationReference:= ValueArgument", message: "a multiline expression starts on a line of its own" }
 description: >-
-  An expression that spans lines and starts after code on its line: the value of a property or a
-  function body after `=`, or an argument (ktlint multiline-expression-wrapping).
+  Reports an expression that spans lines and starts after code on its line: the value of a property
+  or a function body after `=`, or an argument.
+why: >-
+  An expression that begins after `val a = ` and goes on over several lines has its first line far
+  from the left edge and the rest below, so the shape of the block is hard to read. A new line
+  before it gives it a place of its own.
+
+  To fix, start the expression on the next line.
 example: 'val a = run {\n    1\n}'
 severity: off
 category: style
@@ -32,8 +49,14 @@ id: chain-method-continuation
 family: format-diff
 params: { kind: "DotQualifiedExpression SafeAccessExpression", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the call chain is not broken as the formatter writes it" }
 description: >-
-  A call chain whose lines the formatter would break or join differently (ktlint
-  chain-method-continuation).
+  Reports a call chain (`a.b().c()`, with `?.` too) whose line breaks differ from what the formatter
+  writes.
+why: >-
+  A chain that is broken in some places and not in others hides which calls belong together, and a
+  later edit adds or moves breaks. One layout for all chains makes each step visible and keeps the
+  diff small.
+
+  To fix, run the formatter.
 example: 'val a = b.c().d()\n    .e()'
 severity: off
 category: style
@@ -42,7 +65,13 @@ id: function-expression-body
 family: format-diff
 params: { kind: Fun, until: "Block Eq", change: edit, message: "the function body is written as the formatter writes it" }
 description: >-
-  A function whose body the formatter would write differently (ktlint function-expression-body).
+  Reports a function with a block body that is only a `return`, which the formatter would write as
+  an expression body (`fun f(): Int { return 1 }` is `fun f(): Int = 1`).
+why: >-
+  A function with a single `return` as its body is clearer as an expression: the type is inferred
+  and a line of braces goes away. One style makes functions of that kind look the same.
+
+  To fix, run the formatter, or write the expression body.
 example: 'fun f(): Int { return 1 }'
 severity: off
 category: style
@@ -51,7 +80,12 @@ id: multiline-if-else
 family: format-diff
 params: { kind: If, change: "split join edit", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the if-else is laid out as the formatter writes it" }
 description: >-
-  An `if` whose lines the formatter would change (ktlint multiline-if-else).
+  Reports an `if` whose line breaks the formatter would change.
+why: >-
+  An `if` and `else` that are split over lines in an arbitrary way are hard to read, and a line
+  added to a branch that has no braces is not part of it. One layout for every `if` avoids both.
+
+  To fix, run the formatter.
 example: 'val a = if (b)\n    1\nelse 2'
 severity: off
 category: style
@@ -60,7 +94,13 @@ id: when-entry-bracing
 family: format-diff
 params: { kind: WhenEntry, change: edit, skip: "Block FunctionLiteral LambdaArgument", message: "the when entry is written as the formatter writes it" }
 description: >-
-  A `when` entry whose first line the formatter would change (ktlint when-entry-bracing).
+  Reports a `when` entry whose first line the formatter would change.
+why: >-
+  Entries of one `when` that are written in different ways (some with braces, some without, in
+  different line layouts) look as if the difference meant something. One layout for all entries
+  makes a real difference stand out.
+
+  To fix, run the formatter.
 example: 'val a = when (b) {\n    1 -> { c() }\n    else -> d()\n}'
 severity: off
 category: style
@@ -69,7 +109,14 @@ id: statement-wrapping
 family: format-diff
 params: { kind: "Block Then Else Body", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the statements are wrapped as the formatter writes them" }
 description: >-
-  A block whose lines the formatter would change (ktlint statement-wrapping).
+  Reports a block whose line breaks the formatter would change, such as several statements on one
+  line (`{ a(); b() }`).
+why: >-
+  One statement to a line is the layout every Kotlin reader expects, and a second statement after a
+  `;` is easily missed. It also makes a diff show a change to the statement and not to its
+  neighbour.
+
+  To fix, run the formatter.
 example: 'fun f() { a(); b() }'
 severity: off
 category: style
@@ -78,8 +125,14 @@ id: newline-wrapping
 family: format-diff
 params: { kind: "ValueArgumentList ValueParameterList Block FunctionLiteral ClassBody WhenEntry", change: "split comma", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "a line break is missing where the formatter writes one" }
 description: >-
-  A bracket, comma or arrow where the formatter would break the line, or add a trailing comma
-  (ktlint wrapping).
+  Reports a bracket, comma or arrow where the formatter would break the line, or add a trailing
+  comma.
+why: >-
+  A list that wraps in one place and not in another has a layout that depends on who wrote it. One
+  rule for the line breaks, and the trailing comma of a wrapped list, makes it independent of the
+  author.
+
+  To fix, run the formatter.
 example: 'fun f(a: Int,\n    b: Int) {}'
 severity: off
 category: style

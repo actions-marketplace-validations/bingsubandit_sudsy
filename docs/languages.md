@@ -36,18 +36,18 @@ The status and the numbers of every language are in the generated table "Languag
   - Lint, eslint-plugin-svelte: 100% of its findings also reported (67 of 67 findings).
 - **Measured (Angular templates):** Ready.
   - Format, Prettier: 99% of the files identical (1,134 of 1,139 files).
-  - Lint: 163 rules, no reference tool to compare with.
+  - Lint, angular-eslint: 99% of its findings also reported (487 of 488 findings).
 <!-- /generated -->
 
 - One parser serves all four. Config sections: `html`, `vue`, `svelte`, `angular`.
 - **Formatter:** Prettier 3.9.10 (Svelte: with prettier-plugin-svelte 3.5.2).
 
 - **Corpora:** real-world files (the HTML group adds the demo pages of mdn's dom, webaudio, web-components, pwa, js, html and webgl examples, Web-Dev-For-Beginners and html5-boilerplate) and Prettier's own tests for HTML, Vue and Svelte; the prettier-plugin-svelte samples; Angular components and Prettier's Angular tests (`--parser angular`).
-- **Linters:** html-validate, htmlhint, html-eslint, eslint-plugin-vue, eslint-plugin-svelte. Angular: a few angular-eslint rules, no coverage run.
-- **Presets:** `html/html-validate-recommended`, `html/html-validate-standard`, `html/htmlhint`, `html/html-eslint-recommended`, `html/eslint-plugin-vue-recommended`, `html/eslint-plugin-svelte-recommended`.
+- **Linters:** html-validate, htmlhint, html-eslint, eslint-plugin-vue, eslint-plugin-svelte. angular-eslint (Angular templates).
+- **Presets:** `html/html-validate-recommended`, `html/html-validate-standard`, `html/htmlhint`, `html/html-eslint-recommended`, `html/eslint-plugin-vue-recommended`, `html/eslint-plugin-svelte-recommended`, `html/angular-eslint-recommended`.
 - **Options:** `whitespace_sensitivity`, `bracket_same_line`, `single_attribute_per_line`, `embedded_language_formatting`. Vue and Svelte add `indent_script_and_style`. Default `line_width` is 80.
 - **Differences:** Vue and Svelte differ most. The named gaps are in the source checkout.
-- **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier-html`, `scripts/parity.sh format prettier-angular`, `scripts/parity.sh coverage html-validate`.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier-html`, `scripts/parity.sh format prettier-angular`, `scripts/parity.sh coverage html-validate`, `scripts/parity.sh coverage angular-eslint`.
 
 ## JavaScript / TypeScript
 
@@ -115,7 +115,7 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-markdown -->
 - **Measured:** Ready.
-  - Format, Prettier: 92% of the files identical (96 of 104 files).
+  - Format, Prettier: 92% of the files identical (106 of 114 files).
   - Lint, markdownlint: 99% of its findings also reported (1,965 of 1,985 findings).
 <!-- /generated -->
 
@@ -161,13 +161,20 @@ The status and the numbers of every language are in the generated table "Languag
 - Config section: `yaml`.
 - **Formatter:** Prettier 3.9.10. Corpus: YAML files of real projects (awesome-compose, the Kubernetes website, GitHub starter workflows, actionlint). The yaml-test-suite valid cases parse, round-trip and keep their data model.
 - **Linter:** yamllint.
-- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`.
+- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`.
 - **Options:** `quote_style`, `sequence_indent`, `document_start`, `document_end`, `max_blank_lines`, `comment_spacing`, `bracket_spacing`. Default `line_width` is 80.
 - **Differences:**
   - Long scalars and comments are not re-wrapped.
   - A broken flow sequence has no trailing comma; Prettier writes one.
   - A comment before a dedented item takes the next line's column; Prettier keeps its own.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier`, `scripts/parity.sh coverage yamllint`.
+
+### Ansible (YAML)
+
+- Ansible playbooks, roles, tasks and handlers are YAML files: the YAML formatter and the `yaml` config section apply. The preset `yaml/ansible-lint` turns on the Ansible rules (`ansible-module-fqcn`, `ansible-task-name-casing`, `ansible-task-name-missing`, `ansible-command-changed-when`, `ansible-no-free-form`, `ansible-role-var-prefix`) and the yamllint rules that ansible-lint runs (`block-indentation`, line length 160, truthy values, octal values, trailing spaces, comment spacing). They run on files named like Ansible's: `tasks/`, `handlers/`, `playbooks/`, `*playbook*.yml` and `molecule/<scenario>/`.
+- **Linter:** ansible-lint with its default rule set; the preset covers most of its findings on real projects. Rules that need the installed collections or the Ansible runtime (`fqcn[action]`, `args[module]`, `syntax-check`) are not covered.
+- **Jinja2 is not supported:** templates in values are not parsed, so template checks such as `jinja[spacing]` are not covered.
+- **Reproduce (needs a source checkout):** `scripts/evidence_ansible_baseline.py` (see [ai/design/ansible.md](ai/design/ansible.md)).
 
 ## Shell
 
@@ -190,11 +197,11 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-dockerfile -->
 - **Measured:** Ready.
-  - Format, stable: 100% of the files format stably, by the rules of the formatter (211 of 211 files).
+  - Format, dockerfmt: 86% of the files identical (484 of 561 files).
   - Lint, hadolint: 91% of its findings also reported (685 of 751 findings).
 <!-- /generated -->
 
-- The formatter fixes keyword case and blank lines. No reference formatter exists: the format column is the stable share.
+- The formatter fixes keyword case and blank lines and keeps nested continuation lines nested. The reference formatter is dockerfmt, which also lays out the shell code of `RUN` and rewrites legacy `ENV` and `COPY` forms: those are the open differences.
 - **Linter:** hadolint.
 - **Presets:** `dockerfile/hadolint`.
 - **Options:** `max_blank_lines`.
@@ -206,7 +213,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-sql -->
 - **Measured:** Ready.
   - Format, sqlfluff: 85% of the files identical (703 of 825 files).
-  - Lint, sqlfluff: 88% of its findings also reported (100,738 of 113,542 findings).
+  - Lint, sqlfluff: 90% of its findings also reported (102,190 of 113,308 findings).
 <!-- /generated -->
 
 - Dialects: `ansi`, `postgres`, `mysql`, `tsql` (option `dialect`).
@@ -219,12 +226,27 @@ The status and the numbers of every language are in the generated table "Languag
   - Layout of some constructs is not written: expressions, joins, CASE, CTEs, comments. Those parts stay as written.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format sqlfluff`, `scripts/parity.sh coverage sqlfluff`.
 
+## Jupyter Notebook
+
+<!-- generated:measured-jupyter-notebook -->
+- **Measured:** Ready.
+  - Format, ruff format: 88% of the files identical (861 of 974 files).
+  - Lint: 22 rules, no reference tool to compare with.
+<!-- /generated -->
+
+- Config section: `jupyter`, on top of `json`.
+- **Formatter:** the code cells of a notebook whose kernel language is Python, formatted like `.py` files (`python` section options; IPython `%`, `!` and `?` lines stay as written, the `;` that ends a cell stays). Every byte outside the `source` of a code cell stays as written; a cell that does not parse stays as written.
+  - Compared with `ruff format` on the source of every code cell; ruff writes the JSON with its own layout, Sudsy never does.
+- **Linter:** not yet.
+- **Options:** `embedded_language_formatting` (`off` keeps the cells as written).
+- **Reproduce (needs a source checkout):** `scripts/parity.sh format ruff-notebook`.
+
 ## Java
 
 <!-- generated:measured-java -->
 - **Measured:** Ready.
   - Format, google-java-format: 91% of the files identical (4,898 of 5,337 files).
-  - Lint, Checkstyle: 88% of its findings also reported (53,149 of 59,973 findings).
+  - Lint, Checkstyle: 88% of its findings also reported (53,144 of 59,979 findings).
 <!-- /generated -->
 
 - **Formatter:** google-java-format 2.0.0, run with `--skip-javadoc-formatting --skip-removing-unused-imports --skip-reflowing-long-strings`. Corpus: Guava, Gson, Error Prone, Commons Lang.
@@ -293,7 +315,7 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-makefile -->
 - **Measured:** Ready.
-  - Format, stable: 100% of the files format stably, by the rules of the formatter (59 of 59 files).
+  - Format, mbake: 88% of the files identical (888 of 1,007 files).
   - Lint, checkmake: 100% of its findings also reported (349 of 349 findings).
 <!-- /generated -->
 
@@ -374,7 +396,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-kotlin -->
 - **Measured:** Ready.
   - Format, ktlint: 85% of the files identical (4,924 of 5,776 files).
-  - Lint, ktlint: 92% of its findings also reported (109,702 of 118,836 findings).
+  - Lint, ktlint: 92% of its findings also reported (109,638 of 118,837 findings).
 <!-- /generated -->
 
 - **Formatter:** ktlint 1.8.0 (`ktlint_official`). Corpus: coroutines, ktor, nowinandroid, ktlint.
@@ -421,15 +443,16 @@ The status and the numbers of every language are in the generated table "Languag
 ## Ruby
 
 <!-- generated:measured-ruby -->
-- **Measured:** Lint only: Ready.
-  - Format: Sudsy does not format the language.
+- **Measured:** Ready.
+  - Format, RuboCop: 86% of the files identical (16,302 of 18,950 files).
   - Lint, RuboCop: 96% of its findings also reported (7,717 of 8,022 findings).
 <!-- /generated -->
 
-- The formatter keeps files as written.
+- **Formatter:** RuboCop's Layout cops: blank lines, indentation, spacing; every line break of the source stays.
+- **Options:** `max_blank_lines`.
 - **Linter:** RuboCop Lint department. Other departments are not covered.
 - **Presets:** `ruby/rubocop`.
-- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage rubocop`.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh format rubocop`, `scripts/parity.sh coverage rubocop`.
 
 ## GraphQL
 
@@ -451,7 +474,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-protobuf -->
 - **Measured:** Ready.
   - Format, buf format: 99% of the files identical (319 of 322 files).
-  - Lint, buf: 85% of its findings also reported (2,027 of 2,362 findings).
+  - Lint, buf: 89% of its findings also reported (2,119 of 2,362 findings).
 <!-- /generated -->
 
 - **Formatter:** buf format 1.75.0. Corpus: googleapis, protobuf and grpc protos.
@@ -461,11 +484,24 @@ The status and the numbers of every language are in the generated table "Languag
 - **Differences:** Sudsy keeps empty statements (`;`). buf drops them.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format buf`, `scripts/parity.sh coverage buf`.
 
+## Batchfile
+
+<!-- generated:measured-batchfile -->
+- **Measured:** In progress.
+  - Format, stable: 0% of the files format stably, by the rules of the formatter (0 of 547 files).
+  - Lint: 22 rules, no reference tool to compare with.
+<!-- /generated -->
+
+- Files: `*.bat` and `*.cmd`.
+- The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
+- **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
+
 ## C / C++
 
 <!-- generated:measured-c-c -->
 - **Measured:** In progress.
-  - Format, clang-format: 69% of the files identical (4,606 of 6,639 files).
+  - Format, clang-format: 72% of the files identical (4,826 of 6,639 files).
   - Lint, clang-tidy: not measured.
   - clang-format: line wrapping is not compared.
 <!-- /generated -->
@@ -479,7 +515,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-php -->
 - **Measured:** In progress.
   - Format, PHP-CS-Fixer: 88% of the files identical (9,190 of 10,382 files).
-  - Lint, PHPStan: 36% of its findings also reported (340 of 942 findings).
+  - Lint, PHPStan: 36% of its findings also reported (342 of 942 findings).
   - PHP-CS-Fixer: measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains).
 <!-- /generated -->
 

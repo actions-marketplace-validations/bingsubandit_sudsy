@@ -1,8 +1,13 @@
 id: no-region-in-body
 message: do not place regions within elements
 description: >-
-  A `#region` inside a block (a method, accessor or lambda body, or any block in one); regions
-  belong between members. No fix.
+  Reports a `#region` inside a block (a method, accessor or lambda body, or any block in one).
+  Regions belong between members. No fix.
+why: >-
+  A region in a body splits one piece of logic with a fold that hides the middle of it. A body that
+  needs sections is a body that should be split into methods.
+
+  To fix, extract the section into a method and delete the region.
 example: "void M() {\n#region Setup   // move the region out of the body\n}"
 severity: off
 category: style

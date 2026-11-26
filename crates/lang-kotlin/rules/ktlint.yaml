@@ -1,7 +1,12 @@
 id: no-empty-class-body
 message: 'the class body is empty: leave out the braces'
 description: >-
-  A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body).
+  Reports a class or interface with `{ }` and nothing in it (`class A {}`).
+why: >-
+  An empty body adds two characters and says nothing. Kotlin does not need the braces for a class
+  without members.
+
+  To fix, delete the braces: `class A`.
 example: 'class A {}'
 severity: off
 category: style
@@ -10,7 +15,12 @@ rule: { kind: ClassBody, regex: '^\{\s*\}$', parent: { kind: Class } }
 id: no-unit-return
 message: '`Unit` is the default return type: leave it out'
 description: >-
-  A function with a block body that declares `: Unit` (ktlint no-unit-return).
+  Reports a function with a block body that declares `: Unit` as its return type.
+why: >-
+  `Unit` is what a function returns by default, so writing it repeats the language and distracts a
+  reader who looks for a type that matters.
+
+  To fix, delete `: Unit`.
 example: 'fun f(): Unit {}'
 severity: warn
 category: cleanup
@@ -20,7 +30,12 @@ report-on: first-token
 id: package-name
 message: 'the package name is lowercase and has no underscores'
 description: >-
-  A package whose name has an uppercase letter or an underscore (ktlint package-name).
+  Reports a package whose name has an uppercase letter or an underscore.
+why: >-
+  Package names in Kotlin and Java are in lowercase, joined without underscores, so a name with
+  capitals looks like a class and does not match the directory on file systems that ignore case.
+
+  To fix, write the name in lowercase.
 example: 'package a.My_pkg'
 severity: off
 category: style
@@ -29,8 +44,12 @@ rule: { kind: PackageDirective, regex: '^package\s+(?:[\w`]+\.)*[\w`]*[A-Z_]' }
 id: class-naming
 message: 'a class name starts with an uppercase letter'
 description: >-
-  A class, interface or object whose name starts with a lowercase letter or an underscore
-  (ktlint class-naming).
+  Reports a class, interface or object whose name starts with a lowercase letter or an underscore.
+why: >-
+  Kotlin follows the convention that types are in PascalCase, so a lowercase name reads as a
+  variable or a function and is mistaken for one at the call site.
+
+  To fix, rename the class to PascalCase.
 example: 'class my_class'
 severity: off
 category: style
@@ -40,8 +59,13 @@ token: { kind: [Identifier], regex: '^[a-z_]' }
 id: enum-entry-name-case
 message: 'an enum entry is written in UPPER_SNAKE_CASE or PascalCase'
 description: >-
-  An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint
-  enum-entry-name-case).
+  Reports an enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (`a` in `enum class E
+  { a, B }`).
+why: >-
+  Enum entries are constants, and the conventions for constants are `UPPER_SNAKE_CASE` or, since
+  Kotlin reads them as objects, `PascalCase`. A lowercase entry reads as a property.
+
+  To fix, rename the entry in one of the two styles.
 example: 'enum class E { a, B }'
 severity: off
 category: style
@@ -51,7 +75,12 @@ token: { kind: [Identifier], not-regex: '^(?:[A-Z][A-Za-z0-9]*|[A-Z][A-Z_0-9]*)$
 id: no-empty-file
 message: 'the file has no declarations'
 description: >-
-  A `.kt` file with nothing in it but a package, imports and comments (ktlint no-empty-file).
+  Reports a `.kt` file with nothing in it but a package, imports and comments.
+why: >-
+  A file without a declaration is a leftover of a deleted class, or one that was never filled, and
+  it still compiles and shows up in the project.
+
+  To fix, delete the file, or add the declaration.
 example: 'package a'
 severity: off
 category: cleanup

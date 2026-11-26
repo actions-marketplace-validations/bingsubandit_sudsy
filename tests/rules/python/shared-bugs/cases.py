@@ -19,3 +19,17 @@ match a:
     case 1: pass
     case 1: pass
 #   ^^^^^^^^^^^^ no-duplicate-case
+try:
+    int()
+except Exception:
+    pass  # ignored on purpose
+try:
+    int()
+except Exception:
+    # ignored on purpose
+    pass
+try:
+    int()
+except Exception:
+^ no-empty-catch
+    pass

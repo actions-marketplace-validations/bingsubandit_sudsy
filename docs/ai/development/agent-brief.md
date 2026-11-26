@@ -31,5 +31,20 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 ## Landing
 After `FINISH OK`: write the commit message to a file (subject, 2-5 lines on why, the `Language-only:` / `Cost-exception:` lines if needed, the Co-Authored-By trailer), then `scripts/land.sh <file>`. It squashes (refuses after a fetch: rebase first), commits with `-F`, fetches and rebases, resolves `bench/history.jsonl` (both sides) and the generated `kit/index.md` and `single-use.txt` (`cargo xtask codegen`), stops for any other conflict (merge by hand, `git add`, `git rebase --continue`, run it again), refuses conflict markers, runs `codegen --check`, `dupes --check`, `cost.sh --languages --check origin/main HEAD` and, when a language crate grows, the HARD RULE review (a headless Haiku session with `scripts/review-hard-rule.md`; a MECHANISM finding refuses the landing: move it to a shared crate, or name a real fact as `Language-only: lang-<name>: <item>: <fact>`; output in `.cargo/tmp/review.txt`; a finding you hold to be wrong: stop and report it to the lead with the item and why; only the lead writes a `Lead-approved: lang-<name>: <item>: <reason>` line, which the review accepts), prints both stat views (`git show --stat HEAD`, `git diff origin/main --stat`: every deleted or shrunk file must be meant) and pushes `HEAD:main`, up to 3 rounds. Never `--ours`/`--theirs`, never a reset after a fetch.
 
+## Mechanics
+Mechanics (`.claude/agents/mechanic.md`, Haiku) take the work that a script or test checks; the lead starts them, and build agents for the cases under "Helpers".
+- **Landing.** A build agent ends at a green `scripts/gate.sh -p` with everything committed on its branch, then hands over: branch and commit, slot, changed crates, the commit message in the branch's `.cargo/tmp/msg.txt` copied into the report, open questions. The mechanic resets its own worktree to that branch, rebases, runs codegen, gate and finish (the rules above) and `scripts/land.sh`. It stops and reports for: a conflict outside the files `land.sh` and the lead name, a failing gate (one rerun when it looks like the network), a bench regression above budget, or a line `land.sh` asks for. It keeps the bench line.
+- **Measuring and setup.** It rebuilds corpora and tools, runs parity, coverage or stability and reports the command and the printed numbers.
+- **Classifying.** It sorts listed pairs, rows or findings into given classes, one line each with the evidence. The lead checks a random sample; above 10% wrong the batch is discarded.
+- **Data.** Rule texts, catalog rows, docs, fixtures from a given list; codegen and the gate must pass.
+
+## Helpers
+A build agent may start Haiku helpers with the Agent tool: one at a time, in the foreground, no other type than these two. The tool cannot enforce the list, so this rule does. They do not count as build agents.
+- **`scout`**: a broad search (more than three files or an unknown place), or reading a long file, log or parity output. Ask one question and say what the answer is for; check the lines it names before editing them. A lookup of a known place is a grep of your own.
+- **`mechanic`** in your worktree: corpus and tool setup, measuring and classifying ("Mechanics"), when it takes under 4 minutes or is a `scripts/long.sh` step. It never edits while you do.
+- **Landing**: only of a step that changes docs, scripts, evidence or data and no product code or grammar, when the task prompt says so. Every other step is handed to the lead, who reviews it first. Start that mechanic with `isolation: worktree` and the hand-over of "Landing".
+
 ## Final report
+One report per finished step, not per stage; a question only when the step cannot go on. Keep it under 40 lines: tables and lists in files, named in the report.
+
 What changed; measured results (bench metrics, ratchets, `perf-bench` counts); `scripts/cost.sh` output; commits; open items and hard cases recorded.

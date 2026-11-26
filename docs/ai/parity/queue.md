@@ -8,7 +8,8 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| C / C++ | format clang-format | 4 | 69.4% | 15.6 | 1038 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 | 12 | 5.21 | - |
+| Batchfile | format stable | 4 | 0.0% | 85.0 | 465 files | `unclassified` 465 | 3 | 113.33 | - |
+| C / C++ | format clang-format | 4 | 72.7% | 12.3 | 818 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300 | 9 | 5.47 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -16,24 +17,20 @@ Blocked on a decision:
 
 | Language | Leg | Now | Points | Reason |
 |---|---|---|---|---|
-| PHP | lint PHPStan | 36.1% | 48.9 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
+| PHP | lint PHPStan | 36.3% | 48.7 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); one primary tool per leg (the one most users run), every plan is assumed to reach the bar and its cost holds everything it takes: 1 + 0.3 type worker + 0.2 index + 0.1 per missing shared part + layout (whitespace only -0.3, width +0.2, penalty +0.5); a leg with no reference tool competes like any other. `retrofit` rows are the existing legs with no reference tool (parser paid): they rank by the same formula but never ahead of a primary leg under the bar. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); one primary tool per leg (the one most users run), every plan is assumed to reach the bar and its cost holds everything it takes: 1 + 0.3 type worker + 0.2 index + 0.1 per missing shared part + layout (whitespace only -0.3, width +0.2, penalty +0.5); a leg with no reference tool competes like any other. `retrofit` rows are the existing legs with no reference tool (parser paid): they rank by the same formula but never ahead of a primary leg under the bar. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format; Batchfile format stable.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
-| Dockerfile | 0.68 | 0 (paid) | - | 10.55~ | - | format: format none found | retrofit to no-reference-tool.md; estimate: pick only to measure it |
-| Makefile | 0.44 | 0 (paid) | - | 6.75~ | - | format: format none found | retrofit to no-reference-tool.md; estimate: pick only to measure it |
-| Batchfile | 0.51~ | ~1.2 | 3.48~ | 3.48~ | 4.58~ | both: lint none found + format none found | estimate: pick only to measure it |
-| Angular templates | 0.31~ | 0 (paid) | 3.72~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
-| Gradle | 0.31~ | ~0.2 | 3.51~ | 2.46~ | 3.20~ | lint: lint none found | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
-| Jupyter Notebook | 0.57~ | ~1 | 1.94~ | 1.94~ | 2.59~ | both: lint ruff check on cells + format ruff format on cells | JSON file with Python cells: the Python leg does the work; estimate: pick only to measure it |
-| Ruby | 0.27 | 0 (paid) | - | 2.47~ | - | format: format RuboCop layout cops | estimate: pick only to measure it |
-| Ansible | 0.28~ | ~0.2 | 2.37~ | - | - | lint: lint ansible-lint | YAML with playbook semantics; estimate: pick only to measure it |
+| Batchfile | 0.51~ | 0 (paid) | 6.09~ | - | - | lint: lint Blinter | estimate: pick only to measure it |
+| Jupyter Notebook | 0.57~ | 0 (paid) | 2.78~ | - | - | lint: lint ruff check on cells | JSON file with Python cells: the Python leg does the work; evidence in docs/ai/design/jupyter.md; estimate: pick only to measure it |
+| Gradle | 0.31~ | 1.2 | 2.10~ | 1.47~ | 2.35~ | both: lint none found + format Spotless (greclipse) | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; evidence in docs/ai/design/gradle.md; estimate: pick only to measure it |
 | Kubernetes manifests | 0.41~ | ~0.2 | 2.33~ | - | - | lint: lint kubeconform | estimate: pick only to measure it |
 | Procfile | 0.26~ | ~1.5 | 1.59~ | 1.59~ | 2.17~ | both: lint none found + format none found | estimate: pick only to measure it |
+| Ansible | 0.28~ | ~0.2 | 2.07~ | 0.36~ | 1.40~ | lint: lint ansible-lint | YAML dialect (playbooks, roles, tasks, collections); evidence in docs/ai/design/ansible.md; estimate: pick only to measure it |
 | Rust | 0.38 | ~1 | 1.96~ | 0.28~ | 1.43~ | lint: lint clippy with types | estimate: pick only to measure it |
 | Helm templates | 0.28~ | ~1.2 | 0.20~ | 1.92~ | 1.43~ | format: format none found | estimate: pick only to measure it |
 | Mako | 0.22~ | ~1.5 | 1.36~ | 1.36~ | 1.86~ | both: lint none found + format none found | estimate: pick only to measure it |
@@ -49,8 +46,12 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | GitHub Actions | 0.10~ | 0 (paid) | - | 1.55~ | - | format: format none found | retrofit to no-reference-tool.md; estimate: pick only to measure it |
 | Linker Script | 0.17~ | ~1.2 | 1.16~ | 1.16~ | 1.53~ | both: lint none found + format none found | estimate: pick only to measure it |
 | Swift | 0.27 | ~1.2 | 1.46~ | 0.73~ | 1.44~ | lint: lint SwiftLint defaults | estimate: pick only to measure it |
+| ShaderLab | 0.17~ | ~1.5 | 1.05~ | 1.05~ | 1.44~ | both: lint none found + format none found | estimate: pick only to measure it |
+| Hack | 0.20~ | ~1.2 | 1.10~ | 0.97~ | 1.39~ | both: lint hhast + format hackfmt | grammar archived; estimate: pick only to measure it |
+| Smarty | 0.15~ | ~1.2 | 1.04~ | 1.04~ | 1.37~ | both: lint none found + format none found | estimate: pick only to measure it |
+| Astro | 0.22~ | ~1.2 | 1.04~ | 1.04~ | 1.37~ | both: lint astro check + format prettier-plugin-astro | estimate: pick only to measure it |
 
-The other 152 entries of the file, each with the score of its best plan: ShaderLab 1.44~; Hack 1.39~; Smarty 1.37~; Astro 1.37~; R 1.35~; package.json 1.32~; EJS 1.31~; Yacc / Lex 1.30~; Perl 1.30~; Vim Script 1.26~; Roff 1.24~; Cython 1.21~; Lua 1.21~; GraphQL 1.19~; MATLAB 1.16~; Handlebars 1.15~; VBA / VB6 1.15~; M4 1.13~; EDN 1.13~; GDScript 1.13~; Groovy 1.09~; OpenAPI 1.08~; NSIS 1.02~; ARM templates 0.99~; CloudFormation 0.99~; Docker Compose 0.99~; Tekton pipelines 0.99~; Rich Text Format 0.99~; Inno Setup 0.97~; Emacs Lisp 0.97~; RON 0.94~; Common Lisp / Scheme 0.91~; AsciiDoc 0.89~; ASP.NET (Razor, Web Forms) 0.89~; Cap'n Proto 0.89~; COBOL 0.89~; Java properties 0.89~; Prolog 0.89~; Thrift 0.89~; VBScript 0.89~; Visual Basic .NET 0.89~; Snakemake 0.88~; Gherkin 0.88~; Mermaid 0.88~; Elixir 0.87~; Awk 0.86~; Scala 0.86~; Avro IDL 0.83~; FlatBuffers 0.83~; GDB script 0.83~; Pawn 0.83~; QMake 0.83~; Raku 0.83~; RenderScript 0.83~; sed 0.83~; SWIG 0.83~; Tcl 0.83~; BitBake 0.83~; Grain 0.83~; Nix 0.81~; Smithy 0.78~; KDL 0.77~; BibTeX 0.76~; CoffeeScript 0.76~; Fennel / Janet 0.76~; Mojo 0.76~; PureScript 0.76~; Puppet 0.74~; Twig 0.74~; CSV / TSV 0.74~; Typst 0.74~; WebAssembly text 0.74~; Beancount / hledger 0.72~; JSON5 0.72~; MDX 0.72~; ANTLR 0.70~; Liquidsoap 0.70~; Marko 0.70~; Nextflow 0.70~; Prisma 0.70~; Meson 0.70~; Julia 0.69~; TOML 0.68~; CodeQL 0.68~; D2 0.68~; Gleam 0.68~; GN 0.68~; HTTP files / Hurl 0.68~; jq 0.68~; Just 0.68~; Metal 0.68~; Nickel 0.68~; Nim 0.68~; Nushell 0.68~; OCaml 0.68~; Odin 0.68~; Pkl 0.68~; ReScript / Reason 0.68~; Roc 0.68~; Standard ML 0.68~; templ 0.68~; Apex 0.68~; BrightScript / BrighterScript 0.68~; ERB 0.68~; Erlang 0.68~; F# 0.68~; Liquid 0.68~; Racket 0.68~; reStructuredText 0.68~; Robot Framework 0.68~; VHDL 0.68~; Fortran 0.66~; TypeSpec 0.64~; Stylus 0.63~; Elm 0.62~; Inko 0.61~; Protocol Buffer text format 0.61~; Soong (Android.bp) 0.61~; Ziggy 0.61~; Nginx config 0.59~; Clojure 0.58~; Sass (indented) 0.58~; Pascal / Delphi 0.58~; Go 0.58~; Solidity 0.54~; Haskell 0.52~; dotenv 0.45~; Quarto / R Markdown 0.41~; Zig 0.39~; D 0.39~; Ada 0.37~; WGSL 0.36~; Verilog / SystemVerilog 0.35~; Crystal 0.31~; Rego (Open Policy Agent) 0.31~; Dart 0.23~; Objective-C 0.18~; XML 0.17~; HLSL 0.16~; GLSL 0.15~; Starlark / Bazel 0.15~; CUDA 0.13~; Dhall 0.11~; Fish 0.11~; V 0.11~; Caddyfile 0.10~; Bicep 0.10~; KCL 0.10~; CUE 0.10~; Cedar 0.09~; Jsonnet 0.09~; QML 0.09~.
+The other 148 entries of the file, each with the score of its best plan: R 1.35~; package.json 1.32~; EJS 1.31~; Yacc / Lex 1.30~; Perl 1.30~; Vim Script 1.26~; Roff 1.24~; Cython 1.21~; Lua 1.21~; GraphQL 1.19~; MATLAB 1.16~; Handlebars 1.15~; VBA / VB6 1.15~; M4 1.13~; EDN 1.13~; GDScript 1.13~; Groovy 1.09~; OpenAPI 1.08~; NSIS 1.02~; ARM templates 0.99~; CloudFormation 0.99~; Docker Compose 0.99~; Tekton pipelines 0.99~; Rich Text Format 0.99~; Inno Setup 0.97~; Emacs Lisp 0.97~; RON 0.94~; Common Lisp / Scheme 0.91~; AsciiDoc 0.89~; ASP.NET (Razor, Web Forms) 0.89~; Cap'n Proto 0.89~; COBOL 0.89~; Java properties 0.89~; Prolog 0.89~; Thrift 0.89~; VBScript 0.89~; Visual Basic .NET 0.89~; Snakemake 0.88~; Gherkin 0.88~; Mermaid 0.88~; Elixir 0.87~; Awk 0.86~; Scala 0.86~; Avro IDL 0.83~; FlatBuffers 0.83~; GDB script 0.83~; Pawn 0.83~; QMake 0.83~; Raku 0.83~; RenderScript 0.83~; sed 0.83~; SWIG 0.83~; Tcl 0.83~; BitBake 0.83~; Grain 0.83~; Nix 0.81~; Smithy 0.78~; KDL 0.77~; BibTeX 0.76~; CoffeeScript 0.76~; Fennel / Janet 0.76~; Mojo 0.76~; PureScript 0.76~; Puppet 0.74~; Twig 0.74~; CSV / TSV 0.74~; Typst 0.74~; WebAssembly text 0.74~; Beancount / hledger 0.72~; JSON5 0.72~; MDX 0.72~; ANTLR 0.70~; Liquidsoap 0.70~; Marko 0.70~; Nextflow 0.70~; Prisma 0.70~; Meson 0.70~; Julia 0.69~; TOML 0.68~; CodeQL 0.68~; D2 0.68~; Gleam 0.68~; GN 0.68~; HTTP files / Hurl 0.68~; jq 0.68~; Just 0.68~; Metal 0.68~; Nickel 0.68~; Nim 0.68~; Nushell 0.68~; OCaml 0.68~; Odin 0.68~; Pkl 0.68~; ReScript / Reason 0.68~; Roc 0.68~; Standard ML 0.68~; templ 0.68~; Apex 0.68~; BrightScript / BrighterScript 0.68~; ERB 0.68~; Erlang 0.68~; F# 0.68~; Liquid 0.68~; Racket 0.68~; reStructuredText 0.68~; Robot Framework 0.68~; VHDL 0.68~; Fortran 0.66~; TypeSpec 0.64~; Stylus 0.63~; Elm 0.62~; Inko 0.61~; Protocol Buffer text format 0.61~; Soong (Android.bp) 0.61~; Ziggy 0.61~; Nginx config 0.59~; Clojure 0.58~; Sass (indented) 0.58~; Pascal / Delphi 0.58~; Go 0.58~; Solidity 0.54~; Haskell 0.52~; dotenv 0.45~; Quarto / R Markdown 0.41~; Zig 0.39~; D 0.39~; Ada 0.37~; WGSL 0.36~; Verilog / SystemVerilog 0.35~; Crystal 0.31~; Rego (Open Policy Agent) 0.31~; Dart 0.23~; Objective-C 0.18~; XML 0.17~; HLSL 0.16~; GLSL 0.15~; Starlark / Bazel 0.15~; CUDA 0.13~; Dhall 0.11~; Fish 0.11~; V 0.11~; Caddyfile 0.10~; Bicep 0.10~; KCL 0.10~; CUE 0.10~; Cedar 0.09~; Jsonnet 0.09~; QML 0.09~.
 
 ## actionlint
 
@@ -73,6 +74,11 @@ Lint: target 87% (627 of 721, 94 missed, measured on cbdd3e85); rules by missed 
 
 6 more rules: 8 missed.
 
+## angular-eslint
+
+Lint: target 99.8% (487 of 488, 1 missed, measured on b314ffb4); rules by missed findings:
+1. `valid-aria` (1 missed)
+
 ## biome
 
 Format: unclassified 0 of 24 differing files (0%).
@@ -87,23 +93,23 @@ Format: unclassified 0 of 3 differing files (0%).
 2. `option-comments` (1 files): comments separated by blank lines between the file options travel with the next statement; buf keeps them where they stand
 3. `statement-comments` (1 files): comments inside a statement before its `;` stay line comments on their own lines; buf joins them into block comments on the statement's line
 4. `literal-field-blank` (0 files): a blank line before a comment between the fields of a message literal is dropped; buf keeps it
-Lint: target 85.8% (2027 of 2362, 335 missed, measured on 7514c1f3); rules by missed findings:
-1. `RPC_REQUEST_RESPONSE_UNIQUE` (117 missed)
-2. `PACKAGE_DIRECTORY_MATCH` (98 missed)
-3. `RPC_RESPONSE_STANDARD_NAME` (65 missed)
-4. `FIELD_NOT_REQUIRED` (39 missed)
+Lint: target 89.7% (2119 of 2362, 243 missed, measured on 2a570ae8); rules by missed findings:
+1. `PACKAGE_DIRECTORY_MATCH` (98 missed)
+2. `RPC_RESPONSE_STANDARD_NAME` (65 missed)
+3. `FIELD_NOT_REQUIRED` (39 missed)
+4. `RPC_REQUEST_RESPONSE_UNIQUE` (27 missed)
 5. `RPC_REQUEST_STANDARD_NAME` (9 missed)
-6. `IMPORT_USED` (5 missed)
+6. `IMPORT_USED` (3 missed)
 7. `PACKAGE_DEFINED` (2 missed)
 
 ## checkstyle
 
-Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by missed findings:
-1. `Indentation` (4338 missed)
+Lint: target 88.6% (53144 of 59979, 6835 missed, measured on f29ba2f0); rules by missed findings:
+1. `Indentation` (4344 missed)
 2. `EmptyLineSeparator` (658 missed)
 3. `VariableDeclarationUsageDistance` (632 missed) Fix: cause: no rule. Scope family: statements between a local's declaration and its first use
 4. `SingleSpaceSeparator` (239 missed) Fix: cause: no rule. Token pattern rule: one space between tokens on a line
-5. `LineLength` (186 missed)
+5. `LineLength` (189 missed)
 6. `AtclauseOrder` (85 missed)
 7. `OverloadMethodsDeclarationOrder` (72 missed)
 8. `OperatorWrapNL` (71 missed)
@@ -115,11 +121,11 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 14. `LocalVariableName` (28 missed)
 15. `PatternVariableName` (28 missed)
 
-39 more rules: 302 missed.
+39 more rules: 304 missed.
 
 ## clang-format
 
-Format: unclassified 0 of 2033 differing files (0%).
+Format: unclassified 0 of 1813 differing files (0%).
 1. `brace-own-line-in-source` (361 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 2. `pointer-align` (328 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 3. `reference-align` (300 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
@@ -196,6 +202,17 @@ Format: unclassified 1099 of 1099 differing files (100%).
 Format: unclassified 0 of 1 differing files (0%).
 1. `text-as-written` (1 files): text content and attribute values stay as written; CSharpier writes a double quote in a value as `&quot;`, puts CDATA and `xml:space="preserve"` content on lines of their own and trims its whitespace
 
+## dockerfmt
+
+Format: unclassified 0 of 77 differing files (0%).
+1. `shell-layout` (48 files): shell layouts that differ from mvdan/sh (the level of a deeply continued argument list, a redirect on a line of its own), a long `;` list in one line and `ADD --chmod` continuations, a `RUN` whose double space dockerfmt keeps, comment placement beside a `;`-only line
+2. `heredoc-body` (10 files): the body of `RUN <<EOT` stays as written (heredoc bodies are kept) and dockerfmt formats it as shell
+3. `env-legacy` (7 files): a multi-line `ENV KEY \` legacy value is kept; dockerfmt writes it as one quoted string
+4. `copy-layout` (5 files): a continued COPY or ADD keeps its arguments as written; dockerfmt puts every argument on a line of its own
+5. `blank-lines` (4 files): a blank line at the start of a file is dropped; dockerfmt keeps it
+6. `escape` (2 files): a file with `# escape=` and PowerShell stays as written; dockerfmt changes it
+7. `maintainer` (1 files): `MAINTAINER x` is kept; dockerfmt writes `LABEL org.opencontainers.image.authors="x"`, which changes metadata and is not done
+
 ## dotnet-format
 
 1. `initializer-layout` (1 files): a wrapped initializer is laid out by `object_collection_array_initializers` and `anonymous_types`; dotnet format leaves the brace where the source has it
@@ -213,10 +230,12 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 ## gersemi
 
 Format: unclassified 0 of 851 differing files (0%).
-1. `keyword-sections` (622 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
-2. `condition-layout` (169 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
-3. `blank-before-closer-comment` (30 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
-4. `unknown-command-layout` (30 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
+1. `keyword-sections` (623 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
+2. `condition-layout` (171 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
+3. `unknown-command-layout` (33 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
+4. `empty-file` (14 files): a file of only blank lines (or none) is `\n` in gersemi; Sudsy writes an empty file
+5. `blank-before-closer-comment` (8 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
+6. `template-lines` (2 files): gersemi accepts a line `@VAR@` on its own (`run_nvcc.cmake`) as a command; Sudsy rejects the file
 
 ## google-java-format
 
@@ -340,9 +359,9 @@ Format: unclassified 0 of 15 differing files (0%).
 36. `kt-array-hug` (1 files): an annotation argument array stays on the `=` line in ktlint (`foo = [`); fix: a shared option: keep `name = [` on the `=` line in annotation arguments
 37. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
 38. `kt-template-braces` (1 files): `${name}` is written as `$name` by ktlint; fix: a shared rule: `${name}` to `$name` when no identifier char follows
-Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 7514c1f3); rules by missed findings:
-1. `function-signature` (1660 missed)
-2. `multiline-expression-wrapping` (904 missed)
+Lint: target 92.3% (109638 of 118837, 9199 missed, measured on bede0bee); rules by missed findings:
+1. `function-signature` (1665 missed)
+2. `multiline-expression-wrapping` (933 missed)
 3. `blank-line-between-when-conditions` (726 missed)
 4. `string-template-indent` (534 missed)
 5. `indent` (509 missed)
@@ -357,7 +376,7 @@ Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 7514c1f3); rules 
 14. `no-unit-return` (188 missed)
 15. `function-naming` (160 missed)
 
-48 more rules: 1773 missed.
+50 more rules: 1804 missed.
 
 ## markdownlint
 
@@ -371,10 +390,20 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 7. `MD034` (1 missed)
 8. `MD046` (1 missed)
 
+## mbake
+
+Format: unclassified 0 of 119 differing files (0%).
+1. `shell-indent` (59 files): mbake re-indents the lines of a shell block in a recipe (two spaces to a tab, nesting by depth); Sudsy keeps the indentation of a recipe line after the tab
+2. `blank-lines` (19 files): mbake inserts or removes a blank line in places the source keeps it (a leading blank line of a file, a run of blank lines after the empty last line of a continuation, an empty `define` body line); Sudsy keeps the blank lines of the source (at most `max_blank_lines`)
+3. `inner-blanks` (18 files): mbake keeps or adds blanks inside a line in ways of its own (a blank after the colon of `.PHONY:x`, blanks inside `$(call ...)`, blanks before a trailing comment); Sudsy keeps the blanks of a recipe or value as written
+4. `conditional-indent` (10 files): mbake moves an indented conditional keyword (`ifeq`, `else`, `endif`) to column 1; Sudsy keeps the indentation of the source
+5. `subst-ref-colon` (8 files): mbake writes a blank after the colon of `$(F:$(SRC)/%=%)`, which changes the pattern of the reference; the line with a substitution reference stays as written otherwise
+6. `continued-indent` (5 files): mbake keeps the indentation of a continued line in places Sudsy sets it by the second line (a target-specific assignment after a function call target, a shell block in a variable value, a closing parenthesis)
+
 ## phpstan
 
-Lint: target 36.1% (340 of 942, 602 missed, measured on 362a7f17); rules by missed findings:
-1. `class.notFound` (209 missed)
+Lint: target 36.3% (342 of 942, 600 missed, measured on 062a8f18); rules by missed findings:
+1. `class.notFound` (207 missed)
 2. `method.notFound` (94 missed)
 3. `function.notFound` (80 missed)
 4. `new.static` (43 missed)
@@ -540,6 +569,7 @@ Lint: target 0.4% (40 of 11111, 11071 missed, measured on 66718389); rules by mi
 
 ## rubocop
 
+Format: unclassified 2640 of 2648 differing files (100%).
 Lint: target 96.2% (7717 of 8022, 305 missed, measured on 7514c1f3); rules by missed findings:
 1. `Lint/UselessAssignment` (168 missed)
 2. `Lint/AssignmentInCondition` (14 missed)
@@ -561,7 +591,7 @@ Lint: target 96.2% (7717 of 8022, 305 missed, measured on 7514c1f3); rules by mi
 
 ## ruff
 
-Format: unclassified 0 of 226 differing files (0%).
+Format: unclassified 0 of 225 differing files (0%).
 1. `comment-placement` (59 files): 59 files first differ here: comments in unusual places (after an operator, between `lambda` and its body, after a bracket, around keywords) and trailing comments that count for the width. fix: dangling-comment placement in the shared comments engine with a per-construct option
 2. `fmt-directives` (44 files): 44 files first differ here: `# fmt: off` / `# fmt: on` / `# fmt: skip` regions: skip on compound headers and bodies on the header line, off inside brackets, blank lines around a region. fix: extend the shared ignore rows to ruff region rules (header skip, bracket-level off) and read the blank-line policy of a region from lang.yaml
 3. `blank-lines` (28 files): 28 files first differ here: blank lines around comments, decorators, stub bodies and after a block opener that ruff keeps or adds differently. fix: blank-line rules per comment placement in the shared block layout, read as options; also open: a function body keeps a blank line before its first comment, no blank line before the first `case` of a `match` (+3 files once the block blank rules are on the shared shapes)
@@ -589,6 +619,16 @@ Lint: target 94.6% (4132 of 4367, 235 missed, measured on 7514c1f3); rules by mi
 15. `PLE2502` (3 missed)
 
 43 more rules: 61 missed.
+
+## ruff-notebook
+
+Format: unclassified 0 of 113 differing files (0%).
+1. `fstring-fields` (35 files): 35 files first differ here: the expressions inside f-string replacement fields (`{idx+1}` is `{idx + 1}`, quotes and breaks inside) are formatted by ruff and kept as written here. fix: parse each replacement field with the Python grammar and format it flat in the shared string literal code (the same cause as `fstring-quotes` of the ruff leg)
+2. `comment-width` (33 files): 33 files first differ here: a trailing comment counts for the width of the bracket, header colon or atom that ends the line: ruff splits `x={...},  # long comment` and a call whose last line is the comment's, here the line stays one. fix: the comment's reserved width in the shared bracket-split shapes (`comment-placement` of the ruff leg)
+3. `layout-other` (26 files): 26 files first differ here: single-cause layouts of the Python formatter (a call chain in parentheses, `with` items and trailing commas, return annotations, unpacking targets). fix: one shape rule each (`misc`, `binary-layout`, `bracket-split` of the ruff leg)
+4. `multiline-string-arg` (13 files): 13 files first differ here: a call whose only argument is a multi-line string: ruff keeps `f("""` on the call's line and the closing `""")` with it, here the argument moves to its own lines. fix: hug a lone multi-line string argument in the shared delimited-list shape (`bracket-split` of the ruff leg)
+5. `blank-lines` (4 files): 4 files first differ here: blank lines around comments and after a block opener that ruff keeps or adds differently. fix: the blank-line rules of the shared block layout (`blank-lines` of the ruff leg)
+6. `comment-placement` (2 files): 2 files first differ here: comments after a bracket or an operator that ruff moves. fix: dangling-comment placement in the shared comments engine
 
 ## shellcheck
 
@@ -632,24 +672,24 @@ Format: unclassified 106 of 228 differing files (46%).
 5. `tsql-block-indent` (3 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
 6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 88.7% (100738 of 113542, 12804 missed, measured on b11e8bdd); rules by missed findings:
-1. `LT02` (6040 missed) Fix: indentation findings left after `sudsy format` on real-world code (6,040 missed; almost all T-SQL: `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies, comments after a statement in an `IF` / `BEGIN` block); the files Sudsy refuses or cannot read (not UTF-8) keep their layout as written
-2. `CV06` (1452 missed)
-3. `CP02` (1041 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (1,041 missed): sqlfluff's per-file consistency choice of the identifier case differs from ours; not yet split by file
-4. `LT01` (438 missed) Fix: spacing findings left after `sudsy format` (438 missed); not yet split by construct
-5. `RF02` (413 missed)
-6. `CV11` (320 missed)
-7. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-8. `LT03` (236 missed)
-9. `RF01` (206 missed)
-10. `LT04` (202 missed)
-11. `CP01` (187 missed) Fix: 187 keyword-case findings left after format, in files with a word kind (`SEQUENCE NAME`, mysql `STATE`, `default NULL`) sqlfluff reads another way; not yet split by file
-12. `ST06` (179 missed)
-13. `CV10` (174 missed)
-14. `AL09` (165 missed)
-15. `LT06` (159 missed)
+Lint: target 90.2% (102190 of 113308, 11118 missed, measured on bede0bee); rules by missed findings:
+1. `LT02` (5920 missed) Fix: indentation findings left after `sudsy format` on real-world code (6,040 missed; almost all T-SQL: `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies, comments after a statement in an `IF` / `BEGIN` block); the files Sudsy refuses or cannot read (not UTF-8) keep their layout as written
+2. `CP02` (1041 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (1,041 missed): sqlfluff's per-file consistency choice of the identifier case differs from ours; not yet split by file
+3. `RF02` (413 missed)
+4. `LT01` (332 missed) Fix: spacing findings left after `sudsy format` (438 missed); not yet split by construct
+5. `CV11` (320 missed)
+6. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+7. `LT03` (236 missed)
+8. `RF01` (206 missed)
+9. `LT04` (202 missed)
+10. `CP01` (187 missed) Fix: 187 keyword-case findings left after format, in files with a word kind (`SEQUENCE NAME`, mysql `STATE`, `default NULL`) sqlfluff reads another way; not yet split by file
+11. `ST06` (179 missed)
+12. `CV10` (174 missed)
+13. `AL09` (165 missed)
+14. `LT06` (158 missed)
+15. `AL08` (135 missed)
 
-38 more rules: 1329 missed.
+37 more rules: 1187 missed.
 
 ## sqlfluff-fixtures
 

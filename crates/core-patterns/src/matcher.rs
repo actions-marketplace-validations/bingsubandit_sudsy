@@ -62,6 +62,8 @@ pub struct Capture {
     /// The significant tokens joined by a space: what repeated metavariables are compared by
     /// (only computed for those).
     normalized: Option<String>,
+    /// Text that is not in the source (a group of the file path).
+    owned: Option<String>,
 }
 
 pub type Captures = BTreeMap<String, Capture>;
@@ -269,6 +271,7 @@ impl<'p> Cx<'p> {
             range,
             kind,
             normalized,
+            owned: None,
         }
     }
 
@@ -365,6 +368,15 @@ impl Capture {
             range,
             kind: None,
             normalized: None,
+            owned: None,
+        }
+    }
+
+    /// A group of the file path: text that is no part of the source.
+    pub fn path_group(text: &str) -> Capture {
+        Capture {
+            owned: Some(text.to_string()),
+            ..Capture::span(TextRange::default())
         }
     }
 
@@ -385,7 +397,7 @@ impl Capture {
     }
 
     /// The captured source text.
-    pub fn text<'a>(&self, source: &'a str) -> &'a str {
-        &source[self.range]
+    pub fn text<'a>(&'a self, source: &'a str) -> &'a str {
+        self.owned.as_deref().unwrap_or(&source[self.range])
     }
 }

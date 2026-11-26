@@ -207,6 +207,11 @@ impl Cases {
             .is_some_and(|r| !r.words.spans.is_empty() && r.covers(text))
     }
 
+    /// Are there no rows?
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Does any row name `kind`?
     pub fn covers(&self, kind: SyntaxKind) -> bool {
         self.0.iter().any(|r| r.kinds.contains(&kind))

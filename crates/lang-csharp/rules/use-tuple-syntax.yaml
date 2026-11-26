@@ -2,7 +2,13 @@ id: use-tuple-syntax
 family: finding
 params: { check: value_tuple, fix-title: "Use tuple syntax" }
 message: "use tuple syntax instead of `ValueTuple`"
-description: "`ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax `(int, int)` and `(a, b)` is available (not inside an expression tree). The fix is offered for types and `ValueTuple.Create` calls."
+description: >-
+  Reports `ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax (`(int, int)` and
+  `(a, b)`) can be used; not inside an expression tree. The fix is offered for types and
+  `ValueTuple.Create` calls.
+why: >-
+  The tuple syntax is the form of the language, short and the one that supports element names.
+  `ValueTuple<...>` is the type it compiles to, so writing it out is noise.
 example: "ValueTuple<int, int> p;   // write: (int, int) p;"
 severity: off
 category: style

@@ -1,83 +1,96 @@
-# C/C++ format: path to 85% by mechanism
+# C/C++ format: plan to 85%
 
-Current plan. Reference: clang-format 20.1.8, 6,639 files, 85% = 5,644 equal. All counts are upper bounds.
+Reference: clang-format 20.1.8, 6,639 files. Equal now: 4,827 (72.7%) under the comparison with short bodies as wraps
+(4,668 under the old one: +159 comes from the comparison, none from the formatter). 85% is 5,644 (817 more).
 
-Data: wrap-r8.json (4,597 equal, 2,042 differing, 1,047 needed). Every gap of a differing file is mapped to one mechanism
-(by gap name and parent kinds; lambda = a Lambda kind in parent, grandparent or the tokens). A file counts as fixed only
-when ALL its mechanisms are fixed (solo + pair + triple cover, greedy by files completed). Numbers are upper bounds: a
-mechanism that is built imperfectly leaves files behind, and files also hide gaps behind a first one (the comparator lists
-every gap, so this is already counted).
+The plan has two contents: differences the comparison should not count (A), and the class-a work that takes the rest to
+85% (B). The classification covers every gap record of the 1,812 differing files (73,252 records: 53,916 a, 7,462 b,
+11,874 c).
 
-## Cumulative, best order (equal files after each mechanism)
+## Classes
 
-| # | Mechanism | Files touched | Files completed (cumulative) | Equal |
-|---|-----------|--------------:|-----------------------------:|------:|
-| 0 | now | | | 4,597 |
-| 1 | comments outside lists (comment-other: own-line comment indent/join in blocks, directives, declarations) | 509 | 113 | 4,710 |
-| 2 | comments inside lists (parameters, arguments, init lists, template args) | 451 | 228 | 4,825 |
-| 3 | trailing comment column alignment | 356 | 354 | 4,951 |
-| 4 | pointer / reference alignment (parens, directives, unary, conditions) | 427 | 495 | 5,092 |
-| 5 | brace placement `brace-own-line-in-source` (non-lambda) | 423 | 584 | 5,181 |
-| 6 | short lambda bodies (brace, continuation indent, empty body) | 257 | 721 | 5,318 |
-| 7 | continuation indent of non-wrap lines | 318 | 855 | 5,452 |
-| 8 | braced list padding | 171 | 936 | 5,533 |
-| 9 | column layout of initializer tables | 160 | 1,019 | 5,616 |
-| 10 | binary operator spacing | 209 | 1,099 | 5,696 |
+| Class | Meaning | Files with it | Sole-class files |
+|-------|---------|--------------:|-----------------:|
+| a | real: spacing, pointer side, token changes, blank lines, comment places, a wrap-independent indent, an option not implemented | 1,500 | 903 |
+| b | a line's indent, a comment line's indent or a brace gap that follows a wrap point which has a newline in one output only | 704 | 171 |
+| c | column padding: a same-line gap of a tab or two or more blanks (trailing comments, tables, `\` of macros) | 454 | 88 |
 
-5,644 is reached between steps 9 and 10: the first nine mechanisms give 5,616, the tenth (or the sum of the next three
-spacing families) passes it. Long tail begins at step 10: after it each mechanism adds under 85 files and the next ones
-(spacing-rare 81, escaped-newline align 76, cast-space 78, brace-own-line-in-reference 67, space-before-paren 70) are
-each under 3.5 percent of the gap. The first nine are all large (80-140 files each) and sum to 1,019 of the 1,047 needed.
-Step 9 alone needs 3 steps of the same family to finish, so the real minimum is all nine plus one tail family.
+Mixed sets: a+b 284, a+b+c 196, a+c 117, b+c 53. Reachable with only class a fixed and the comparison as it is: 5,730
+(86.3%); with a fixed and class b not counted: 6,185 (93.2%); a fixed and class c not counted: 5,935 (89.4%); all three
+not counted but a: 6,639. With nothing fixed: class b not counted 4,998 (75.3%), class c not counted 4,915, both 5,139
+(77.4%).
 
-Order matters little: files hold 1-3 mechanisms, so the cover is not additive; the numbers above are greedy completion
-counts. Doing the mechanisms out of order gives the same total after step 9 but a lower curve before it.
+## A. What the comparison should not count
 
-## Mechanisms, kit concept, second language, size
+Both are proposals (nothing changed): the records carry the flag `w` (`wrapped_before` in `scripts/parity_wrap.py`) that
+decides b.
 
-1. Comments outside lists: extends the shared comment layer (`comments.rs`, kit row "comments: own-line and trailing") with
-   rules for a comment between declaration parts and after a directive. Second language: any with a blocky comment
-   (C#, Java, Go, Rust all hit the same joins). Size: 150-250 lines shared, 0 in lang-cpp (rows or options).
-2. Comments inside lists: extends the list shapes (`items`, `calls.rs` argument lists, init lists) so a comment between
-   elements keeps its line and its column neighbours. Second language: C# and TypeScript argument lists, Rust struct
-   literals. Size: 200-300 lines shared.
-3. Trailing comment column alignment: extends `align_trailing_comment` / `align_lines` (context.rs, comments.rs
-   `gap_before`) from "one run, one column" to clang's rules (alignment across blank-free groups, a comment that no longer
-   fits, `AlignTrailingComments` with consecutive-line limits). Second language: Go (gofmt aligns trailing comments in
-   blocks), C#. Size: 100-200 lines shared, mostly options in lang.yaml.
-4. Pointer and reference alignment: extends `spacing.rs` `pointer_gap` and the `pointer_in` kind sets to more parents
-   (ParenGroup, Directive, Unary, Condition). Experience: adding parents blindly lost 550 files, so it needs a real
-   declarator-versus-expression decision: the deep parse of C++ must tag declarations in parameters, conditions and
-   macro arguments. Second language: Go and Rust types (`&`/`*` spacing), D. Size: 150-250 lines, part in lang-cpp deep
-   parse (grammar lookahead, allowed by the lead ruling), part shared.
-5. Brace placement `brace-own-line-in-source`: extends the `brace_wrapping` option (layout.rs, lang.yaml `attach` kind
-   sets). The gap is constructs the deep parse does not tag (macro-block, class vs function in headers, braces after
-   macros). Second language: C# (Allman/K&R), Java, PHP. Size: mostly deep-parse work in lang-cpp (grammar facts, about
-   100-200 lines) plus 50 shared.
-6. Short lambda bodies: extends `compound`/`block` shapes with a "short body fits, else expand" decision for lambdas as
-   call arguments; clang breaks before the lambda argument rather than inside its body. Second language: C# lambdas,
-   Rust closures, TypeScript arrows (all want "short body stays inline in an argument list"). Size: 250-400 lines shared
-   (printer-level: a break priority between argument and body, so it touches doc/printer fits logic).
-7. Continuation indent of non-wrap lines: extends the indentation of continued statements (layout `items`, `chain`);
-   second language: C#, Java (all continuation indent options). Size: 100-150 lines shared.
-8. Braced list padding: extends `pad_gap` (spacing.rs, kit "padded braces"): the `Cpp11BracedListStyle` rule that
-   `{a}` vs `{ a }` depends on the list's use. Second language: JS/TS object padding (`{ a }`), Rust, Swift. Size:
-   about 60 lines shared plus kind sets.
-9. Column layout of initializer tables: new shared shape (`table`/columns) that pads the cells of a braced list of rows
-   to a common width (clang CommaSeparatedList). Second language: YAML/JSON flow tables, Rust arrays and Go composite
-   literals (gofmt aligns key: value columns). Size: 200-300 lines shared in a new module with a kit row, 0 in lang-cpp.
-10. Binary operator spacing and the other spacing families (the rest): small causes in wrapped or macro contexts, each
-    3 to 80 files; long tail.
+- Class b, 704 files (171 sole). Counted by three exact rules of `compare`: the brace gaps, the lines next to comments
+  and the `indent` branch (the line's indent relative to the anchor line of its container). The indent of such a line
+  is relative to the anchor line, and the anchor line's own continuation lines depend on where the statement wrapped.
+  Extension of "wrapping is ignored": a gap with the same newline count (or a brace gap) is free when a wrap point
+  between the gap's anchor token (else the start of its statement) and the gap has a newline in one output only. Where
+  the wraps are equal up to the gap the difference stays exact. Typical: `; return` in `ReturnStatement`, `) {` after a
+  wrapped signature, comments in a parameter list whose first parameter moved.
+- Class c, 454 files (88 sole). Counted by the exact `spacing` and `comment-gap` rules of a gap without a newline.
+  Extension: a gap without a newline whose blanks are a tab or two or more blanks on either side is free (padding to a
+  column, decided by the width of the lines around it). It also hides a run Sudsy does not align at all; the pairs of
+  class c in the report show that most are `, 714` in tables and trailing comments.
 
-## Honest read
+## B. Class-a work
 
-- Total shared work for steps 1-9 is roughly 1,200-1,800 lines of shared Rust and 200-300 of lang-cpp. That is 6-9
-  steps of the size of the current batch, not one.
-- The first reachable block with the best ratio is 1-3 (all comment mechanisms): 354 files for about 500 shared lines.
-- Steps 5 and 6 are the risky ones (parse and printer level); step 4 is risky for regressions (see the 550-file loss).
-- 85% is reachable only with all nine; skipping any one of 5, 6, 7 leaves the target out of reach (the long tail
-  after step 10 cannot make up more than about 400 files in total).
+Each mechanism is a set of gap records mapped by cause, token kinds and parent kinds. A file is won when all its
+mechanisms are fixed (the greedy cover counts it at that step). Size: rows (R: a few kit rows or lang.yaml kind sets),
+S (a shared mechanism of 50 to 150 lines plus rows), D (a decision in the deep parse of 200 or more lines: the tree has
+to tell a declaration from an expression, a template from a comparison). Sizes are estimates, replaced by measurements
+when the mechanism is built. Measured earlier: R work converts nearly all its files, D work 10 to 25 percent until the
+decision is complete.
+
+| Mechanism | Files | Sole | Size | What |
+|-----------|------:|-----:|------|------|
+| pointer | 229 | 130 | D | `*`, `&` of a declarator in `ParenGroup` (`for (T *p`), `Assignment`, `Binary`, `Condition`, directives, `Line`: the deep parse decides declaration against product, cast against subtraction |
+| spacing-other | 170 | 88 | R | `->` then a name in `QualifiedName`, a string next to a macro name, `...`, `::` after a string (about 15 rows) |
+| paren-space | 103 | 47 | R | the space before `(` of calls and parameter lists (gnu, webkit; `SpaceBeforeParens` per construct kind) |
+| cmt-indent | 118 | 57 | S+D | comments inside lists (hug list, branch `cpp-hug-list`: 50 won, 16 lost; the losses need the `Dot|InitList`, `Call` and `Binary` comment indents) |
+| statement-join | 76 | 41 | S | a loop-macro body stays on its line, a statement macro split, a directive's arguments |
+| comment-outside | 61 | 38 | S | a comment before `;` of an empty statement, before `}` (blank lines), after `{` |
+| brace-placement | 71 | 34 | R+S | `) {` and `{` per construct (BraceWrapping words), empty bodies after a wrapped initializer |
+| binary-space | 59 | 29 | D | `-` as binary or unary after `)`, `|` in a directive, `=` before `::` |
+| angle | 51 | 16 | D | `<` as template or comparison (`template <`, `a < b`), `> (` after a template |
+| comment-trailing | 46 | 27 | S | a trailing comment after `{` or `,` of a list |
+| short-body | 47 | 18 | S | empty bodies `{}` against `{ }`, a body after a wrapped initializer |
+| indent-cont | 78 | 24 | S | the indent of a label's block, a loop macro's body, macro argument items |
+| indent-brace | 64 | 9 | S | `}` and `{` lines whose anchor is a label or a macro head |
+| blank-lines | 24 | 15 | R | a blank before `}`, after `{`, around access specifiers |
+| bitfield-space | 22 | 17 | R | the colon of a bitfield (`a : 3`) |
+| braced-pad | 22 | 4 | R | the blanks inside `{ }` of initializer lists (Cpp11BracedListStyle) |
+| comment-in-list, tokens-reorder (sorted `using`), brace-other, tokens, cast-space, indent-stmt, comma-space, format-off | 18 to 1 each | | R and S | the tail, 90 files |
+
+Joint cover (greedy, each step the mechanism that completes most files; 100% yield assumed):
+
+- With the comparison as it is: files with a b or c record cannot be won by class-a work, so 903 files are left. Order:
+  pointer 130, spacing-other 97, paren-space 70, cmt-indent 68, statement-join 53, comment-outside 48, brace-placement
+  45, binary-space 40, angle 40, comment-trailing 42, short-body 36, indent-cont 32, indent-brace 54, blank-lines 22,
+  bitfield-space 21, braced-pad 20: 5,645 (85.0%) after 16 mechanisms. The whole of class a: 5,730 (86.3%).
+- With the class-b extension: 1,358 files are open. Order: pointer 152, spacing-other 121, cmt-indent 95, paren-space
+  85, statement-join 67, brace-placement 58, comment-outside 58, angle 48, binary-space 53, comment-trailing 50,
+  short-body 45: 5,659 (85.2%) after 11 mechanisms; the rest (indent-brace, indent-cont, blank-lines, ...) reach 6,014
+  (90.6%).
+- With the class-b and class-c extensions: 1,812 files open, 5,690 (85.7%) after pointer, cmt-indent, spacing-other,
+  paren-space, statement-join, brace-placement, comment-outside, comment-trailing (8 mechanisms); all of class a gives
+  6,327 (95.3%).
+
+Order of the build: R items and kind sets first (they convert almost fully), then the S items, then the D items
+(pointer, binary-space, angle) whose tree decision is the work. After the OK the set is built in one landing.
 
 ## Measured so far
 
-- Mechanism 1 (comments outside lists), first batch: a region under `clang-format off` keeps the comments after the marker and the indentation of its first line (`FormatCtx::verbatim_region`); a comment at column 0 right above a directive stays at column 0 (`leading_comments_doc_before_directive`). Result 4,597 -> 4,606 (+9 of the 113 files the mechanism could complete). The rest of the "comment-other" files are comment lines inside statements that clang wraps differently (continuation indent, `template(...)(requires ...)` macro heads, trailing `//` forcing a break): they depend on wrapping, not on the comment layer. Steps 2 and 3 have the same dependence: parameter lists with comments are laid out by clang one parameter per line with aligned trailing comments.
+- Comments outside lists, first batch: a region under `clang-format off` keeps the comments after the marker and the
+  indentation of its first line (`FormatCtx::verbatim_region`); a comment at column 0 right above a directive stays at
+  column 0. 4,597 to 4,606.
+- Option cases and kind sets: a conversion operator with a ref-qualifier is a function, `noexcept`, `override`, `final`
+  and `requires` behind a `&` are no names, a `name(args) { }` macro block joins like a function body unless it is a
+  loop macro, a body that holds a block of its own or has a directive in its signature stays expanded, `Line`,
+  directives and function-pointer groups hold declarator marks, `a[i-1]` gets blanks. 4,607 to 4,668.
+- List hug (comments in lists): 4,607 to 4,641 (50 won, 16 lost). Not landed, branch `cpp-hug-list`.
+- Comparison: short bodies as wraps where the style's option permits the join. 4,668 to 4,827 (+159).

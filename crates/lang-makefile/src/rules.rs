@@ -65,8 +65,12 @@ rule! {
         id: "min-phony",
         category: Suspicious,
         default: Off,
-        description: "A target that must exist and be declared `.PHONY` (checkmake `minphony`). \
-                  Reported on the last `.PHONY` line, or the last rule's when there is none.",
+        description: "Reports a target of the `required` option (default `all`, `clean` and `test`) that \
+                  is not declared `.PHONY`, on the last `.PHONY` line, or on the last rule when there \
+                  is none.",
+        why: "Conventional targets (`all`, `clean`, `test`) do not name files. If a file with that \
+                  name appears, `make` considers the target up to date and does nothing.\n\
+                  To fix, add the target to `.PHONY`.",
         example: ".PHONY: all   # `clean` and `test` are missing",
         options: [OptionDecl {
             name: "required",
@@ -103,8 +107,12 @@ rule! {
         id: "phony-declared",
         category: Suspicious,
         default: Off,
-        description: "A target with no recipe that is not declared `.PHONY` (checkmake \
-                  `phonydeclared`); targets that start with a `.` are special and skipped.",
+        description: "Reports a target with no recipe that is not declared `.PHONY`. Targets that start \
+                  with a `.` are special and are not reported.",
+        why: "A target without a recipe that is not a file only groups other targets. If a file of \
+                  that name appears, `make` stops running it, so the behaviour of the Makefile depends \
+                  on what is in the directory.\n\
+                  To fix, add the target to `.PHONY`.",
         example: "all: build   # `all` is not in .PHONY",
         kinds: &[k::DOCUMENT],
     }
@@ -129,9 +137,12 @@ rule! {
         id: "timestamp-expanded",
         category: Suspicious,
         default: Warn,
-        description: "A variable whose value runs `date` and that is not simply expanded (`:=`, \
-                  `::=`): every use runs `date` again and the values differ within one build \
-                  (checkmake `timestampexpanded`).",
+        description: "Reports a variable whose value runs `date` and that is not simply expanded (`:=`, \
+                  `::=`): every use runs `date` again and the values differ within one build.",
+        why: "A recursively expanded variable (`=`) runs its text each time it is used, so a build \
+                  that uses `TS = $(shell date)` twice gets two different times, and file names built \
+                  from it do not match.\n\
+                  To fix, write `TS := $(shell date +%s)`, which runs once.",
         example: "STAMP = $(shell date +%s)   # use :=",
         kinds: &[k::ASSIGN],
     }
@@ -159,9 +170,13 @@ rule! {
         id: "unique-targets",
         category: Suspicious,
         default: Off,
-        description: "A target defined by more than one rule, which merges prerequisites and \
-                  overrides recipes (checkmake `uniquetargets`). Double-colon rules, `.PHONY` and \
-                  the targets of `ignore` are skipped.",
+        description: "Reports a target defined by more than one rule, which merges prerequisites and \
+                  overrides recipes. Double-colon rules, `.PHONY` and the targets of the `ignore` \
+                  option are not reported.",
+        why: "Several rules for one target add their prerequisites and only one of them may have a \
+                  recipe; `make` uses the last and warns about the override. The recipe that runs \
+                  depends on the order of the rules.\n\
+                  To fix, merge the rules, or rename a target.",
         example: "build:\nbuild:   # defined twice",
         options: [OptionDecl {
             name: "ignore",

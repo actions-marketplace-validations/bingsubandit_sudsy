@@ -10,6 +10,7 @@ publish.workspace = true
 core-config.workspace = true
 core-semantics.workspace = true
 core-format.workspace = true
+core-packages.workspace = true
 core-rules.workspace = true
 core-syntax.workspace = true
 provider-api.workspace = true
@@ -25,6 +26,8 @@ lang-html.workspace = true
 lang-js.workspace = true
 lang-json.workspace = true
 lang-markdown = { workspace = true, features = ["static-grammars"] }
+lang-php.workspace = true
+lang-protobuf = { workspace = true, features = ["static-grammars"] }
 lang-python.workspace = true
 lang-shell = { workspace = true, features = ["static-grammars"] }
 lang-sql.workspace = true

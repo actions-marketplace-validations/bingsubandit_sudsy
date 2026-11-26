@@ -1,0 +1,13 @@
+- hosts: all
+  tasks:
+    - name: Free form
+#     ^^^^ ansible-no-free-form
+      ansible.builtin.service: name=ntpd state=started
+    - name: Mapping
+      ansible.builtin.service:
+        name: ntpd
+    - name: Command option
+#     ^^^^ ansible-no-free-form
+      ansible.builtin.command: ls chdir=/tmp
+    - name: Command plain
+      ansible.builtin.command: ls a=b

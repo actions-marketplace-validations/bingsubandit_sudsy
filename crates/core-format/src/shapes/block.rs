@@ -358,7 +358,14 @@ fn block_of(
             .is_some_and(|t| comments::blank_lines_before(g, &t) > 0)
     };
     let ends = ends_of(cx, &c.open, &c.close, &moved);
-    let single = c.slots.len() == 1 && moved.is_empty();
+    // (a body that holds a block of its own, `SCOPE_EXIT { a(); };`, is no short body; a lambda's is)
+    let nested = |n: &SyntaxNode| {
+        n.descendants().any(|d| {
+            g.has_tag(d.kind(), "block")
+                && d.parent().is_some_and(|p| !g.has_tag(p.kind(), "function"))
+        })
+    };
+    let single = c.slots.len() == 1 && moved.is_empty() && !nested(&first.node);
     let mut rendered = render_slots(cx, &c.slots, true)?;
     for i in 1..rendered.len() {
         if style.blank_before.contains(&rendered[i].first.kind()) {
@@ -538,6 +545,36 @@ pub fn statement_sequence(
     max_blank_lines: usize,
 ) -> Result<Doc, FormatError> {
     statement_sequence_with(cx, items, max_blank_lines, None, false)
+}
+
+/// The blank lines in front of `first` that the source has (at most `max_blank_lines`), one line
+/// break each, to follow the line break that ends the line before.
+pub fn source_blank_lines(
+    cx: &FormatCtx<'_>,
+    first: Option<&SyntaxToken>,
+    max_blank_lines: usize,
+) -> Doc {
+    let count = first.map_or(0, |t| comments::blank_lines_before(cx.grammar, t));
+    doc::concat(
+        (0..count.min(max_blank_lines))
+            .map(|_| doc::hardline())
+            .collect(),
+    )
+}
+
+/// A line break, the blank lines the source has in front of the first item, and the items as a
+/// [`statement_sequence`]: what follows a line that heads them (a rule line, `else`).
+pub fn statements_after_break(
+    cx: &FormatCtx<'_>,
+    items: &[SyntaxNode],
+    max_blank_lines: usize,
+) -> Result<Doc, FormatError> {
+    let first = items.first().and_then(|n| cx.first_token(n));
+    Ok(doc::concat(vec![
+        doc::hardline(),
+        source_blank_lines(cx, first.as_ref(), max_blank_lines),
+        statement_sequence(cx, items, max_blank_lines)?,
+    ]))
 }
 
 /// [`statement_sequence`] with a rule for blank lines the source does not have.

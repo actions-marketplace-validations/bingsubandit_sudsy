@@ -28,14 +28,15 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | Tool | Target | Measured on | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | actionlint | 87.0% | `cbdd3e85` | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
-| angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
+| angular-eslint | 99.8% | `b314ffb4` | 44 | 10 | 4 | 20 | 0 | 0 | 10 | 20 |
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
-| buf | 85.8% | `7514c1f3` | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
+| buf | 89.7% | `2a570ae8` | 47 | 22 | 3 | 0 | 0 | 0 | 22 | 0 |
 | checkmake | 100.0% | `7514c1f3` | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
-| checkstyle | 88.6% | `7514c1f3` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
+| checkstyle | 88.6% | `f29ba2f0` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
 | clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
 | cmake-lint | 97.2% | `92bc171a` | 35 | 8 | 0 | 24 | 0 | 0 | 3 | 24 |
 | csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
+| dockerfmt | - | - | 7 | 3 | 0 | 0 | 0 | 3 | 1 | 0 |
 | dotnet-format-editorconfig | - | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
 | eslint | 100.0% | `7514c1f3` | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
 | eslint-plugin-jsonc | 100.0% | `7514c1f3` | 44 | 35 | 7 | 0 | 0 | 2 | 0 | 0 |
@@ -48,19 +49,20 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | html-eslint | 88.1% | `916059a8` | 66 | 15 | 18 | 33 | 0 | 0 | 0 | 33 |
 | html-validate | 92.5% | `2607e39a` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
 | htmlhint | 91.6% | `0c8a3dcc` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
-| ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
+| ktlint | 92.3% | `bede0bee` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | `7514c1f3` | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
+| mbake | - | - | 17 | 9 | 1 | 0 | 0 | 0 | 7 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| phpstan | 36.1% | `362a7f17` | 18 | 0 | 6 | 10 | 0 | 2 | 0 | 10 |
+| phpstan | 36.3% | `062a8f18` | 19 | 0 | 7 | 10 | 0 | 2 | 0 | 10 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
 | psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
 | revive | 97.5% | `1d6de91f` | 105 | 12 | 4 | 7 | 0 | 0 | 82 | 7 |
 | roslynator | 0.4% | `66718389` | 340 | 28 | 7 | 286 | 18 | 1 | 0 | 286 |
 | rubocop | 96.2% | `7514c1f3` | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
-| ruff | 94.6% | `7514c1f3` | 980 | 135 | 0 | 687 | 0 | 18 | 140 | 687 |
+| ruff | 94.6% | `7514c1f3` | 980 | 134 | 1 | 687 | 0 | 18 | 140 | 687 |
 | shellcheck | 86.6% | `7514c1f3` | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 88.7% | `b11e8bdd` | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
+| sqlfluff | 90.2% | `bede0bee` | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
 | stylecop | 87.3% | `e98263ba` | 197 | 126 | 10 | 1 | 39 | 21 | 0 | 1 |
 | stylelint | 94.8% | `7514c1f3` | 150 | 90 | 11 | 45 | 0 | 0 | 4 | 45 |
 | stylelint-less | 85.4% | `7514c1f3` | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
@@ -109,7 +111,7 @@ Not measured:
 | detekt, PMD, PHPCS | not catalogued |
 | eslint-plugin-jsonc | the JSON corpus is a parser test suite (JSONTestSuite), no real-world files |
 | stylelint-scss, stylelint-less | plugin rules without a recommended set of their own; need SCSS and Less configs and parsers |
-| angular-eslint, graphql-eslint, biome, taplo, terraform | no coverage entry yet (fixtures only) |
+| graphql-eslint, biome, taplo, terraform | no coverage entry yet (fixtures only) |
 
 Sets and corpora of each run: [../development/parity.md](../development/parity.md#coverage-mode). Findings of `formatter` entries are left out; a file the tool cannot read is left out and counted by the run. The layout rules that are `planned` in a catalog (html-eslint `indent`, ktlint `function-signature`) count as missing until the catalog says `formatter` ([../roadmap.md](../roadmap.md#small-tasks)).
 

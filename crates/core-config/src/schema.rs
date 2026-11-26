@@ -673,6 +673,14 @@ pub mod shared {
         )
     }
 
+    pub fn continued_block_words(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::CONTINUED_BLOCK_WORDS,
+            default,
+            "Words (`if`, `done`) that open or close a block of the code in a continued command: a command with one keeps the indentation of its continued lines, which shows the nesting.",
+        )
+    }
+
     pub fn wrapped_body_indent_words(default: &[&str]) -> OptionDef {
         OptionDef::words(
             opt::WRAPPED_BODY_INDENT_WORDS,

@@ -19,6 +19,7 @@ pub mod proxy;
 pub mod snippets;
 pub mod testing;
 
+pub use core_semantics::symbols::SymbolLang;
 pub use format::{
     FileFormatError, format_file, format_parsed, format_parsed_with, is_generated, resolve_dialect,
     select_provider, select_provider_index,

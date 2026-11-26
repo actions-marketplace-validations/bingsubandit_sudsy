@@ -11,10 +11,11 @@ params:
   types: type-declaration
   outer.types: public protected
 description: >-
-  A public or protected method, constructor or type has no `/** */` comment before it
-  (Checkstyle MissingJavadocMethod and MissingJavadocType). Members of an interface are public.
-  A method of a type that is not public (itself or an enclosing one), a type nested in a type
-  that is not visible, and a declaration inside a method or an anonymous class are left out.
+  Reports a public or protected method, constructor or type that has no `/** */` comment before it.
+  Members of an interface are public. A method of a type that is not public (itself or an enclosing
+  one), a type nested in a type that is not visible, and a declaration inside a method or an
+  anonymous class are not reported. The option `allowed_annotations` (default `Override`) excuses
+  annotated declarations, and `property_accessors` leaves out simple getters and setters.
 example: "public class A {\n  public void f() {}\n}"
 severity: off
 category: style

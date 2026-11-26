@@ -12,9 +12,9 @@ params:
   top-level-visible: true
   visible-with: explicit_interface_specifier
 description: >-
-  A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no
-  `<param name="...">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or
-  `<include>` is left out, and so is a declaration without a comment. No fix.
+  Reports a parameter of a documented, non-private method, constructor, delegate, operator or
+  indexer that has no `<param name="...">` in its `///` comment. A comment with `<inheritdoc />` or
+  `<include>` is not reported, and neither is a declaration without a comment. No fix.
 example: "/// <summary>Adds.</summary>\npublic int Add(int a) => a;   // add <param name=\"a\">"
 severity: off
 category: style

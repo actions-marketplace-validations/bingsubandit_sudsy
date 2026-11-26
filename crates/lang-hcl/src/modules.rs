@@ -49,11 +49,14 @@ names_rule! {
         id: "unused-declarations",
         category: Suspicious,
         default: Off,
-        description: "A variable, local value, data source or provider alias that no file of the \
-                  module (the `.tf` files of the directory) refers to (tflint \
-                  terraform_unused_declarations). Override files declare nothing of their own; a \
-                  module with `.tf.json` files, a file that does not parse or one that cannot be \
-                  read is not judged.",
+        description: "Reports a variable, local value, data source or provider alias that no file of the \
+                  module (the `.tf` files of the directory) refers to. Override files declare nothing \
+                  of their own. A module with `.tf.json` files, a file that does not parse or one that \
+                  cannot be read is not judged.",
+        why: "An unused declaration is left over from a change. A variable that nothing reads \
+                  misleads the user of the module, who sets it and sees no effect, and an unused data \
+                  source still makes a request on each plan.\n\
+                  To fix, delete it.",
         example: "variable \"unused\" {}",
         check: Unused,
         message: "`{name}` is declared but not used",
@@ -66,11 +69,16 @@ names_rule! {
         id: "required-providers",
         category: Style,
         default: Off,
-        description: "A provider that a `resource`, `data` or `provider` block uses and that no \
-                  `required_providers` entry of the module names, reported on the last such block \
-                  of the provider, and a `required_providers` entry without a `version` (tflint \
-                  terraform_required_providers). The built-in `terraform` provider is exempt; \
-                  override files do not count.",
+        description: "Reports a provider that a `resource`, `data` or `provider` block uses and that no \
+                  `required_providers` entry of the module names, on the last such block of the \
+                  provider, and a `required_providers` entry without a `version`. The built-in \
+                  `terraform` provider is exempt, and override files do not count.",
+        why: "Without the declaration Terraform picks the source of the provider by the default \
+                  for its name, and without a version it takes the newest, so two runs of the same \
+                  code can use different providers and a new major version can break the module with \
+                  no change in the code.\n\
+                  To fix, add the provider to `required_providers` with a `source` and a version \
+                  constraint.",
         example: "resource \"aws_instance\" \"a\" {}",
         check: MissingProvider,
         message: "Missing version constraint for provider `{name}` in `required_providers`",
@@ -83,9 +91,14 @@ names_rule! {
         id: "required-version",
         category: Style,
         default: Off,
-        description: "A module none of whose `terraform` blocks sets `required_version` (tflint \
-                  terraform_required_version), reported on the `terraform` block, or on the start \
-                  of `main.tf` when the module has no such block. Override files do not count.",
+        description: "Reports a module none of whose `terraform` blocks sets `required_version`, on the \
+                  `terraform` block, or on the start of `main.tf` when the module has no such block. \
+                  Override files do not count.",
+        why: "Terraform language features and the state format change between versions, and a \
+                  state file written by a newer version cannot be used by an older one. A constraint \
+                  makes an incompatible version fail at the start with a clear message instead of in \
+                  the middle of an apply.\n\
+                  To fix, set `required_version` in a `terraform` block.",
         example: "terraform { backend \"s3\" {} }",
         check: MissingSetting,
         message: "the module's `terraform` blocks have no `required_version`",

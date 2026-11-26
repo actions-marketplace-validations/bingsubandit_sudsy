@@ -60,6 +60,50 @@ pub struct Parsed {
 
 /// The lexer base: the text, the position, and the tokens and errors found so far. A language's
 /// lexer wraps it (and derefs to it) and adds its own scanning.
+/// A blank byte: space or tab.
+#[inline]
+pub fn is_blank(c: u8) -> bool {
+    matches!(c, b' ' | b'\t')
+}
+
+/// A line break byte: `\n` or `\r`.
+#[inline]
+pub fn is_eol(c: u8) -> bool {
+    matches!(c, b'\n' | b'\r')
+}
+
+/// A bracketed group production: its node, brackets, nesting limit and unclosed error.
+pub struct Group {
+    pub node: SyntaxKind,
+    pub open: SyntaxKind,
+    pub close: SyntaxKind,
+    /// Plural name in the nesting error (`parentheses are nested deeper than ...`).
+    pub what: &'static str,
+    pub max: usize,
+    /// Code and message of the error on an opener whose closer is missing.
+    pub unclosed: (&'static str, &'static str),
+}
+
+impl Group {
+    /// A group in `(` `)`: the opener and closer kinds, the unclosed error `code`.
+    pub const fn parens(
+        node: SyntaxKind,
+        (open, close): (SyntaxKind, SyntaxKind),
+        what: &'static str,
+        max: usize,
+        code: &'static str,
+    ) -> Group {
+        Group {
+            node,
+            open,
+            close,
+            what,
+            max,
+            unclosed: (code, "expected `)` for this `(`"),
+        }
+    }
+}
+
 pub struct Lexer<'a> {
     pub src: &'a str,
     pub pos: usize,
@@ -128,6 +172,35 @@ impl<'a> Lexer<'a> {
             _ => return false,
         }
         true
+    }
+
+    /// Bytes of the `escape` byte at the position and the line break after it (`\n`, `\r\n`, `\r`); 0 when the escape is not at a line break.
+    pub fn escaped_break(&self, escape: u8) -> usize {
+        if self.at(0) != escape {
+            return 0;
+        }
+        match (self.at(1), self.at(2)) {
+            (b'\r', b'\n') => 3,
+            (b'\n' | b'\r', _) => 2,
+            _ => 0,
+        }
+    }
+
+    /// Moves the position to the end of the line, over the line breaks that follow `escape` (when
+    /// given) as part of it.
+    pub fn eat_line_escaped(&mut self, escape: Option<u8>) {
+        let len = self.src.len();
+        while self.pos < len && !is_eol(self.src.as_bytes()[self.pos]) {
+            self.pos += escape.map_or(0, |e| self.escaped_break(e)).max(1);
+        }
+    }
+
+    /// Moves the position back over the blanks before it, down to `start`.
+    pub fn trim_blanks_back(&mut self, start: usize) {
+        let b = self.src.as_bytes();
+        while self.pos > start && is_blank(b[self.pos - 1]) {
+            self.pos -= 1;
+        }
     }
 
     /// Moves the position to the end of the line (before its line break).
@@ -238,6 +311,11 @@ impl<'a> Parser<'a> {
     #[inline]
     pub fn all_tokens(&self) -> &[Token] {
         &self.tokens
+    }
+
+    /// The current real token follows the one before it with nothing in between.
+    pub fn touches_prev(&self) -> bool {
+        self.pos > 0 && self.tok(self.pos).start == self.tok(self.pos - 1).end
     }
 
     /// The `i`th real token.
@@ -366,6 +444,52 @@ impl<'a> Parser<'a> {
             self.bump();
         }
         self.builder.finish_node();
+    }
+
+    /// The `nesting-too-deep` error on the current token: `what` are nested deeper than `max` levels.
+    pub fn too_deep(&mut self, what: &str, max: usize) {
+        self.error(
+            "nesting-too-deep",
+            format!("{what} are nested deeper than {max} levels"),
+        );
+    }
+
+    /// Starts the group at the current opener: its node and the opener, returning the opener's
+    /// index; too deep (past `g.max`), the error and the balanced group up to `limit` as one `ERROR`
+    /// node, and `None`. The caller parses the items, then [`Parser::group_end`].
+    pub fn group_start(&mut self, g: &Group, limit: usize) -> Option<usize> {
+        if !self.enter(g.max) {
+            self.too_deep(g.what, g.max);
+            self.error_group(g.open, g.close, limit);
+            return None;
+        }
+        self.start(g.node);
+        let open = self.pos;
+        self.bump();
+        Some(open)
+    }
+
+    /// Ends the group of [`Parser::group_start`]: the closer, or the unclosed error on the opener.
+    pub fn group_end(&mut self, g: &Group, open: usize) {
+        self.close_group(g, open);
+        self.finish();
+        self.leave();
+    }
+
+    /// The closer of `g` opened at real token `open`, or the unclosed error on the opener.
+    pub fn close_group(&mut self, g: &Group, open: usize) {
+        if self.cur() == g.close {
+            self.bump();
+        } else {
+            self.error_at(open, g.unclosed.0, g.unclosed.1);
+        }
+    }
+
+    /// An `ERROR` node of the current token.
+    pub fn bump_error(&mut self) {
+        self.start(SyntaxKind::ERROR);
+        self.bump();
+        self.finish();
     }
 
     /// An `ERROR` node of the rest of the input.

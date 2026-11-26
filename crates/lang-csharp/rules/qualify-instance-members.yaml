@@ -2,7 +2,13 @@ id: qualify-instance-members
 family: finding
 params: { check: unqualified_member, fix-title: "Add `this.`" }
 message: "prefix the use of the instance member with `this.`"
-description: "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it."
+description: >-
+  Reports a field, property, method or event of the containing type that is used by its simple name.
+  The fix writes `this.` before it.
+why: >-
+  With `this.` it is clear at a glance that the name is a member and not a local, a parameter or a
+  static, so a reader does not scroll up to see where a name comes from. It is a style that some
+  projects choose and others do not.
 example: "class C { int x; int M() => x; }   // write this.x"
 severity: off
 category: style

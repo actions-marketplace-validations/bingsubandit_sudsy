@@ -1,0 +1,40 @@
+id: ansible-command-changed-when
+message: a command task reports `changed` on every run; set `changed_when`, `creates` or `removes`
+description: >-
+  Reports a task that runs `command`, `shell` or `raw` (short, `ansible.builtin.` or
+  `ansible.legacy.` name; the `commands` option) with none of `changed_when`, `creates`, `removes`
+  and not both `async` and `poll: 0`. The rule runs on files named like Ansible's: `tasks/`,
+  `handlers/`, `playbooks/`, `*playbook*.yml` and `molecule/<scenario>/`.
+why: >-
+  A command module cannot tell whether it changed anything, so it always reports `changed`. Handlers
+  fire and the play summary counts a change on every run, which hides real changes and breaks
+  idempotence checks.
+
+  To fix, add `changed_when` with the condition under which the command changes something, or
+  `creates` or `removes` with the file it makes or deletes.
+example: "- ansible.builtin.command: make   # add changed_when: false"
+severity: off
+category: suspicious
+options:
+  - name: commands
+    type: list
+    description: "Modules that run a command."
+    default: [
+      command, shell, raw, ansible.builtin.command, ansible.builtin.shell, ansible.builtin.raw,
+      ansible.legacy.command, ansible.legacy.shell, ansible.legacy.raw
+    ]
+rule:
+  kind: BlockMapping
+  path: '(^|/)(tasks|handlers)/|(^|/)playbooks/[^/]+$|(^|/)[^/]*playbook[^/]*\.ya?ml$|(^|/)molecule/[^/]+/[^/]+\.ya?ml$'
+  key-path: '(^|\.(tasks|pre_tasks|post_tasks|handlers|block|rescue|always))\[\d+\]$'
+  child:
+    kind: BlockMappingEntry
+    fields: { key: { in-option: commands } }
+  not:
+    any:
+      - child: { kind: BlockMappingEntry, fields: { key: { regex: '^changed_when$' } } }
+      - regex: '\b(creates|removes)\s*[=:]'
+      - all:
+          - child: { kind: BlockMappingEntry, fields: { key: { regex: '^async$' } } }
+          - regex: '\bpoll:\s*0\s'
+report-on: first-token

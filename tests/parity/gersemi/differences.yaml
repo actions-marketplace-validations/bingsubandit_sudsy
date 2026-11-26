@@ -12,7 +12,9 @@ differences:
   condition-layout: gap  gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
   blank-before-closer-comment: gap  gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
   unknown-command-layout: gap  a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
+  empty-file: gap  a file of only blank lines (or none) is `\n` in gersemi; Sudsy writes an empty file
+  template-lines: gap  gersemi accepts a line `@VAR@` on its own (`run_nvcc.cmake`) as a command; Sudsy rejects the file
 files:
-  real-world: keyword-sections:622, condition-layout:169, blank-before-closer-comment:30, unknown-command-layout:30
+  real-world: keyword-sections:623, condition-layout:171, unknown-command-layout:33, empty-file:14, blank-before-closer-comment:8, template-lines:2
 intentional: {}
 pins: {}

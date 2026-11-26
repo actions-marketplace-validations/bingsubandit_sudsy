@@ -18,10 +18,14 @@ rule! {
         id: "doc-partial-required",
         category: Style,
         default: Off,
-        description: "A partial type or method without a documentation comment (or with an empty one). \
-                  Each part is checked on its own; StyleCop (SA1601) accepts one documented part, which \
-                  needs the other parts of the project. Which elements need documentation follows \
-                  StyleCop's defaults: everything but private members.",
+        description: "Reports a partial type or method without a documentation comment, or with an empty \
+                  one. Each part is checked on its own: accepting one documented part would need all \
+                  the other parts of the project. Which elements need documentation follows the \
+                  default of private members being left out.",
+        why: "A partial type is built from several files, and the documentation tools take the \
+                  comment from one of them. A part without a comment leaves the reader of that file \
+                  with nothing to read at the declaration.\n\
+                  To fix, document the part.",
         example: "public partial class A { }   // add a /// <summary> comment",
         kinds: &[
             kind::CLASS_DECLARATION,
@@ -58,8 +62,11 @@ rule! {
         id: "no-default-summary",
         category: Style,
         default: Off,
-        description: "A `<summary>` that starts with the text Visual Studio generates, \"Summary description \
-                  for ...\". Skipped when the comment has `<inheritdoc />`. No fix.",
+        description: "Reports a `<summary>` that starts with the text Visual Studio generates, \"Summary \
+                  description for ...\". A comment with `<inheritdoc />` is not reported. No fix.",
+        why: "The text is a placeholder that the tool inserts. It stays in the generated \
+                  documentation as a sentence that says nothing about the element.\n\
+                  To fix, write the real summary.",
         example: "/// <summary>Summary description for Foo</summary>   // say what Foo is\nclass Foo { }",
         kinds: DOC_KINDS,
     }

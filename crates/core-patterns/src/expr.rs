@@ -10,8 +10,9 @@
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
 use crate::metavar::{Meta, captured, template};
 use core_rules::doc_comments::{holder, leading_doc_text};
+use core_rules::paths::key_path;
 use core_rules::tree::TraversalCache;
-use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleOptions};
+use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleHooks, RuleOptions};
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 use serde::Deserialize;
 use std::cell::{Cell, RefCell};
@@ -42,8 +43,11 @@ pub struct Spec {
     pub pattern: Option<String>,
     pub kind: Option<String>,
     pub regex: Option<String>,
-    /// The file path (with `/`) matches this regex.
+    /// The file path (with `/`) matches this regex; its named groups are captured.
     pub path: Option<String>,
+    /// The key path of the node (`a.b[0].c`: [`core_rules::paths`]) matches this regex.
+    #[serde(rename = "key-path")]
+    pub key_path: Option<String>,
     /// The node is the Nth (from 1) of the children of its parent that have its kind.
     pub nth: Option<usize>,
     pub inside: Option<Box<Spec>>,
@@ -97,6 +101,10 @@ pub struct Spec {
     pub empty: Option<bool>,
     /// The node holds no node and no token but its brackets; a comment does not count.
     pub bare: Option<bool>,
+    /// The node holds a comment, or a comment follows its last token on a later line than the
+    /// node starts on, on that line or indented deeper than the node's line (the body of a clause
+    /// with no brace: `pass  # why`).
+    pub commented: Option<bool>,
     /// The node, looked through parentheses and single-child wrappers, holds this rule.
     pub inner: Option<Box<Spec>>,
 }
@@ -114,6 +122,7 @@ pub struct Ctx<'a> {
     pub grammar: &'a Grammar,
     pub path: &'a Path,
     pub text: &'a str,
+    pub hooks: &'a dyn RuleHooks,
     pub options: &'a RuleOptions,
     /// Matching steps left for this evaluation (see [`STEP_BUDGET`]); 0 means it ran out and
     /// the result is not to be trusted.
@@ -147,7 +156,9 @@ pub enum Expr {
     /// A `regex` with `${NAME}` (captures of the atoms before it, escaped), built for each match.
     RegexTemplate(String, RegexCache),
     Doc(Re),
-    Path(Re),
+    Path(Re, Vec<String>),
+    /// The key path of the node.
+    KeyPath(Re),
     Nth(usize),
     Inside(Box<Expr>),
     Has(Box<Expr>),
@@ -169,6 +180,7 @@ pub enum Expr {
     Same(String, String),
     Empty,
     Bare,
+    Commented,
     Inner(Box<Expr>),
 }
 
@@ -239,16 +251,65 @@ fn is_empty(node: &SyntaxNode, g: &Grammar) -> bool {
         })
 }
 
+/// A comment on a later line than the node starts on (one that trails `rescue` is no comment of
+/// its body), inside the node or after its last token before the next one; in the second case
+/// also on the line of that token or indented deeper than the node's line.
+fn is_commented(node: &SyntaxNode, cx: &Ctx<'_>) -> bool {
+    let g = cx.grammar;
+    let is_comment = |t: &core_syntax::SyntaxToken| g.has_tag(t.kind(), "comment");
+    // (the comments before the node's first token are its leading trivia, not its comments)
+    let code = core_syntax::code_span(node, g).unwrap_or_else(|| node.text_range());
+    let start = usize::from(code.start());
+    // (on a later line than the node starts on)
+    let later = |at: usize| at > start && cx.text[start..at].contains('\n');
+    if node
+        .descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .any(|t| is_comment(&t) && later(usize::from(t.text_range().start())))
+    {
+        return true;
+    }
+    let line_start = cx.text[..start].rfind('\n').map_or(0, |i| i + 1);
+    let indent = cx.text[line_start..start].len();
+    // A node that ends at a closing bracket keeps its comments inside it.
+    let last = node.last_token();
+    if last
+        .as_ref()
+        .is_some_and(|t| matches!(t.text(), "}" | ")" | "]"))
+    {
+        return false;
+    }
+    let mut next = last.and_then(|t| t.next_token());
+    let mut same_line = true;
+    while let Some(t) = next {
+        if !g.is_trivia(t.kind()) {
+            break;
+        }
+        if is_comment(&t) {
+            let at = usize::from(t.text_range().start());
+            let col = at - cx.text[..at].rfind('\n').map_or(0, |i| i + 1);
+            if later(at) && (same_line || col > indent) {
+                return true;
+            }
+        }
+        same_line &= !t.text().contains('\n');
+        next = t.next_token();
+    }
+    false
+}
+
 /// The tokens of an element that are not trivia, read lazily.
 fn words<'a>(
     e: &SyntaxElement,
     g: &'a Grammar,
 ) -> impl Iterator<Item = core_syntax::SyntaxToken> + use<'a> {
-    let all: Box<dyn Iterator<Item = SyntaxElement>> = match e {
-        SyntaxElement::Token(t) => Box::new(std::iter::once(SyntaxElement::Token(t.clone()))),
-        SyntaxElement::Node(n) => Box::new(n.descendants_with_tokens()),
+    let (token, nodes) = match e {
+        SyntaxElement::Token(t) => (Some(t.clone()), None),
+        SyntaxElement::Node(n) => (None, Some(n.descendants_with_tokens())),
     };
-    all.filter_map(|e| e.into_token())
+    token
+        .into_iter()
+        .chain(nodes.into_iter().flatten().filter_map(|e| e.into_token()))
         .filter(|t| !g.is_trivia(t.kind()) && !t.text().is_empty())
 }
 
@@ -270,9 +331,19 @@ impl Expr {
         spec: &Spec,
         parser: &dyn SnippetParser,
         options: &[OptionDecl],
+        builtin: bool,
     ) -> Result<Expr, String> {
         let mut all = Vec::new();
-        let sub = |s: &Spec| Expr::compile(s, parser, options);
+        let sub = |s: &Spec| Expr::compile(s, parser, options, builtin);
+        // A built-in file is tested, so its regexes need no syntax check: they are built when
+        // first matched, and many rules never reach one.
+        let regex = |text: &str| {
+            if builtin {
+                Ok(Re::unchecked(text))
+            } else {
+                Re::new(text)
+            }
+        };
         if let Some(text) = &spec.pattern {
             all.push(Expr::Pattern(Pattern::compile(text, parser)?));
         }
@@ -292,18 +363,23 @@ impl Expr {
             Re::new(&template(text, |_| "x".into())).map_err(|e| format!("regex `{text}`: {e}"))?;
             all.push(Expr::RegexTemplate(text.clone(), RegexCache::default()));
         } else if let Some(text) = &spec.regex {
-            let re = Re::new(text).map_err(|e| format!("regex `{text}`: {e}"))?;
+            let re = regex(text).map_err(|e| format!("regex `{text}`: {e}"))?;
             let groups = re.groups();
             all.push(Expr::Regex(re, groups));
         }
         if let Some(text) = &spec.doc {
             all.push(Expr::Doc(
-                Re::new(text).map_err(|e| format!("doc regex `{text}`: {e}"))?,
+                regex(text).map_err(|e| format!("doc regex `{text}`: {e}"))?,
             ));
         }
         if let Some(text) = &spec.path {
-            all.push(Expr::Path(
-                Re::new(text).map_err(|e| format!("path regex `{text}`: {e}"))?,
+            let re = regex(text).map_err(|e| format!("path regex `{text}`: {e}"))?;
+            let groups = re.groups();
+            all.push(Expr::Path(re, groups));
+        }
+        if let Some(text) = &spec.key_path {
+            all.push(Expr::KeyPath(
+                regex(text).map_err(|e| format!("key-path regex `{text}`: {e}"))?,
             ));
         }
         if let Some(n) = spec.nth {
@@ -424,14 +500,17 @@ impl Expr {
         if spec.bare == Some(true) {
             all.push(Expr::Bare);
         }
+        if spec.commented == Some(true) {
+            all.push(Expr::Commented);
+        }
         if let Some(s) = &spec.inner {
             all.push(Expr::Inner(Box::new(sub(s)?)));
         }
         match all.len() {
             0 => Err(
                 "a rule needs at least one of pattern, kind, regex, path, nth, inside, not-inside, \
-                      has, not-has, parent, child, option, in-option, all, any, not, role, operator, fields, \
-                      items, single, same, empty, bare, inner, regex-option, rethrows"
+                      has, not-has, parent, child, key-path, option, in-option, all, any, not, role, operator, fields, \
+                      items, single, same, empty, bare, commented, inner, regex-option, rethrows"
                     .into(),
             ),
             1 => Ok(all.remove(0)),
@@ -473,10 +552,21 @@ impl Expr {
                 let doc = leading_doc_text(&holder(cx.grammar, node), cx.grammar, &[])?;
                 re.is_match(&doc).then(Captures::new)
             }
-            Expr::Path(re) => {
+            Expr::Path(re, groups) => {
                 let path = cx.path.to_string_lossy().replace('\\', "/");
-                re.is_match(&path).then(Captures::new)
+                if groups.is_empty() {
+                    return re.is_match(&path).then(Captures::new);
+                }
+                let spans = re.groups_in(&path, false)?;
+                let named = groups.iter().zip(spans).filter_map(|(name, span)| {
+                    let (from, to) = span.filter(|_| !name.is_empty())?;
+                    Some((name.clone(), Capture::path_group(&path[from..to])))
+                });
+                Some(named.collect())
             }
+            Expr::KeyPath(re) => re
+                .is_match(&key_path(node, cx.grammar, cx.hooks, cx.text))
+                .then(Captures::new),
             Expr::Nth(n) => {
                 let mut same = node
                     .parent()?
@@ -601,6 +691,7 @@ impl Expr {
             }
             Expr::Empty => is_empty(node, cx.grammar).then(Captures::new),
             Expr::Bare => is_bare(node, cx.grammar).then(Captures::new),
+            Expr::Commented => is_commented(node, cx).then(Captures::new),
             Expr::Inner(e) => e.matches(&unwrap(node, cx.grammar), cx),
         }
     }
@@ -660,7 +751,8 @@ impl Expr {
             | Expr::Regex(..)
             | Expr::RegexTemplate(..)
             | Expr::Doc(_)
-            | Expr::Path(_)
+            | Expr::Path(..)
+            | Expr::KeyPath(_)
             | Expr::Nth(_)
             | Expr::ChildToken(_)
             | Expr::Option(_)
@@ -672,7 +764,8 @@ impl Expr {
             | Expr::Same(..)
             | Expr::Single(_)
             | Expr::Empty
-            | Expr::Bare => false,
+            | Expr::Bare
+            | Expr::Commented => false,
         }
     }
 
@@ -700,7 +793,7 @@ impl Expr {
     pub fn metas(&self, out: &mut Vec<Meta>) {
         match self {
             Expr::Pattern(p) => out.extend(p.metas().iter().cloned()),
-            Expr::Regex(_, groups) => {
+            Expr::Regex(_, groups) | Expr::Path(_, groups) => {
                 out.extend(groups.iter().filter(|n| !n.is_empty()).map(|name| Meta {
                     multi: false,
                     name: name.clone(),
@@ -712,7 +805,7 @@ impl Expr {
             Expr::Kind(_)
             | Expr::RegexTemplate(..)
             | Expr::Doc(_)
-            | Expr::Path(_)
+            | Expr::KeyPath(_)
             | Expr::Nth(_)
             | Expr::Option(_)
             | Expr::InOption(_)
@@ -730,6 +823,7 @@ impl Expr {
             | Expr::Same(..)
             | Expr::Empty
             | Expr::Bare
+            | Expr::Commented
             | Expr::Inner(_) => {}
         }
     }

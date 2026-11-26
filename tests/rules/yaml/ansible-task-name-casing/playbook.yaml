@@ -1,0 +1,14 @@
+- name: configure hosts
+# ^^^^ ansible-task-name-casing
+  hosts: all
+  tasks:
+    - name: install nginx
+#     ^^^^ ansible-task-name-casing
+      ansible.builtin.package: {name: nginx}
+    - name: "quoted lower"
+#     ^^^^ ansible-task-name-casing
+      ansible.builtin.ping:
+    - name: Fine
+      ansible.builtin.ping:
+    - name: "{{ item }}"
+      ansible.builtin.ping:

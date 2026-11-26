@@ -63,12 +63,6 @@ impl std::ops::DerefMut for Parser<'_> {
 }
 
 impl Parser<'_> {
-    fn error_node(&mut self) {
-        self.start(SyntaxKind::ERROR);
-        self.bump();
-        self.finish();
-    }
-
     fn starts_value(&self) -> bool {
         matches!(
             self.cur(),
@@ -148,7 +142,7 @@ impl Parser<'_> {
                 }
                 k::COMMA => {
                     self.error("unexpected-comma", "unexpected `,`");
-                    self.error_node();
+                    self.bump_error();
                 }
                 _ => {
                     self.error("expected-key", "expected a string key or `}`");
@@ -219,7 +213,7 @@ impl Parser<'_> {
                 }
                 k::COMMA => {
                     self.error("unexpected-comma", "unexpected `,`");
-                    self.error_node();
+                    self.bump_error();
                 }
                 _ if self.starts_value() => {
                     self.value();

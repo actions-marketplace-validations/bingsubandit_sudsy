@@ -2,7 +2,13 @@ id: doc-param-has-text
 family: doc-element
 params: { check: text, element: param, scope: element, skip-inheritdoc: true, report: element }
 message: "the <param> should have text"
-description: "A `<param>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
+description: >-
+  Reports a `<param>` without text. A comment with `<inheritdoc />` is not reported. No fix.
+why: >-
+  An empty `<param name="x"></param>` looks like documentation and says nothing, and it stops the
+  compiler from warning about the missing parameter.
+
+  To fix, describe the parameter.
 example: "/// <param name=\"value\"></param>   // describe the parameter\nvoid Set(int value) { }"
 severity: off
 category: style

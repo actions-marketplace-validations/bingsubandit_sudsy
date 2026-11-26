@@ -195,8 +195,8 @@ pub fn exit_code(collected: &Collected) -> ExitCode {
 }
 
 pub fn run(args: ReportArgs) -> Result<ExitCode> {
-    let session = args.open()?;
-    let loaded = session.load_all(|db, file| {
+    let mut session = args.open()?;
+    let loaded = session.load_linted(|db, file| {
         lint(db, file);
     });
     let collected = collect(&session, &loaded)?;

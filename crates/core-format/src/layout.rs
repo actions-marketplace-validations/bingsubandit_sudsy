@@ -496,6 +496,23 @@ impl Layout {
                 let parent = node.parent().map(|p| p.kind());
                 style.flat = parent.is_some_and(|p| self.is_none(cx, "flat", p));
                 style.fit_single = parent.is_some_and(|p| self.fits(cx, p));
+                // (the body of a loop macro is a loop's: it is not short)
+                if style.fit_single
+                    && flow
+                        .rules
+                        .is_some_and(|r| r.is_loop_block(node, cx.options))
+                {
+                    style.fit_single = false;
+                }
+                // (a directive inside the signature keeps the body expanded: `[[x]]` `#endif` `void f() {`)
+                if style.fit_single
+                    && let Some(p) = node.parent()
+                {
+                    let start = node.text_range().start();
+                    style.fit_single = !p.descendants().any(|d| {
+                        d.text_range().end() <= start && cx.grammar.has_tag(d.kind(), "directive")
+                    });
+                }
                 // (`blank_before`: a blank line before the items of these kinds, by the option's value)
                 if let Some(b) = self.bindings.iter().find(|b| b.role == "blank_before") {
                     let mode = cx.options.str(b.option);

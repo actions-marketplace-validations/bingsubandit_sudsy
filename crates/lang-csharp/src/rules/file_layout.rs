@@ -62,9 +62,13 @@ rule! {
         id: "single-class-per-file",
         category: Style,
         default: Off,
-        description: "A file holds one class or record: every later one is reported, more parts of \
-                  the first class (when it is partial) excepted. Structs, interfaces, enums and \
-                  delegates are not counted. No fix.",
+        description: "Reports a class or record that comes after the first one in a file: more parts of \
+                  the first class (when it is partial) are not reported. Structs, interfaces, enums \
+                  and delegates are not counted. No fix.",
+        why: "A file with one class is found by the name of the class, and a change to a class \
+                  touches one file. A file with several is a place where a class has to be searched \
+                  for.\n\
+                  To fix, move the class into a file of its own.",
         example: "class A { } class B { }   // move B to its own file",
         kinds: &[kind::COMPILATION_UNIT],
     }
@@ -95,8 +99,12 @@ rule! {
         id: "single-namespace-per-file",
         category: Style,
         default: Off,
-        description: "A file declares one namespace: every later one, nested ones included, is \
-                  reported. No fix.",
+        description: "Reports a namespace that comes after the first one in a file; nested namespaces are \
+                  reported too. No fix.",
+        why: "A file with one namespace has one place where its names come from. Several \
+                  namespaces in a file make the meaning of a name depend on where in the file it is \
+                  read.\n\
+                  To fix, move the later namespaces into files of their own.",
         example: "namespace A { } namespace B { }   // move B to its own file",
         kinds: &[kind::COMPILATION_UNIT],
     }
@@ -118,9 +126,13 @@ rule! {
         id: "file-name-matches-type",
         category: Style,
         default: Off,
-        description: "The file name, up to its first dot and ignoring case, is the name of the first \
-                  type in the file; a generic type may also be written `Name{T,U}`. Not checked \
-                  when that type is partial. No fix.",
+        description: "Reports a file whose name, up to its first dot and ignoring case, is not the name of \
+                  the first type in the file; a generic type may also be written `Name{T,U}`. Not \
+                  checked when that type is partial. No fix.",
+        why: "A file named after its type is found by the name from the file tree, from a stack \
+                  trace and from a search. A file whose name says something else sends the reader to \
+                  the wrong place.\n\
+                  To fix, rename the file or the type.",
         example: "// Orders.cs\nclass Order { }   // rename the file Order.cs",
         kinds: &[kind::COMPILATION_UNIT],
     }

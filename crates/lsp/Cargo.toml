@@ -27,6 +27,7 @@ core-format.workspace = true
 core-syntax.workspace = true
 lang-csharp.workspace = true
 lang-json.workspace = true
+lang-protobuf.workspace = true
 lang-yaml.workspace = true
 tempfile.workspace = true
 

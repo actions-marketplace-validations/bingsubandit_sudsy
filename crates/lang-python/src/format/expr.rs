@@ -71,6 +71,7 @@ fn expr_inner(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         | k::EXPR_BOOLEAN_LITERAL
         | k::EXPR_NONE_LITERAL
         | k::EXPR_ELLIPSIS_LITERAL
+        | k::EXPR_IPY_ESCAPE_COMMAND
         | k::IDENTIFIER => plain(cx, node),
         k::EXPR_NUMBER_LITERAL => number(cx, node),
         k::EXPR_STRING_LITERAL | k::EXPR_BYTES_LITERAL | k::EXPR_F_STRING | k::EXPR_T_STRING => {

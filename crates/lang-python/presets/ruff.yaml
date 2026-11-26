@@ -80,7 +80,10 @@ python:
       string-dot-format-missing-arguments: warn
       string-dot-format-mixing-automatic: warn
       subprocess-run-without-check: warn
-      no-empty-catch: warn
+      no-empty-catch:
+        level: warn
+        options:
+          comment_handles: false
       type-alias-annotation: warn
       type-check-without-type-error: warn
       type-var-name-variance: warn

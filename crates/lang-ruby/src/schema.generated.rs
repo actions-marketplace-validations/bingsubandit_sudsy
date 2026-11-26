@@ -8,6 +8,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::line_width(120),
         shared::indent_style(),
         core_config::shared::final_newline(true),
+        core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between lines (RuboCop Layout/EmptyLines)."),
         shared::end_of_line(),
         ])
         .with_presets(vec![
