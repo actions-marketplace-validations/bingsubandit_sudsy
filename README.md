@@ -63,7 +63,7 @@ A typical repo runs one tool per language. Each tool has its own install, config
 
 ## Language support
 
-Each number is measured on real-world code against the default rule set of the reference tool (formatters: its default settings) and counts every difference except the reviewed intentional ones. A row measured with another set says so in the notes under the table. How each language is measured: [docs/languages.md](docs/languages.md). Ready languages come first, then the others, each by how widely the language is used. `Ready` means the first tool of each column is at least 85%; the others are shown for reference. Where no reference formatter exists, `stable` is the share of real-world files that Sudsy formats without error, to the same text on a second run and by its rules rather than copied through.
+Each number is measured on real-world code against the default rule set of the reference tool (formatters: its default settings) and counts every difference except the reviewed intentional ones. A row measured with another set says so in the notes under the table. How each language is measured: [docs/languages.md](docs/languages.md). Ready languages come first, then the others, each by how widely the language is used. `Ready` means the first tool of each column is at least 85%; the others are shown for reference. Where no reference formatter exists, two numbers replace it: `stable` is the share of real-world files that Sudsy formats without error, to the same text on a second run and by its rules rather than copied through; `agreement` is the share of places in held-out real-world files that already have the form Sudsy writes (its style is chosen from what most projects do, so this shows how closely it matches existing code). Such a leg is Ready at `stable` 100% and `agreement` 80%. INI, EditorConfig, .gitignore, Dockerfile and GitHub Actions format, older legs, are Ready at `stable` 85%.
 
 <!-- generated:support -->
 | Language | Format | Lint | Status |
@@ -105,7 +105,7 @@ Notes: clang-format (C / C++): line wrapping is not compared. PHP-CS-Fixer (PHP)
 The rows are ordered by how widely the language is used. Every number is measured against each reference tool's default rule set; a row measured with another set says so in the notes above. How each language is measured, with the tool versions and corpora: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
 
-All languages: <!-- generated:languages -->HTML, JavaScript/TypeScript, CSS, JSON, Markdown, Python, YAML, Shell, Dockerfile, SQL, Java, C#, PowerShell, Makefile, TOML, XML, Go, CMake, Kotlin, HCL, EditorConfig, Gitignore, INI, Ruby, GraphQL, Protobuf, Batchfile, C/C++ and PHP<!-- /generated -->. Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
+Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
 
 ## Highly configurable
 

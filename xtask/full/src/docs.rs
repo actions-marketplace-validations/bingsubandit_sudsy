@@ -116,7 +116,6 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     out.push(splice(
         "README.md",
         &[
-            ("languages", names.clone()),
             ("speed", crate::speed::table(&speed_order)?),
             ("support", support.table),
             ("support-headline", support.headline),
